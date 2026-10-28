@@ -20,11 +20,14 @@ python -m unittest discover -s tests -t tests
 | `test_map.py` | 코드 색인: 여러 언어의 심볼, 증분 색인, 글자 예산, 한국어 찾기, 중복, git 기록 |
 | `test_mcp.py` | MCP 서버를 따로 띄워 줄 단위 JSON-RPC로 주고받기 |
 | `test_conformance.py` | [conformance/](../conformance/)의 사례 |
+| `test_audit.py` | 세션 기록 읽기(중복 제거, 프로젝트 판정, 모르는 형식), 비용, 낭비 신호, 규칙 후보(`audit`) |
+| `test_bench.py` | fake 실행기로 `bench run`과 `report`, 계획 보기, 결과 읽기, 예제 과제의 채점 |
+| `fixtures/sessions/` | 실제 형식을 본뜬 합성 세션 기록(한글·Windows·POSIX·NFD 경로, 중복 줄, 처음 보는 줄) |
 
-사용자 환경에서 가장 먼저 문제가 나는 곳이 경로라서, 임시 프로젝트 이름에 일부러 한글과 공백을 넣었습니다. 네트워크나 유료 API를 쓰는 시험은 두지 않습니다.
+사용자 환경에서 가장 먼저 문제가 나는 곳이 경로라서, 임시 프로젝트 이름에 일부러 한글과 공백을 넣었습니다. 네트워크나 유료 API를 쓰는 시험은 두지 않습니다. 세션 기록 시험도 사용자 홈의 실제 기록을 읽지 않고 합성 기록만 씁니다.
 
 ---
 
 ## English
 
-Habitree's tests, using only the standard `unittest`; CI runs them on Windows, macOS and Linux. Paths are where real environments break first, so the temporary project names deliberately contain Korean characters and spaces. No test uses the network or a paid API.
+Habitree's tests, using only the standard `unittest`; CI runs them on Windows, macOS and Linux. Paths are where real environments break first, so the temporary project names deliberately contain Korean characters and spaces. No test uses the network or a paid API, and session tests read only synthetic transcripts, never the real home folder.

@@ -2,6 +2,14 @@
 
 새 버전을 위에 씁니다.
 
+## 0.5.0 (2026-10-28)
+
+재지 않은 숫자는 말하지 않기 위해, 실제로 어디에 토큰을 썼는지 읽고 효과를 재는 도구를 더했습니다. 둘 다 부를 때만 돕니다.
+
+- `habitree audit`: Claude Code 세션 기록을 이 컴퓨터 안에서만 읽어 세션별·모델별 토큰과 비용, 도구 호출, 낭비 신호를 보여 줍니다. 낭비 신호는 큰 결과가 뒤의 요청마다 다시 청구되는 비용, 같은 호출과 같은 오류의 되풀이, 거듭된 정정, 비싼 모델로 한 단순 작업, 세션마다 다시 쓴 스크립트입니다. 응답 하나는 한 번만 세고, 프로젝트는 기록에 남은 작업 폴더로 가립니다. `--suggest`는 처방과 `rules hit`·`rules add` 명령 초안을 보여 줄 뿐 실행하지 않습니다.
+- `habitree bench`: 규칙을 켠 갈래와 끈 갈래를 번갈아 여러 번 돌리고 검증 명령으로 채점해, 토큰·비용·시간을 평균, 표준편차, 합격률과 나란히 놓습니다. 실제 실행에는 `--yes`가 필요하고 결과 폴더는 커밋하지 않습니다. 예제 과제 두 개(Python, JavaScript).
+- 명세 `docs/spec/audit.md`, `docs/spec/bench.md`, 합성 세션 기록으로 만든 시험.
+
 ## 0.4.0 (2026-10-28)
 
 새로 만들기 전에 이미 있는 것을 먼저 찾게 하는 버전입니다.
@@ -48,6 +56,14 @@
 ## English
 
 Newest first.
+
+### 0.5.0 (2026-10-28)
+
+To avoid quoting numbers we have not measured, this release adds tools that read where tokens actually went and measure the effect of the rules. Both run only when you call them.
+
+- `habitree audit` reads Claude Code session transcripts on your own machine and shows tokens and cost per session and per model, tool calls and waste signals: large results billed again on every later request, repeated calls and errors, repeated corrections, simple work on expensive models and scripts rewritten every session. Each response is counted once, and the project is matched by the working directory recorded in the transcript. `--suggest` shows prescriptions and draft `rules hit`/`rules add` commands without running them.
+- `habitree bench` alternates repeated runs with rules on and off, grades them with the verify command, and lays tokens, cost and time next to the mean, standard deviation and pass rate. Real runs need `--yes`, and results are not committed. Two example tasks (Python and JavaScript).
+- Specs `docs/spec/audit.md` and `docs/spec/bench.md`, and tests built on synthetic transcripts.
 
 ### 0.4.0 (2026-10-28)
 

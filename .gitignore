@@ -221,3 +221,6 @@ __marimo__/
 
 # Habitree 세션 상태(커밋하지 않음) / Habitree session state (not committed)
 .habitree/state/
+
+# bench 결과(공개 전에 사람이 읽고 옮긴다) / bench results (reviewed before publishing)
+bench/results/

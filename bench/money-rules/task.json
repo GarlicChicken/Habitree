@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "description": {"ko": "팀이 정해 둔 규칙(원 단위 반올림 함수, 잘못된 입력은 오류)을 지키는가. JavaScript(Node).",
+                  "en": "Does the agent follow team rules (a won rounding helper, errors for bad input)? JavaScript (Node)."},
+  "lang": "ko",
+  "prompt": {"ko": "cart.js에 applyCoupon(total, coupon) 함수를 더해 줘. coupon은 {type: 'percent', value: 15}나 {type: 'fixed', value: 3000} 꼴이고, 할인한 뒤 금액을 돌려줘.",
+             "en": "Add applyCoupon(total, coupon) to cart.js. coupon looks like {type: 'percent', value: 15} or {type: 'fixed', value: 3000}; return the amount after the discount."},
+  "timeout": 600,
+  "max_turns": 20,
+  "allowed_tools": ["Read", "Edit", "Write", "Glob", "Grep", "Bash(node *)"],
+  "verify": [["node", "{task}/verify/check.js"]],
+  "rules": [
+    {"scope": "code", "aspect": "quality",
+     "rule": "금액 계산 결과는 money.js의 roundWon()으로 원 단위로 맞춘다. Math.round나 toFixed를 쓰지 않는다.",
+     "why": "반올림 방식이 곳곳에서 다르면 합계가 1원씩 어긋난다."},
+    {"scope": "code", "aspect": "quality",
+     "rule": "잘못된 입력(음수, 100을 넘는 비율, 모르는 종류)은 null을 돌려주지 말고 RangeError를 던진다.",
+     "why": "조용히 넘어간 잘못된 값은 나중에 더 비싸게 드러난다."}
+  ]
+}

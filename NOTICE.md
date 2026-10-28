@@ -45,6 +45,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 | '없다'와 '못 읽었다'를 나누고, 빈 결과 대신 다음에 할 일을 알려 주기 | [llm-context.py](https://github.com/cyberchitta/llm-context.py), [jCodeMunch-MCP](https://github.com/jgravelle/jcodemunch-mcp)(공개 설명만 참고) |
 | 코드가 바뀌면 그 코드를 설명한 글을 낡았을 수 있다고 알리기 | [code-graph-rag](https://github.com/vitali87/code-graph-rag), [contextful](https://github.com/Inferensys/contextful) |
 | 표준 입출력 MCP 서버, 도구는 몇 개만 | [MCP 명세](https://modelcontextprotocol.io/specification) |
+| 세션 기록에서 응답 하나를 한 번만 세기(`message.id`·`requestId` 묶음), 도구 호출은 `tool_use.id` 단위 | [ccusage](https://github.com/ccusage/ccusage), [tokscale](https://github.com/junhoyeo/tokscale), [Harbor](https://github.com/harbor-framework/harbor) |
+| 큰 결과 × 남은 요청 수로 다시 청구되는 비용 매기기 | [claude-context-optimizer](https://github.com/egorfedorov/claude-context-optimizer), [tokenwise](https://github.com/lohani-mohit/tokenwise), [cctx](https://github.com/jacquardlabs/cctx) |
+| 낭비 유형마다 고정 처방을 두고 규칙 후보로 잇기 | [cctx](https://github.com/jacquardlabs/cctx) |
+| 짧은 사용자 응답과 정정 표지로 정정을 찾기 | [agentsview](https://github.com/kenn-io/agentsview) |
+| 모르는 기록 형식은 세어 알리고, 실제 형식을 본뜬 픽스처로 회귀를 막기 | [claude-code-log](https://github.com/daaain/claude-code-log), [agent-sessions](https://github.com/jazzyalex/agent-sessions) |
+| 같은 호출 3번, 같은 오류 3번을 막힘의 기준으로 | [Cline](https://github.com/cline/cline), [OpenHands](https://github.com/All-Hands-AI/OpenHands), [Gemini CLI](https://github.com/google-gemini/gemini-cli) |
+| 두 갈래를 기본 3번씩 돌려 평균과 표준편차로 비교 | [claude plugin eval](https://code.claude.com/docs/en/plugin-evals.md), [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) |
+| 채점을 작업 폴더 밖에 두고, 아예 돌지 못한 실행은 통과로 세지 않기 | [Aider 벤치마크](https://github.com/Aider-AI/aider/tree/main/benchmark), [SWE-bench](https://github.com/SWE-bench/SWE-bench) |
 
 ---
 
@@ -81,5 +89,13 @@ The values in the model vendor table (`src/habitree/data/vendors.json`) were rea
 | Telling "not there" from "could not read", and giving next steps instead of empty results | llm-context.py, jCodeMunch-MCP |
 | Flagging descriptions as possibly stale when the code they describe changes | code-graph-rag, contextful |
 | A stdio MCP server with only a few tools | MCP specification |
+| Counting each response once in transcripts (`message.id` and `requestId`), tool calls by `tool_use.id` | ccusage, tokscale, Harbor |
+| Pricing large results by the number of later requests that bill them again | claude-context-optimizer, tokenwise, cctx |
+| A fixed prescription per waste type, linked to rule candidates | cctx |
+| Finding corrections from short replies with correction markers | agentsview |
+| Counting unknown record types and guarding the format with realistic fixtures | claude-code-log, agent-sessions |
+| Three identical calls or three identical errors as the sign of being stuck | Cline, OpenHands, Gemini CLI |
+| Two arms, three runs each by default, compared by mean and standard deviation | claude plugin eval, skill-creator |
+| Graders outside the work folder; runs that never started are not passes | Aider benchmark, SWE-bench |
 
 Links are in the Korean table above.

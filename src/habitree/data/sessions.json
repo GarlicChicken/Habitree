@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "about": {
+    "ko": "세션 기록 분석(audit)이 쓰는 표. 언어·셸·도구에 따라 달라지는 지식은 코드가 아니라 여기에 둔다.",
+    "en": "Tables used by session analysis (audit). Knowledge that varies by language, shell or tool lives here, not in code."
+  },
+  "claude": {
+    "ignored_types": ["attachment", "queue-operation", "file-history-snapshot", "file-history-delta", "last-prompt",
+                      "ai-title", "mode", "api-request", "api-request-blob", "api-request-shape", "cost-state",
+                      "atis-latch", "frame-link", "artifact-comment-monitor", "artifact-autoreact-ledger",
+                      "summary", "custom-title", "agent-name", "progress", "tools-used", "pr-link"],
+    "system_tags": ["<command-name>", "<command-message>", "<local-command-stdout>", "<local-command-caveat>",
+                    "<system-reminder>", "<task-notification>", "<bash-input>", "<bash-stdout>", "Caveat:"]
+  },
+  "tool_categories": {
+    "read": ["Read", "NotebookRead", "LS"],
+    "search": ["Grep", "Glob", "ToolSearch"],
+    "write": ["Edit", "MultiEdit", "Write", "NotebookEdit"],
+    "shell": ["Bash", "PowerShell"],
+    "delegate": ["Agent", "Task", "SendMessage"],
+    "web": ["WebFetch", "WebSearch"]
+  },
+  "repeat_ok_tools": ["TaskOutput", "BashOutput", "Monitor", "TaskStop", "TodoWrite", "ScheduleWakeup"],
+  "read_only_shell": [
+    "ls", "dir", "cat", "type", "head", "tail", "wc", "grep", "rg", "find", "tree", "pwd", "echo", "which",
+    "where", "stat", "file", "du", "sort", "uniq", "cut", "jq",
+    "git status", "git log", "git diff", "git show", "git blame", "git ls-files", "git grep", "git rev-parse",
+    "Get-Content", "Get-ChildItem", "Select-String", "Get-Item", "Test-Path", "Resolve-Path", "Measure-Object"
+  ],
+  "script_extensions": [".py", ".js", ".mjs", ".cjs", ".ts", ".sh", ".ps1", ".rb", ".pl", ".php", ".go", ".rs"],
+  "inline_script": ["<<", "python -c", "python3 -c", "py -c", "node -e", "-Command"],
+  "correction": {
+    "ko": {
+      "start": ["아니", "아뇨", "그게 아니", "그거 말고", "다시 해", "틀렸"],
+      "contains": ["그게 아니라", "그거 말고", "다시 해", "다시 하라", "틀렸", "잘못했", "잘못 했", "안 돼", "안돼",
+                   "안 되잖", "여전히 안", "아직도 안", "또 그러", "또 틀", "왜 또", "하지 말라고", "하지 말랬", "했잖아",
+                   "말했잖아", "그러지 말", "원래대로", "되돌려", "건드리지 말", "그런 뜻이 아니"]
+    },
+    "en": {
+      "start": ["no,", "no.", "nope", "wrong", "not that"],
+      "contains": ["that's not", "not what i", "i said", "i told you", "don't do that", "still not", "still broken",
+                   "still failing", "doesn't work", "didn't work", "revert that", "undo that", "you broke", "i meant"]
+    },
+    "not": ["아니면", "아니라면", "no problem", "no worries", "not bad"]
+  }
+}
