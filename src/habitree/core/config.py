@@ -17,6 +17,8 @@ DEFAULTS = {
         "db": ".habitree/rules.json",
         "doc": ".habitree/RULES.md",
         "brief_budget": 6000,  # rules brief 기본 글자 예산(넘치면 필수 → 권장 순으로 자른다)
+        "max_active": 150,     # 프로젝트 규칙이 이보다 많으면 rules.weight 경고(규칙도 짐이다)
+        "stale_days": 180,     # 직접 더한 규칙이 이만큼 반응이 없으면 rules.stale 알림
     },
     "docs": {
         "map": "README.md",
@@ -27,6 +29,7 @@ DEFAULTS = {
         "instructions": ["AGENTS.md", "CLAUDE.md"],
         "agents_md_max_bytes": 32768,
         "claude_md_max_lines": 200,
+        "instructions_warn_bytes": 8192,  # AI가 매번 읽는 지침(AGENTS.md+CLAUDE.md) 예산, 넘으면 rules.weight
     },
     "export": {
         "targets": ["agents", "claude"],

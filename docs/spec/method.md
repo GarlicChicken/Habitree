@@ -47,6 +47,23 @@ AI는 프로젝트 전체를 뒤지기 전에 이 지도부터 읽습니다. 지
 
 규칙은 맞는 곳 중 가장 넓은 범위에 둡니다. 그리고 새 규칙을 만들기 전에 같은 뜻의 규칙이 있는지 먼저 찾습니다. 같은 뜻이 두 규칙으로 갈라지면 지적 횟수가 흩어져서 사다리를 오르지 못하기 때문입니다.
 
+## 쌓는 만큼 덜어내기
+
+이 방법은 쌓는 쪽으로 기울기 쉽습니다. 되풀이되면 도구로, 피드백은 규칙으로, 커지면 나눠서 모듈로. 그런데 그렇게 쌓인 것도 결국 읽고 지켜야 하는 짐입니다. 한 번 쓰고 마는 도구, 아무도 다시 쓰지 않는 추상화, 끝없이 늘어나는 규칙은 처음에 아끼려던 토큰과 시간을 다른 모습으로 다시 씁니다.
+
+그래서 쌓는 방향마다 덜어내는 방향을 짝으로 둡니다.
+
+| 쌓는 방향 | 짝이 되는 덜어내기 |
+|---|---|
+| 되풀이되면 도구·모듈로 | 실제로 다시 쓰일 때만 만든다. 한 곳에서만 쓰는 래퍼·설정 층은 풀어 넣는다 |
+| 피드백은 규칙으로 | 같은 뜻 규칙은 합치고, 오래 반응이 없는 규칙은 다시 보고, 맞지 않으면 버린다 |
+| 커지면 나눈다 | 서로만 쓰는 작은 파일 여러 개는 하나로 합친다. 새 층을 얹기보다 있는 경계를 따라 나눈다 |
+| 기능을 켠다 | 쓰지 않는 기능의 규칙은 프로젝트에 옮겨 적지 않는다. 쓸 때 켠다 |
+
+정리를 제안할 때도 같은 문제라면 덜어내는 해법을 먼저 보여 줍니다. `habitree check`는 끝에 프로젝트의 무게(규칙 수, AI가 매번 읽는 지침 크기)를 한 줄로 보여 주고, 예산을 넘거나 오래 반응이 없는 규칙이 있으면 알려 줍니다.
+
+Habitree 자신에게도 같은 기준을 둡니다. AI가 매번 읽는 지침과 세션 시작 때 넣는 글, 경고 한 건의 길이에는 상한이 있고, 시험으로 지킵니다. 도구를 쓸 때마다 도는 훅은 무거운 모듈을 불러오지 않습니다. 작업 중 경고와 모델 배분의 규칙은 프로젝트에 옮겨 적지 않고 패키지에서 바로 읽으며, 사용자가 반응하거나 고친 규칙만 프로젝트에 남깁니다.
+
 ## AI가 읽는 분량
 
 AI가 매번 읽는 파일(AGENTS.md, CLAUDE.md)은 짧게 유지합니다. 작업 순환과 필수 규칙 요약만 넣고, 나머지는 `habitree rules brief`로 필요한 범위만 꺼내 읽게 합니다. 이 파일들은 한 언어로만 만들어서 같은 내용을 두 번 읽지 않게 합니다. 여러 도구가 읽는 AGENTS.md는 32KiB 안쪽, Claude Code가 읽는 CLAUDE.md는 200줄 안쪽을 기준으로 삼습니다.
@@ -101,6 +118,23 @@ Rules move at different speeds depending on the evidence.
 Human words are strong evidence, so they take effect quickly. Automatic signals always include some false positives, so they move slowly. Decisions that stop work are expensive when wrong, so a person always makes them. The ratio thresholds come from how Google ran static analysis warnings (Tricorder).
 
 Place each rule at the widest scope where it holds, and look for a rule with the same meaning before adding a new one. Duplicates split the feedback count and never climb the ladder.
+
+### Trim as much as you grow
+
+This method leans toward adding: repeated work becomes a tool, feedback becomes a rule, growing code is split into modules. But whatever piles up is something to read and maintain. A tool used once, an abstraction nobody reuses and a rule list that keeps growing spend, in another form, the very tokens and time they were meant to save.
+
+So every direction of growth is paired with a direction of trimming.
+
+| Growing | Paired trimming |
+|---|---|
+| Repeated work becomes a tool or module | Build it only when it will actually be reused; inline wrappers and config layers used in one place |
+| Feedback becomes a rule | Merge rules with the same meaning, revisit rules with no feedback for a long time, drop the ones that no longer fit |
+| Growing code gets split | Merge clusters of tiny files that only use each other; split along existing boundaries rather than adding layers |
+| Features get switched on | Rules of features you do not use are not copied into the project; switch them on when you use them |
+
+Cleanup suggestions show the subtracting fix first when it solves the same problem. `habitree check` ends with one line on the project's weight (number of rules, size of the instructions read every session) and warns when a budget is exceeded or rules have gone quiet for a long time.
+
+Habitree holds itself to the same standard. The instructions read every session, the text injected at session start and the length of a single warning have limits that tests enforce. Hooks, which run on every tool call, do not load heavy modules. The rules for in-flight warnings and model allocation are read straight from the package instead of being copied into the project; only rules you react to or edit are kept there.
 
 ### What the AI reads
 

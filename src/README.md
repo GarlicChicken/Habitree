@@ -27,7 +27,9 @@ habitree/
 │   ├── timeutil.py   # UTC 저장, 지역 시각 표시
 │   ├── state.py      # 세션 상태 파일(훅이 씀)
 │   ├── vendors.py    # 회사별 모델 대응표와 가격
-│   └── modelpolicy.py  # 작업별 칸, 승격, 조정
+│   ├── modelpolicy.py  # 작업별 칸, 승격, 조정
+│   ├── packs.py      # 꾸러미 읽기(옮겨 적는 것과 패키지에서 바로 읽는 것)
+│   └── fast.py       # 훅처럼 자주 도는 길을 가볍게 하는 작은 도구
 ├── guard/            # 감지기, 위임, Claude Code 훅 어댑터
 ├── mapper/           # 코드 색인: 언어 판정, 심볼, 순위, 찾기, 중복, 변경 기록, 정리 제안 판단
 ├── sessions/         # 세션 기록 읽기(응답 단위 중복 제거), 사용량과 비용, 낭비 신호

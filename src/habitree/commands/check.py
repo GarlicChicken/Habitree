@@ -22,6 +22,8 @@
   models.deprecated      쓰는 모델의 단종이 가까움
   models.floor           에이전트 모델이 작업 하한보다 낮음
   models.price-stale     모델 가격 확인일이 오래됨
+  rules.weight           AI가 매번 읽는 지침이나 규칙 수가 예산을 넘음
+  rules.stale            직접 더한 규칙이 오래 아무 반응 없음(다시 볼 때)
   custom.<id>            설정 checks.custom의 명령
 종료 코드: 오류가 있으면 1. / Exit code 1 when any error is found.
 """
@@ -305,7 +307,7 @@ def check_rules(ctx, files, out, no_auto=False):
     doc_rel = ctx.get("rules.doc")
     if doc_rel:
         doc = ctx.p(doc_rel)
-        want = db.render_md(doc.parent, p)
+        want = db.render_md(doc.parent, p, ctx.lang)
         if not doc.exists() or hio.read_text(doc) != want:
             out.append(Finding("rules.doc-stale", "warn",
                                {"ko": f"{doc_rel}가 규칙 DB와 다름 (habitree rules doc)",
@@ -329,6 +331,70 @@ def check_rules(ctx, files, out, no_auto=False):
     if not no_auto:
         run_auto(ctx, db, files, out)
     return db
+
+
+def weight(ctx):
+    """이 프로젝트가 Habitree 때문에 지는 무게: 프로젝트 규칙 수와 AI가 매번 읽는 지침 크기.
+    / The weight Habitree puts on this project: project rules and the instructions read every session."""
+    w = {"rules": 0, "must": 0, "live": 0, "instructions_bytes": 0}
+    p = ctx.p(ctx.get("rules.db"))
+    if p.is_file():
+        try:
+            db = RuleDB.load(p, ctx.lang)
+            mine = [r for r in db.persisted() if r.get("status", "active") == "active"]
+            w["rules"] = len(mine)
+            w["must"] = sum(1 for r in mine if r.get("level") == "must")
+            w["live"] = sum(1 for r in db.rules if db.untouched_virtual(r))
+        except HabitreeError:
+            pass
+    for name in ctx.get("docs.instructions") or []:
+        f = ctx.p(name)
+        if f.is_file():
+            w["instructions_bytes"] += f.stat().st_size
+    return w
+
+
+def check_weight(ctx, out, w):
+    """쌓는 만큼 덜어내기: 예산을 넘으면 경고, 오래 반응 없는 직접 규칙은 알림. / Trim as much as you grow."""
+    rel = ctx.get("rules.db")
+    budget = ctx.get("docs.instructions_warn_bytes", 8192)
+    if budget and w["instructions_bytes"] > budget:
+        out.append(Finding("rules.weight", "warn",
+                           {"ko": f"AI가 매번 읽는 지침이 {w['instructions_bytes']}바이트로 예산 {budget}을 넘음. "
+                                  f"겹치는 규칙은 합치고(`habitree rules similar`), 안 쓰는 규칙은 쉬게 하거나 폐기하세요",
+                            "en": f"Instructions read every session are {w['instructions_bytes']} bytes, over the {budget} budget. "
+                                  f"Merge overlapping rules (`habitree rules similar`) and pause or retire unused ones"}, rel))
+    most = ctx.get("rules.max_active", 150)
+    if most and w["rules"] > most:
+        out.append(Finding("rules.weight", "warn",
+                           {"ko": f"프로젝트 규칙이 {w['rules']}개로 {most}개를 넘음. 규칙도 짐이라 합치거나 버릴 때입니다",
+                            "en": f"{w['rules']} project rules, over {most}. Rules are weight too; time to merge or drop some"}, rel))
+    days = ctx.get("rules.stale_days", 180)
+    p = ctx.p(rel)
+    if not days or not p.is_file():
+        return
+    try:
+        db = RuleDB.load(p, ctx.lang)
+    except HabitreeError:
+        return
+    today = now_utc().date()
+    stale = []
+    for r in db.persisted():
+        if r.get("origin") or r.get("status", "active") != "active":
+            continue
+        dates = [x.get("date", "") for x in r.get("feedback", []) + r.get("history", [])]
+        try:
+            last = max(datetime.strptime(d, "%Y-%m-%d").date() for d in dates if d)
+        except ValueError:
+            continue
+        if (today - last).days > days:
+            stale.append(r["id"])
+    if stale:
+        out.append(Finding("rules.stale", "info",
+                           {"ko": f"{days}일 넘게 반응이 없는 직접 규칙 {len(stale)}개: {', '.join(stale[:5])}. "
+                                  f"아직 맞는지 보고, 아니면 `habitree rules retire`",
+                            "en": f"{len(stale)} of your rules had no feedback for over {days} days: {', '.join(stale[:5])}. "
+                                  f"Check they still hold, or `habitree rules retire`"}, rel))
 
 
 def check_generated(ctx, out):
@@ -465,9 +531,11 @@ def collect(ctx, no_auto=False):
     check_paths(ctx, files, out)
     check_custom(ctx, out)
     check_models(ctx, out)
+    w = weight(ctx)
+    check_weight(ctx, out, w)
     disabled = ctx.get("checks.disable") or []
     out = [f for f in out if not any(f.id == d or f.id.startswith(d + ".") for d in disabled)]
-    return out, files
+    return out, files, w
 
 
 def _match(fid, prefixes):
@@ -475,7 +543,7 @@ def _match(fid, prefixes):
 
 
 def run(args, ctx):
-    findings, files = collect(ctx, args.no_auto)
+    findings, files, w = collect(ctx, args.no_auto)
     if args.only:
         findings = [f for f in findings if _match(f.id, args.only)]
     if args.skip:
@@ -484,12 +552,15 @@ def run(args, ctx):
     errors = sum(1 for f in findings if f.level == "error")
     lang = ctx.lang
     if args.json:
-        print(json.dumps({"root": str(ctx.root), "files": len(files), "errors": errors,
+        print(json.dumps({"root": str(ctx.root), "files": len(files), "errors": errors, "weight": w,
                           "findings": [f.to_json(lang) for f in findings]}, ensure_ascii=False, indent=1))
         return 1 if errors else 0
     ko = lang == "ko"
     print(("Habitree 점검" if ko else "Habitree check") + f": {ctx.root}")
     print(f"  {'파일' if ko else 'files'} {len(files)}")
+    print(("  무게: 프로젝트 규칙 {r}개(필수 {m}) · 패키지에서 읽는 규칙 {l}개 · AI가 매번 읽는 지침 {b:.1f}KB" if ko else
+           "  weight: {r} project rules ({m} must) · {l} rules read from the package · {b:.1f} KB of instructions per session"
+           ).format(r=w["rules"], m=w["must"], l=w["live"], b=w["instructions_bytes"] / 1024))
     if not findings:
         print("  " + ("문제 없음" if ko else "No problems"))
         return 0

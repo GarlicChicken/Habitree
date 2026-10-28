@@ -146,6 +146,7 @@ claude plugin install habitree@habitree
 
 ## 한계
 
+- 훅은 도구를 쓸 때마다 앞뒤로 두 번 돌고, 한 번에 Python을 새로 띄웁니다. 개발 컴퓨터(Windows)에서 Python 시작을 빼고 한 번에 약 55~115ms(부하에 따라)가 더해졌습니다. 읽기만 하는 도구는 '사용 전' 훅이 필요 없을 수 있어, 반복 감지를 '사용 후'로 옮겨 훅 호출을 줄이는 것을 다음에 볼 일로 남겨 두었습니다.
 - 같음은 정확히 같은 입력으로만 봅니다. 말을 바꿔 같은 일을 되풀이하는 것은 못 잡습니다.
 - 복사 코드는 줄 해시라 이름만 바꾼 복사는 못 잡습니다. 정밀하게 보려면 jscpd 같은 언어별 도구가 필요합니다.
 - 정정·위임 표현은 한국어와 영어 사전입니다. 다른 언어는 `detect.params`로 더해야 합니다.
@@ -300,6 +301,7 @@ Session state lives in `.habitree/state/sessions/<session id>.json` and is not c
 
 ### Limits
 
+- Hooks run twice per tool call and start a fresh Python each time. On the development machine (Windows) each call added about 55 to 115 ms on top of starting Python, depending on load. Read-only tools may not need the pre-use hook; moving repeat detection to the post-use hook to cut hook calls is left as a next step.
 - Sameness means exactly the same input. Doing the same thing in different words is not caught.
 - Copy detection uses line hashes, so copies with renamed identifiers are missed. A language-aware tool such as jscpd is needed for that.
 - Correction and delegation phrases are Korean and English dictionaries. Other languages need entries in `detect.params`.

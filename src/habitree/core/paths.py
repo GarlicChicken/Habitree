@@ -8,8 +8,6 @@
 import fnmatch
 import os
 import re
-import shutil
-import subprocess
 import unicodedata
 from functools import lru_cache
 from pathlib import Path
@@ -148,6 +146,7 @@ def resolve(root, relpath):
 
 
 def git_exe():
+    import shutil
     return shutil.which("git")
 
 
@@ -156,6 +155,7 @@ def git(root, *args, timeout=20):
     exe = git_exe()
     if not exe:
         return None
+    import subprocess
     try:
         r = subprocess.run([exe, "-C", str(root), *args], capture_output=True, timeout=timeout)
     except (OSError, subprocess.SubprocessError):

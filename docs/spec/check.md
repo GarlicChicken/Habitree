@@ -25,6 +25,8 @@
 | `models.deprecated` | 경고 | 쓰는 모델(기본 회사의 등급 모델, `models.agents`에 묶인 에이전트 파일의 model)이 `models.deprecation_days`(90) 안에 단종되거나 이미 단종됨. 설정에 `models` 절이 없으면 보지 않음 |
 | `models.floor` | 오류 | 에이전트 파일의 model(같은 등급이면 강도까지)이 그 작업의 하한(필수 규칙의 `cell`)보다 낮거나, 대응표를 읽지 못함 |
 | `models.price-stale` | 알림 | 쓰는 회사의 가격·모델 확인일이 `models.price_stale_days`(90)보다 오래됨 |
+| `rules.weight` | 경고 | AI가 매번 읽는 지침(`docs.instructions`의 파일들)이 `docs.instructions_warn_bytes`(8192)를 넘거나, 프로젝트 규칙이 `rules.max_active`(150)개를 넘음. 규칙도 짐이라 합치거나 버릴 때 |
+| `rules.stale` | 알림 | 직접 더한 규칙(꾸러미에서 오지 않은 것)이 `rules.stale_days`(180)일 넘게 피드백도 고침도 없음. 아직 맞는지 다시 볼 때 |
 | `custom.<id>` | 설정대로 | 설정 `checks.custom`의 명령이 0이 아닌 코드로 끝남 |
 
 ## 설정
@@ -39,6 +41,8 @@
   "exclude": ["node_modules", "dist"]
 }
 ```
+
+점검이 끝나면 이 프로젝트의 무게를 한 줄로 보여 줍니다. 프로젝트 규칙 수(필수 수), 패키지에서 바로 읽는 규칙 수, AI가 매번 읽는 지침의 크기입니다. `--json`에서는 `weight` 칸에 들어 있습니다.
 
 git이 있으면 `.gitignore`를 따라 파일을 고르고, 없으면 `exclude`에 적은 것을 뺀 전체를 봅니다. 명령줄의 `--only`와 `--skip`은 id 앞부분으로 항목을 고르고, `--no-auto`는 자동 검사를 건너뜁니다.
 
@@ -71,8 +75,12 @@ The items reported by `habitree check`. Checks that ask an AI to judge cost mone
 | `models.deprecated` | warn | A model in use (the default vendor's tier models, or the model in an agent file bound by `models.agents`) retires within `models.deprecation_days` (90) or already has; skipped without a `models` section |
 | `models.floor` | error | An agent file's model (and effort, within the same tier) is below the task's floor (the `cell` of a must rule), or the vendor table cannot be read |
 | `models.price-stale` | info | The vendor's prices and models were checked longer ago than `models.price_stale_days` (90) |
+| `rules.weight` | warn | Instructions read every session (the files in `docs.instructions`) exceed `docs.instructions_warn_bytes` (8192), or project rules exceed `rules.max_active` (150). Rules are weight too; time to merge or drop |
+| `rules.stale` | info | A rule you added yourself (not from a pack) has had no feedback or edit for over `rules.stale_days` (180) days; check it still holds |
 | `custom.<id>` | as configured | A command in `checks.custom` exited with a non-zero code |
 
 ### Configuration
+
+At the end, a single line shows the project's weight: the number of project rules (and must rules), the rules read straight from the package, and the size of the instructions read every session. In `--json` it is the `weight` field.
 
 The JSON above shows the main settings. With git, files are chosen according to `.gitignore`; without it, everything except `exclude` is scanned. On the command line, `--only` and `--skip` take id prefixes and `--no-auto` skips automatic checks.

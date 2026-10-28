@@ -4,7 +4,6 @@
 감지기는 행동만 본다: 도구 이름, 입력, 결과의 성패와 길이, 파일 경로, 사용자 메시지.
 프로그래밍 언어나 사람의 말(언어)에 기대지 않는다(정정·위임 표현 사전만 언어별).
 """
-import hashlib
 import json
 import os
 import re
@@ -12,6 +11,8 @@ from pathlib import Path
 
 from ..core import io as hio
 from ..core.paths import nfc
+from ..core.fast import short
+from ..core.fast import lazy_re
 from ..core.timeutil import now_iso
 
 KINDS = ("start", "prompt", "pre", "post", "stop")
@@ -80,7 +81,7 @@ def signature(tool, tool_input, keyfn=None, ignore=IGNORE_KEYS):
             if isinstance(data.get(k), str) and data[k]:
                 data[k] = keyfn(data[k])
     body = json.dumps([tool, data], ensure_ascii=False, sort_keys=True, default=str)
-    return hashlib.sha1(nfc(body).encode("utf-8")).hexdigest()[:16]
+    return short(nfc(body), 16)
 
 
 def target_path(tool, tool_input):
@@ -108,7 +109,7 @@ def output_length(value, limit=10_000_000):
     return total
 
 
-_VOLATILE = re.compile(r"0x[0-9a-fA-F]+|\d{4,}|\d+\.\d+s\b")
+_VOLATILE = lazy_re(r"0x[0-9a-fA-F]+|\d{4,}|\d+\.\d+s\b")
 
 
 def error_parts(error):
@@ -116,7 +117,7 @@ def error_parts(error):
     / (error key, display line). Volatile numbers such as times and addresses are dropped."""
     text = nfc(str(error or "")).replace("\r\n", "\n")
     norm = _VOLATILE.sub("#", " ".join(text.lower().split()))[:2000]
-    key = hashlib.sha1(norm.encode("utf-8")).hexdigest()[:12] if norm else ""
+    key = short(norm, 12) if norm else ""
     line = ""
     for ln in text.split("\n"):
         ln = ln.strip()

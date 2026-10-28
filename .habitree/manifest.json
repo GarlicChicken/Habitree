@@ -1,11 +1,11 @@
 {
   "files": {
     "AGENTS.md": {
-      "habitree": "0d502be9962a948f"
+      "habitree": "d502795be0f1038c"
     },
     "CLAUDE.md": {
       "habitree-claude": "aa5c8e4abd7244f7"
     }
   },
-  "version": "0.6.0"
+  "version": "0.7.0"
 }

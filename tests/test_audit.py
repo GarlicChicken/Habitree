@@ -285,8 +285,9 @@ class TestAuditCommand(TempProject):
         self.assertEqual(code, 0, err)
         self.assertIn("같은 호출 되풀이", out)
         # 같은 신호의 감지 규칙이 규칙 DB에 있으면 hit, 없으면 add 초안을 낸다
-        db = json.loads((self.root / ".habitree" / "rules.json").read_text(encoding="utf-8"))
-        same = [r["id"] for r in db["rules"] if (r.get("detect") or {}).get("signal") == "same_call_streak"]
+        from habitree.core.ruledb import RuleDB
+        db = RuleDB.load(self.root / ".habitree" / "rules.json")  # 살아 있는 꾸러미 포함
+        same = [r["id"] for r in db.rules if (r.get("detect") or {}).get("signal") == "same_call_streak"]
         if same:
             self.assertIn(f"rules hit {same[0]}", out)
         else:

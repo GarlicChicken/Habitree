@@ -1,3 +1,3 @@
 """Habitree: AI와 일하는 습관을 나무처럼 키운다. / Grow good habits for AI coding."""
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"

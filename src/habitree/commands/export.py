@@ -23,9 +23,9 @@ CYCLE = {
 
 1. 찾기: [지도]({map})와 `habitree rules brief <범위>`로 관련 문서·도구·규칙을 먼저 본다.
 2. 있으면 쓰기: 있는 것을 쓰고, 낡았거나 틀린 곳은 그 자리에서 고친다.
-3. 없으면 만들기: 되풀이할 일이면 도구·모듈·양식으로 만든다.
+3. 없으면 만들기: 되풀이가 실제로 보일 때만 도구·모듈·양식으로 만든다. 한 번 쓰고 마는 것은 만들지 않는다.
 4. 기록하기: 바꾼 것을 폴더 README, 지도, [변경 기록]({log})에 함께 반영한다.
-5. 고치기: 지금 못 고친 문제는 변경 기록의 '손볼 것'에 적는다.
+5. 고치기: 지금 못 고친 문제는 변경 기록의 '손볼 것'에 적는다. 쌓는 만큼 덜어낸다: 겹치거나 안 쓰이는 규칙·도구·코드는 합치거나 지운다.
 6. 점검하기: 끝내기 전에 `habitree check`와 검증 명령을 실행하고 나온 문제를 고친다.
 
 사용자 피드백은 고치는 것과 동시에 규칙으로 남긴다. 같은 뜻 규칙이 있으면 `habitree rules hit <id> --feedback "…"`, 없으면 `habitree rules add --scope … --aspect … --rule "…" --why "…" --feedback "…"`. 전체 규칙: [{doc}]({doc}).""",
@@ -35,9 +35,9 @@ This project manages its working habits with Habitree. Every task follows this o
 
 1. Find: check the [map]({map}) and `habitree rules brief <scope>` for related docs, tools and rules first.
 2. Reuse: use what exists; fix stale or wrong parts on the spot.
-3. Build: if the work will repeat, make it a tool, module or template.
+3. Build: make a tool, module or template only when the work actually repeats; nothing used just once.
 4. Record: reflect changes in the folder README, the map and the [change log]({log}).
-5. Fix later: write problems you cannot fix now under 'To fix' in the change log.
+5. Fix later: write problems you cannot fix now under 'To fix' in the change log. Trim as much as you grow: merge or remove overlapping or unused rules, tools and code.
 6. Check: before finishing, run `habitree check` and the verify commands, and fix what they report.
 
 Record user feedback as a rule while fixing it: `habitree rules hit <id> --feedback "…"` when a rule with the same meaning exists, otherwise `habitree rules add --scope … --aspect … --rule "…" --why "…" --feedback "…"`. All rules: [{doc}]({doc}).""",
@@ -57,6 +57,7 @@ def add_arguments(p):
 def agents_block(ctx, db):
     lang = ctx.lang
     text = CYCLE[lang].format(map=ctx.get("docs.map"), log=ctx.get("docs.log"), doc=ctx.get("rules.doc"))
+    db = RuleDB(db.file_data(), db.path)  # 프로젝트에 있는 규칙만 / persisted rules only
     brief = db.brief(["global"], must_only=True, budget=ctx.get("export.brief_budget", 3000), lang=lang,
                      compact=True, skip_scopes=("work/cycle",))
     body = brief.split("\n", 1)[1].strip() if "\n" in brief else ""

@@ -114,7 +114,8 @@ def overview(db, lang):
 def run(args, ctx):
     lang = ctx.lang
     db_path, doc_path = _paths(args, ctx)
-    db = RuleDB.load(db_path, lang)
+    # 다른 위치의 DB(--db)에는 코딩용 꾸러미를 얹지 않는다 / no live packs on an external DB
+    db = RuleDB.load(db_path, lang, live=not args.db)
     act = args.action
 
     def save():

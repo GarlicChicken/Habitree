@@ -7,7 +7,6 @@
 import json
 import os
 import sys
-import tempfile
 import time
 from pathlib import Path
 
@@ -47,9 +46,9 @@ def write_text(path, text):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     data = text.replace("\r\n", "\n").encode("utf-8")
-    fd, tmp = tempfile.mkstemp(prefix=".ht-", dir=str(path.parent))
+    tmp = str(path.parent / f".ht-{os.getpid()}-{os.urandom(4).hex()}.tmp")
     try:
-        with os.fdopen(fd, "wb") as f:
+        with open(tmp, "xb") as f:
             f.write(data)
         for attempt in range(5):  # Windows: 다른 프로그램이 잠깐 잡고 있으면 다시 시도
             try:

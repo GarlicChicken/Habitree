@@ -13,15 +13,13 @@
 - 프로젝트에 .habitree/config.json이 없으면 아무것도 하지 않는다.
 - 같은 훅이 플러그인과 프로젝트 설정에 두 번 걸려도 한 번만 처리한다.
 """
-import hashlib
 import os
 
 from ..core import io as hio
+from ..core.fast import short
 from ..core import state as hstate
 from ..core.config import CONFIG_REL, Context, deep_merge
 from ..core.i18n import tr
-from ..core.markdown import get_block
-from ..core.ruledb import RuleDB
 from ..core.timeutil import now_iso, seconds_since
 from ..guard import claude, delegate, engine
 from ..guard.texts import t
@@ -74,11 +72,14 @@ def handle(event, payload, root=None):
     ctx = Context.load(_start_dir(payload, root))
     if not ctx.configured or not ctx.get("guard.enabled", True):
         return {}
-    db = RuleDB.load(ctx.p(ctx.get("rules.db")), ctx.lang)
+    db_path = ctx.p(ctx.get("rules.db"))
+    data = hio.load_json(db_path, {}) or {}
     sid = str(payload.get("session_id") or "default")
     kind = claude.EVENTS[event]
     if kind == "start":
-        return _session_start(ctx, db, sid, payload)
+        from ..core.ruledb import RuleDB  # 세션 시작 때만(요약을 만들 때) / only at session start
+        return _session_start(ctx, RuleDB(data, db_path), sid, payload)
+    db = _Rules(data)
     with hstate.session(ctx.state_dir, sid) as st:
         ev = claude.to_event(event, payload, ctx.root, lambda p: hstate.file_key(ctx.root, p, st))
         if _duplicate(st, ev):
@@ -93,6 +94,21 @@ def handle(event, payload, root=None):
         return claude.render(event, out, ctx.lang, relay=ctx.get("guard.relay", "always") != "never")
 
 
+class _Rules:
+    """훅이 쓰는 규칙 DB의 읽기 전용 모습. 도구를 쓸 때마다 도는 길이라 검사기·비교기 없이 JSON만 읽는다.
+    / Read-only view of the rule DB for hooks: plain JSON, no validator, on the hot path."""
+
+    __slots__ = ("data", "rules")
+
+    def __init__(self, data):
+        from ..core.packs import live_rules
+        self.data = data
+        self.rules = list(data.get("rules") or []) + live_rules(data, ("work",))  # 훅은 감지 규칙만
+
+    def active(self):
+        return [r for r in self.rules if r.get("status", "active") == "active"]
+
+
 def _duplicate(st, ev):
     """플러그인과 프로젝트 설정에 같은 훅이 둘 다 있을 때 두 번째 부름을 건너뛴다. / Skip a doubled hook call."""
     seen = st.setdefault("seen", {})
@@ -104,7 +120,7 @@ def _duplicate(st, ev):
         del ids[:-60]
         return False
     body = f"{ev.kind}\0{ev.prompt or ev.last_message}\0{ev.source}\0{ev.stop_active}"
-    key = hashlib.sha1(body.encode("utf-8")).hexdigest()[:12]
+    key = short(body, 12)
     items = seen.setdefault(ev.kind, [])
     if any(k == key and (seconds_since(at) or 99) < 5 for k, at in items):
         return True
@@ -117,7 +133,7 @@ def _session_start(ctx, db, sid, payload):
     source = str(payload.get("source") or "startup")
     sdir = ctx.state_dir
     old = hstate.read(sdir, sid)
-    body = hashlib.sha1(f"start\0{source}".encode("utf-8")).hexdigest()[:12]
+    body = short(f"start\0{source}", 12)
     if old and any(k == body and (seconds_since(at) or 99) < 5 for k, at in old.get("seen", {}).get("start", [])):
         return {}
     hstate.cleanup(sdir, ctx.get("guard.state_days", 7) or 7)
@@ -137,6 +153,7 @@ def _session_start(ctx, db, sid, payload):
 
 def _agents_loaded(ctx):
     """AGENTS.md(작업 순환·필수 규칙)가 CLAUDE.md의 @AGENTS.md로 이미 실리는가. / Already loaded via CLAUDE.md?"""
+    from ..core.markdown import get_block
     try:
         claude_md, agents_md = ctx.p("CLAUDE.md"), ctx.p("AGENTS.md")
         if not (claude_md.is_file() and agents_md.is_file()):
@@ -174,7 +191,7 @@ def quick_check(ctx):
     """Stop 때 빠른 점검: check.collect를 자동 검사·사용자 명령 없이. 오류만. / Fast check without auto/custom runs."""
     from . import check  # 문서로 정한 도우미: check.collect / documented helper
     qctx = Context(ctx.root, deep_merge(ctx.cfg, {"checks": {"custom": []}}), ctx.lang)
-    findings, _files = check.collect(qctx, no_auto=True)
+    findings = check.collect(qctx, no_auto=True)[0]
     return sorted((f for f in findings if f.level == "error"), key=lambda f: (f.id, f.path, f.line))
 
 
@@ -185,7 +202,7 @@ def _stop_extras(run, out, was_delegated):
         errors = quick_check(ctx)
         st["edits_since_check"] = 0
         if errors:
-            fp = hashlib.sha1("\n".join(f"{f.id}\0{f.path}" for f in errors).encode("utf-8")).hexdigest()[:12]
+            fp = short("\n".join(f"{f.id}\0{f.path}" for f in errors), 12)
             if fp != stop.get("check_fp") and stop.get("check_blocks", 0) < (ctx.get("guard.stop_check_max", 3) or 3):
                 stop["check_fp"] = fp
                 stop["check_blocks"] = stop.get("check_blocks", 0) + 1

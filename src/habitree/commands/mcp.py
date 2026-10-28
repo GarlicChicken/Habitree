@@ -293,7 +293,7 @@ class Server:
         from . import check as check_cmd
         only = _strs(args.get("only"), "only")
         auto = bool(args.get("auto", False))
-        findings, files = check_cmd.collect(self.ctx, no_auto=not auto)
+        findings, files = check_cmd.collect(self.ctx, no_auto=not auto)[:2]
         if only:
             findings = [f for f in findings if check_cmd._match(f.id, only)]
         findings.sort(key=lambda f: (check_cmd.LEVEL_ORDER[f.level], f.id, f.path, f.line))

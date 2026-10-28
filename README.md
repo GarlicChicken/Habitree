@@ -3,7 +3,7 @@
 AI와 함께 일하는 습관을 나무처럼 키우는 도구입니다. 피드백은 규칙으로, 되풀이는 모듈로 자라게 하고, 그렇게 자란 것이 짐이 되지 않게 함께 다듬습니다.
 
 - 마지막 갱신: 2026-10-28
-- 상태: 알파(로드맵 참고)
+- 상태: v0.7 알파
 - 라이선스: [MIT](LICENSE)
 - [English](#english)
 
@@ -39,7 +39,7 @@ Habitree는 [Open Prompt](https://github.com/GarlicChicken)를 운영하며 쓰�
 |---|---|---|
 | 작업 전 | 지켜야 할 규칙과 이미 있는 코드를 적은 분량으로 찾기 | `rules brief`, `map` |
 | 작업 중 | 같은 일을 맴돌거나 파일에 덧대기만 할 때 그 자리에서 알리기, 맡긴 일은 경계 안에서 | `hook`, `guard`(Claude Code 플러그인) |
-| 끝낼 때 | 지도·문서·규칙이 실제와 맞는지, 검증 명령이 통과하는지 확인 | `check`, `verify` |
+| 끝낼 때 | 지도·문서·규칙이 실제와 맞는지, 검증 명령이 통과하는지 확인하고, 이 프로젝트가 지는 무게를 한 줄로 보여 주기 | `check`, `verify` |
 | 되돌아볼 때 | 어디서 토큰이 샜는지, 무엇을 합치고 덜어낼지 | `audit`, `refactor` |
 | 모델을 고를 때 | 일마다 알맞은 등급에서 시작하고, 검증이 실패할 때만 올리기 | `models` |
 | 효과를 잴 때 | 규칙을 켜고 끈 채 같은 과제를 여러 번 돌려 비교 | `bench` |
@@ -64,7 +64,7 @@ claude plugin marketplace add GarlicChicken/habitree
 claude plugin install habitree@habitree
 ```
 
-`init`은 이미 있는 파일에서 사람이 쓴 내용을 지우지 않습니다. AGENTS.md와 CLAUDE.md에는 표시된 생성 구역 하나만 두고, 나중에 다시 실행하면 새로 생긴 기본 규칙만 더합니다.
+`init`은 이미 있는 파일에서 사람이 쓴 내용을 지우지 않습니다. AGENTS.md와 CLAUDE.md에는 표시된 생성 구역 하나만 두고, 나중에 다시 실행하면 새로 생긴 기본 규칙만 더합니다. 프로젝트에 옮겨 적는 것은 기본 규칙뿐이고, 작업 중 경고와 모델 배분의 규칙은 쓸 때 패키지에서 바로 읽습니다.
 
 ## 피드백을 규칙으로
 
@@ -89,7 +89,7 @@ habitree rules miss <id> --feedback "이번 경고는 틀렸음"  # 규칙이나
 | v0.4 | 코드 색인, MCP 서버 | 완료 |
 | v0.5 | 세션 기록 분석, 전후 비교 측정 | 완료 |
 | v0.6 | 리팩토링 제안(합치기와 덜어내기 먼저) | 완료 |
-| v0.7 | 가볍게: 훅 비용과 기본 설치를 줄이고, 쓰는 프로젝트의 무게도 보여 주기 | 예정 |
+| v0.7 | 가볍게: 훅 비용과 기본 설치를 줄이고, 쓰는 프로젝트의 무게도 보여 주기 | 완료 |
 
 ## 문서와 지도
 
@@ -154,7 +154,7 @@ spoken feedback → should rule → must rule → automatic check → blocked in
 |---|---|---|
 | Before work | Find the rules to follow and the code that already exists, in few tokens | `rules brief`, `map` |
 | During work | Point out going in circles or patching onto one file on the spot; keep delegated work inside its boundaries | `hook`, `guard` (Claude Code plugin) |
-| When finishing | Check that the map, docs and rules match reality and that verify commands pass | `check`, `verify` |
+| When finishing | Check that the map, docs and rules match reality and that verify commands pass, and show in one line the weight the project carries | `check`, `verify` |
 | Looking back | See where tokens leaked and what to merge or remove | `audit`, `refactor` |
 | Choosing a model | Start each kind of work at a suitable tier and move up only when verification fails | `models` |
 | Measuring | Run the same tasks with the rules on and off and compare | `bench` |
@@ -179,7 +179,7 @@ claude plugin marketplace add GarlicChicken/habitree
 claude plugin install habitree@habitree
 ```
 
-`init` never deletes what you wrote in existing files. AGENTS.md and CLAUDE.md get a single marked managed block, and running `init` again later only adds new default rules.
+`init` never deletes what you wrote in existing files. AGENTS.md and CLAUDE.md get a single marked managed block, and running `init` again later only adds new default rules. Only the base rules are copied into the project; the rules for in-flight warnings and model allocation are read straight from the package when used.
 
 ### Turning feedback into rules
 
@@ -195,7 +195,7 @@ When you correct the AI, record the correction as a rule while fixing it; AGENTS
 | v0.4 | Code index, MCP server | Done |
 | v0.5 | Session audit, before/after benchmark | Done |
 | v0.6 | Refactoring suggestions (merging and removing first) | Done |
-| v0.7 | Lighter: smaller hook cost and default install, and showing the weight of the project that uses it | Planned |
+| v0.7 | Lighter: smaller hook cost and default install, and showing the weight of the project that uses it | Done |
 
 ### Made by
 

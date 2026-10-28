@@ -134,7 +134,9 @@ def explain(args, ctx):
     if not det:
         _say(lang, "  감지 규칙이 아닙니다(작업 중에 알리지 않음).", "  Not a detection rule (no in-flight notes).")
         return 0
-    known = det.get("signal") in DETECTORS
+    # 훅이 아닌 명령이 쓰는 규칙(예: refactor)의 감지 이름은 훅 감지기 목록에 없어도 정상이다
+    known = det.get("signal") in DETECTORS or det.get("event") not in (None, "", "SessionStart", "UserPromptSubmit",
+                                                                        "PreToolUse", "PostToolUse", "PostToolUseFailure", "Stop")
     print(("  감지: " if ko else "  detect: ") + f"{det.get('signal')}{'' if known else ' (?)'} · "
           f"{det.get('event', '')} · threshold {det.get('threshold', '-')} · stop_at {det.get('stop_at', '-')} · "
           f"{det.get('severity', 'info')} · {det.get('repeat', 'once_per_streak')}"

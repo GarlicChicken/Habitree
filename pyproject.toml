@@ -39,4 +39,4 @@ path = "src/habitree/__init__.py"
 packages = ["src/habitree"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src", "schema", "docs", "tests", "conformance", "README.md", "README.en.md", "LICENSE", "NOTICE.md", "CHANGELOG.md"]
+include = ["src", "docs", "tests", "conformance", "README.md", "LICENSE", "NOTICE.md", "CHANGELOG.md"]

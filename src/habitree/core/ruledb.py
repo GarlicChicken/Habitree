@@ -14,14 +14,12 @@
 import copy
 import json
 import re
-from importlib import resources
 from pathlib import Path
 
 from . import HabitreeError
 from . import io as hio
+from . import packs as _packs
 from .i18n import t, tr
-from .schema import load_schema, validate
-from .textsim import similarity
 from .timeutil import local_date, now_iso
 
 LEVELS = ("must", "should")
@@ -50,6 +48,8 @@ class RuleDB:
     def __init__(self, data, path=None):
         self.data = data
         self.path = Path(path) if path else None
+        self._file_keys = None   # 파일에 원래 있던 범위·관점·상황 이름(살아 있는 꾸러미를 얹은 뒤에만)
+        self._virtual = set()    # 메모리에만 얹은(아직 손대지 않은) 꾸러미 규칙 id
         self.data.setdefault("scopes", {"global": {"ko": "모든 작업", "en": "All work"}})
         self.data.setdefault("parents", {})
         self.data.setdefault("aspects", {})
@@ -58,7 +58,9 @@ class RuleDB:
 
     # ── 불러오기·저장 ──
     @classmethod
-    def load(cls, path, lang="ko"):
+    def load(cls, path, lang="ko", live=True):
+        """규칙 DB를 읽는다. live면 살아 있는 꾸러미(work, task) 규칙을 메모리에만 얹는다.
+        / Load the DB; with live=True, live pack rules are added in memory only."""
         path = Path(path)
         if not path.is_file():
             raise HabitreeError(t("no_db", lang, path=path))
@@ -66,7 +68,63 @@ class RuleDB:
             data = hio.load_json(path)
         except json.JSONDecodeError as e:
             raise HabitreeError(f"규칙 DB JSON이 깨졌습니다 / Broken JSON: {path}: {e}")
-        return cls(data, path)
+        db = cls(data, path)
+        if live:
+            db.add_live_packs()
+        return db
+
+    def add_live_packs(self, names=_packs.LIVE):
+        """프로젝트 DB에 옮겨 적지 않은 꾸러미 규칙을 메모리에만 얹는다(저장할 때 손대지 않은 것은 빠진다).
+        / Overlay live pack rules in memory; untouched ones are left out on save."""
+        if self._file_keys is None:
+            self._file_keys = {k: set(self.data[k]) for k in ("scopes", "aspects", "contexts", "parents")}
+        copied = self.data.get("packs") or {}
+        have = {r["id"] for r in self.rules}
+        for name in names:
+            if name in copied:
+                continue
+            try:
+                pack = _packs.load_pack(name)
+            except (OSError, ValueError):
+                continue
+            for key in ("scopes", "aspects", "contexts", "parents"):
+                for k, v in pack.get(key, {}).items():
+                    self.data[key].setdefault(k, v)
+            for pr in pack["rules"]:
+                if pr["id"] in have:
+                    continue
+                r = _pack_copy(pr, pack)
+                self.rules.append(r)
+                self._virtual.add(r["id"])
+        return self
+
+    def untouched_virtual(self, r):
+        """메모리에만 얹었고 아직 아무도 손대지 않은 규칙인가. / Overlaid and still untouched?"""
+        return (r["id"] in self._virtual and pack_rule_hash(r) == r.get("origin_hash") and not r.get("feedback")
+                and not r.get("votes") and not r.get("history") and r.get("status", "active") == "active")
+
+    def persisted(self):
+        return [r for r in self.rules if not self.untouched_virtual(r)]
+
+    def file_data(self):
+        """파일에 쓸 모습: 손대지 않은 살아 있는 꾸러미 규칙과, 그것들만 쓰던 범위·관점·상황은 뺀다.
+        / What goes to disk: untouched live rules and names only they used are left out."""
+        if self._file_keys is None:
+            return self.data
+        rules = self.persisted()
+        used = {"scopes": set(), "aspects": set(), "contexts": set()}
+        for r in rules:
+            used["scopes"].update(self.chain(r["scope"]))
+            used["aspects"].add(r["aspect"])
+            used["contexts"].update(r.get("when", []))
+        out = dict(self.data)
+        out["rules"] = rules
+        for key in ("scopes", "aspects", "contexts"):
+            keep = self._file_keys[key] | used[key]
+            out[key] = {k: v for k, v in self.data[key].items() if k in keep}
+        keep = self._file_keys["parents"] | used["scopes"]
+        out["parents"] = {k: v for k, v in self.data["parents"].items() if k in keep}
+        return out
 
     @property
     def rules(self):
@@ -80,9 +138,9 @@ class RuleDB:
         problems = self.validate()
         if problems:
             raise HabitreeError(t("db_invalid", lang) + "\n  " + "\n  ".join(problems))
-        hio.save_json(self.path, self.data)
+        hio.save_json(self.path, self.file_data())
         if doc_path:
-            hio.write_text(doc_path, self.render_md(Path(doc_path).parent, self.path))
+            hio.write_text(doc_path, self.render_md(Path(doc_path).parent, self.path, lang))
 
     # ── 범위 트리 ──
     def parent(self, scope):
@@ -155,6 +213,7 @@ class RuleDB:
 
     # ── 검사 ──
     def validate(self):
+        from .schema import load_schema, validate  # 검사할 때만 / only when validating
         problems = validate(self.data, load_schema("rules.schema.json"))
         ids = set()
         for s in self.scopes:
@@ -300,6 +359,7 @@ class RuleDB:
                 self.data[key].setdefault(k, v)
         by_id = {r["id"]: r for r in self.rules}
         for pr in pack["rules"]:
+            self._virtual.discard(pr["id"])  # 꾸러미를 옮겨 적으면 메모리 전용이 아니다
             new = copy.deepcopy(pr)
             new.setdefault("when", [])
             new.setdefault("feedback", [])
@@ -331,87 +391,69 @@ class RuleDB:
         return report
 
     # ── 문서 ──
-    def render_md(self, doc_dir=None, db_path=None):
-        """RULES.md(사람용, 두 언어). 같은 입력이면 항상 같은 결과. / Deterministic bilingual doc."""
-        rules = self.active()
-        dates = [f["date"] for r in self.rules for f in r.get("feedback", [])]
+    def render_md(self, doc_dir=None, db_path=None, lang="ko"):
+        """RULES.md(사람이 읽는 규칙 문서). 설정 언어 한 벌로, 프로젝트 DB에 있는 규칙만 싣는다.
+        같은 입력이면 늘 같은 결과. / Human-readable rule doc in one language, persisted rules only."""
+        ko = lang == "ko"
+        rules = [r for r in self.persisted() if r.get("status", "active") == "active"]
+        dates = [f["date"] for r in rules for f in r.get("feedback", [])]
         link = "rules.json"
         if doc_dir and db_path:
             try:
                 link = Path(db_path).resolve().relative_to(Path(doc_dir).resolve()).as_posix()
             except ValueError:
                 link = Path(db_path).name
-        L = [
-            "# 규칙 · Rules",
-            "",
-            f"> 이 문서는 [{Path(link).name}]({link})에서 자동으로 만든다. 직접 고치지 말고 `habitree rules`로 고친다.",
-            f"> Generated from [{Path(link).name}]({link}). Do not edit by hand; use `habitree rules`.",
-            "",
-            f"- 규칙 {len(rules)}개 · 피드백 {sum(len(r.get('feedback', [])) for r in rules)}건 · "
-            f"마지막 피드백 {max(dates) if dates else '-'}",
-            f"- {len(rules)} rules · {sum(len(r.get('feedback', [])) for r in rules)} feedback entries · "
-            f"last feedback {max(dates) if dates else '-'}",
-            "",
-            "## 범위 · Scopes",
-            "",
-            "| 범위 · Scope | 뜻 · Meaning | 규칙 · Rules |",
-            "|---|---|---|",
-        ]
-        for s, depth in self.order():
-            n = sum(1 for r in rules if r["scope"] == s)
-            L.append(f"| {'　' * depth}`{s}` | {_cell(self.scopes[s])} | {n} |")
-        L += ["", "## 관점 · Aspects", "", "| 관점 · Aspect | 뜻 · Meaning | 규칙 · Rules |", "|---|---|---|"]
-        for a, desc in self.data["aspects"].items():
-            L.append(f"| `{a}` | {_cell(desc)} | {sum(1 for r in rules if r['aspect'] == a)} |")
-        if self.data["contexts"]:
-            L += ["", "## 상황 태그 · Contexts", "", "| 태그 · Tag | 뜻 · Meaning | 규칙 · Rules |", "|---|---|---|"]
-            for c, desc in self.data["contexts"].items():
-                L.append(f"| `{c}` | {_cell(desc)} | {sum(1 for r in rules if c in r.get('when', []))} |")
-        L += ["", "## 규칙 · Rules", ""]
+        L = ["# 규칙" if ko else "# Rules", "",
+             (f"> [{Path(link).name}]({link})에서 만든 문서입니다. 고칠 때는 `habitree rules`를 쓰세요." if ko else
+              f"> Generated from [{Path(link).name}]({link}). Use `habitree rules` to change it."), ""]
+        fb = sum(len(r.get("feedback", [])) for r in rules)
+        L.append(f"- 규칙 {len(rules)}개 · 피드백 {fb}건 · 마지막 피드백 {max(dates) if dates else '-'}" if ko else
+                 f"- {len(rules)} rules · {fb} feedback entries · last feedback {max(dates) if dates else '-'}")
+        live = sorted({r["origin"].split(":", 1)[1].split("@")[0] for r in self.rules
+                       if self.untouched_virtual(r) and r.get("origin")})
+        if live:
+            L.append(("- 패키지에서 바로 읽는 꾸러미: " if ko else "- Packs read straight from the package: ")
+                     + ", ".join(f"`{n}`" for n in live)
+                     + (" (보기: `habitree rules brief <범위>`, 반응하거나 고친 규칙만 여기에 남습니다)" if ko else
+                        " (see `habitree rules brief <scope>`; only rules you react to or edit are kept here)"))
+        L.append("")
         aspect_order = list(self.data["aspects"])
         for s, _ in self.order():
             rs = [r for r in rules if r["scope"] == s]
             if not rs:
                 continue
-            L += [f"### `{s}` · {_cell(self.scopes[s])}", ""]
+            L += [f"## `{s}` · {tr(self.scopes[s], lang)}", ""]
             for r in sorted(rs, key=lambda r: (aspect_order.index(r["aspect"]) if r["aspect"] in aspect_order else 99,
                                                r["id"])):
-                lv = r.get("level", "should")
-                L.append(f"- **[{LEVEL_TEXT[lv]['ko']} · {lv} · {r['aspect']}] {_inline(r['rule'])}**")
-                L.append(f"  - 이유 · Why: {_inline(r['why'])}")
+                lv = tr(LEVEL_TEXT[r.get("level", "should")], lang)
+                L.append(f"- **[{lv} · {r['aspect']}] {tr(r['rule'], lang)}**")
+                L.append(("  - 이유: " if ko else "  - Why: ") + tr(r["why"], lang))
                 chk = r.get("check", {})
-                ctype = chk.get("type", "review")
-                L.append(f"  - 점검 · Check ({CHECK_TEXT.get(ctype, {}).get('ko', ctype)} · {ctype}): "
-                         f"{_inline(chk.get('how', ''))}")
-                if r.get("detect"):
-                    d = r["detect"]
-                    L.append(f"  - 감지 · Detect: `{d.get('signal')}` · {d.get('event', '')} · "
-                             f"threshold {d.get('threshold', '-')} · {d.get('severity', 'info')}")
+                L.append(("  - 점검" if ko else "  - Check") + f" ({tr(CHECK_TEXT.get(chk.get('type', 'review'), {}), lang)}): "
+                         + tr(chk.get("how", ""), lang))
                 extra = []
                 if r.get("when"):
-                    extra.append("상황 · when: " + ", ".join(f"`{w}`" for w in r["when"]))
+                    extra.append(", ".join(f"`{w}`" for w in r["when"]))
                 if r.get("history"):
-                    extra.append(f"고침 · edits {len(r['history'])}")
-                if r.get("origin"):
-                    extra.append(f"`{r['origin']}`")
-                L.append(f"  - 피드백 · feedback {len(r.get('feedback', []))}"
+                    extra.append((f"고침 {len(r['history'])}" if ko else f"edits {len(r['history'])}"))
+                L.append(("  - 피드백 " if ko else "  - feedback ") + str(len(r.get("feedback", [])))
                          + "".join(f" · {e}" for e in extra) + f" · `{r['id']}`")
             L.append("")
-        off = [r for r in self.rules if r.get("status", "active") != "active"]
+        off = [r for r in self.persisted() if r.get("status", "active") != "active"]
         if off:
-            L += ["## 쉬거나 폐기한 규칙 · Paused or retired", ""]
+            L += ["## 쉬거나 폐기한 규칙" if ko else "## Paused or retired", ""]
             for r in off:
                 last = r["history"][-1]["change"] if r.get("history") else ""
-                L.append(f"- ~~{_inline(r['rule'])}~~ · `{r['id']}` · {r.get('status')} · {_inline(last)}")
+                L.append(f"- ~~{tr(r['rule'], lang)}~~ · `{r['id']}` · {r.get('status')} · {last}")
             L.append("")
-        events = [(f["date"], r["id"], f.get("note", "")) for r in self.rules for f in r.get("feedback", [])]
-        events += [(h["date"], r["id"], f"(고침 · edit) {h['change']}") for r in self.rules for h in r.get("history", [])]
+        events = [(f["date"], r["id"], tr(f.get("note", ""), lang)) for r in self.persisted() for f in r.get("feedback", [])]
+        events += [(h["date"], r["id"], h["change"]) for r in self.persisted() for h in r.get("history", [])]
         if events:
-            L += ["## 피드백·변경 기록 · Feedback and changes", "", "| 날짜 · Date | 규칙 · Rule | 내용 · Note |",
-                  "|---|---|---|"]
+            L += ["## 피드백과 변경 기록" if ko else "## Feedback and changes", "",
+                  "| 날짜 | 규칙 | 내용 |" if ko else "| Date | Rule | Note |", "|---|---|---|"]
             for d, rid, note in sorted(events, key=lambda e: (e[0], e[1], e[2]), reverse=True):
-                L.append(f"| {d} | `{rid}` | {_inline(note).replace('|', '/')} |")
-        return "\n".join(L) + "\n"
+                L.append(f"| {d} | `{rid}` | {str(note).replace('|', '/')} |")
+        return "\n".join(L).rstrip("\n") + "\n"
 
     def brief(self, scopes, aspects=None, when=None, must_only=False, budget=0, lang="ko", compact=False,
               skip_scopes=()):
@@ -471,6 +513,7 @@ def _variants(text):
 
 def max_similarity(text, rule_value):
     """언어별 글과 따로 비교해 가장 높은 점수. / Best score across languages."""
+    from .textsim import similarity
     return max(similarity(text, v) for v in _variants(rule_value))
 
 
@@ -485,32 +528,27 @@ def vote_stats(r, window=VOTE_WINDOW):
 def pack_rule_hash(r):
     keys = ("scope", "aspect", "when", "level", "rule", "why", "check", "detect", "message", "cell", "max_cell",
             "on_delegate", "retire_when")
-    body = json.dumps({k: r.get(k) for k in keys}, ensure_ascii=False, sort_keys=True)
+    # 빈 칸은 없는 칸과 같게 본다(when 없음 = when []) / an empty field equals a missing one
+    body = json.dumps({k: (r.get(k) or None) for k in keys}, ensure_ascii=False, sort_keys=True)
     import hashlib
     return hashlib.sha256(body.encode("utf-8")).hexdigest()[:16]
 
 
 def load_pack(name):
-    text = resources.files("habitree.data").joinpath("packs", f"{name}.json").read_text(encoding="utf-8")
-    return json.loads(text)
+    return _packs.load_pack(name)
 
 
 def available_packs():
-    folder = resources.files("habitree.data").joinpath("packs")
-    return sorted(p.name[:-5] for p in folder.iterdir() if p.name.endswith(".json"))
+    return _packs.available()
 
 
-def _cell(text):
-    if isinstance(text, dict):
-        ko, en = text.get("ko", ""), text.get("en", "")
-        return f"{ko} · {en}" if ko and en and ko != en else (ko or en)
-    return str(text or "")
-
-
-def _inline(text):
-    if isinstance(text, dict):
-        ko, en = text.get("ko", ""), text.get("en", "")
-        if ko and en and ko != en:
-            return f"{ko} / {en}"
-        return ko or en
-    return str(text or "")
+def _pack_copy(pr, pack):
+    """꾸러미 규칙을 DB에 넣을 모양으로. / A pack rule shaped for the DB."""
+    r = copy.deepcopy(pr)
+    r.setdefault("when", [])
+    r.setdefault("feedback", [])
+    r.setdefault("history", [])
+    r.setdefault("status", "active")
+    r["origin"] = f"pack:{pack['pack']}@{pack['version']}"
+    r["origin_hash"] = pack_rule_hash(pr)
+    return r

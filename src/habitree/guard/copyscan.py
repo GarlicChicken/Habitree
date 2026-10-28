@@ -4,16 +4,16 @@
 언어와 무관하게 돈다. 줄 앞뒤 공백을 지우고, 빈 줄·주석만 있는 줄·괄호만 있는 줄을 뺀 뒤
 연속된 k줄(기본 6줄)씩 해시한다. 이름만 바꾼 복사는 못 잡는다(그건 jscpd 같은 언어별 도구의 몫).
 """
-import difflib
-import hashlib
 import os
 import re
 
 from ..core.paths import nfc
+from ..core.fast import short
+from ..core.fast import lazy_re
 from .events import read_text_small
 
-_COMMENT = re.compile(r"^(#|//|--|;|/\*|\*|<!--|%|rem\s)", re.I)
-_TRIVIAL = re.compile(r"^[\W_]*$")
+_COMMENT = lazy_re(r"^(#|//|--|;|/\*|\*|<!--|%|rem\s)", re.I)
+_TRIVIAL = lazy_re(r"^[\W_]*$")
 MAX_DIFF_LINES = 3000
 
 
@@ -36,7 +36,7 @@ def window_hashes(lines, k, min_chars):
         block = texts[i:i + k]
         if sum(len(x) for x in block) < min_chars:
             continue
-        out[hashlib.sha1("\n".join(block).encode("utf-8")).hexdigest()[:16]] = block[0]
+        out[short("\n".join(block), 16)] = block[0]
     return out
 
 
@@ -46,6 +46,7 @@ def inserted_text(old, new):
     if len(a) > MAX_DIFF_LINES or len(b) > MAX_DIFF_LINES:
         return [new] if not old else []
     runs = []
+    import difflib  # 쓸 때만 / only when used
     for tag, _i1, _i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
         if tag in ("insert", "replace") and j2 > j1:
             runs.append("\n".join(b[j1:j2]))
@@ -59,6 +60,7 @@ def line_delta(old, new):
     if len(a) > MAX_DIFF_LINES or len(b) > MAX_DIFF_LINES:
         return max(0, len(b) - len(a)), max(0, len(a) - len(b))
     added = removed = 0
+    import difflib
     for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
         if tag in ("insert", "replace"):
             added += j2 - j1
@@ -106,7 +108,7 @@ def find_copy(root, files, wanted, k, skip_key, keyfn, max_files=400, max_file_b
             hs = first.get(s)
             if not hs or i + k > len(texts):
                 continue
-            h = hashlib.sha1("\n".join(texts[i:i + k]).encode("utf-8")).hexdigest()[:16]
+            h = short("\n".join(texts[i:i + k]), 16)
             if h in hs:
                 return rel, lines[i][0]
     return None

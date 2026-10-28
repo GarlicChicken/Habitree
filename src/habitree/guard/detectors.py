@@ -8,10 +8,11 @@
 '고리가 아닌 것'(오탐 예외)은 판정 방식에 들어 있다: 다른 파일 대상이나 인자를 바꾼 재시도는 입력 해시가
 달라 같은 호출로 세지 않고, 코드를 고친 뒤 테스트를 다시 돌리면 그 사이 수정이 연속을 끊는다.
 """
-import hashlib
 import re
 
 from ..core.textsim import jaccard
+from ..core.fast import short
+from ..core.fast import lazy_re
 from ..core.timeutil import seconds_since
 from . import delegate
 from .copyscan import find_copy
@@ -28,7 +29,7 @@ CORRECTION = [
     r"\bstill\s+(?:not|wrong|broken|failing)\b", r"\b(?:wrong|broken)\s+again\b", r"\bdoesn'?t\s+work\b",
     r"\bundo\s+that\b",
 ]
-ACK = re.compile(r"^(?:응|어|네|넵|예|ㅇㅇ|ㅇㅋ|오케이|좋아|좋아요|좋습니다|고마워|감사합니다|감사|계속|진행|진행해|해 줘|해줘|"
+ACK = lazy_re(r"^(?:응|어|네|넵|예|ㅇㅇ|ㅇㅋ|오케이|좋아|좋아요|좋습니다|고마워|감사합니다|감사|계속|진행|진행해|해 줘|해줘|"
                  r"go|ok|okay|yes|yep|yeah|sure|thanks|thank you|continue|proceed|lgtm|y)[\s.!~]*$", re.I)
 
 
@@ -68,7 +69,7 @@ def is_ack(text):
 
 
 def _h(parts):
-    return hashlib.sha1("\0".join(parts).encode("utf-8")).hexdigest()[:12]
+    return short("\0".join(parts), 12)
 
 
 # ── 작업 중(도구 호출) ──

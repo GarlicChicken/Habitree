@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "scopes": {
+    "global": "all"
+  },
+  "aspects": {
+    "process": "process"
+  },
+  "contexts": {},
+  "rules": [
+    {
+      "id": "global.old",
+      "scope": "global",
+      "aspect": "process",
+      "level": "should",
+      "rule": "an old rule nobody mentions",
+      "why": "test",
+      "check": {
+        "type": "review",
+        "how": "look"
+      },
+      "feedback": [
+        {
+          "date": "2020-01-01",
+          "note": "first",
+          "ref": ""
+        }
+      ],
+      "history": [],
+      "status": "active"
+    }
+  ]
+}

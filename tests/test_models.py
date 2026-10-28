@@ -335,13 +335,22 @@ class ModelsProject(TempProject):
 
 
 class TestModelsCommand(ModelsProject):
-    def test_init_adds_task_pack_and_stays_clean(self):
+    def test_task_pack_is_live_and_stays_clean(self):
+        # task 꾸러미는 프로젝트 DB에 옮겨 적지 않고 패키지에서 바로 읽는다(쓰지 않으면 무게가 없다)
+        db = json.loads(self.read(".habitree/rules.json"))
+        self.assertNotIn("task", db.get("packs", {}))
+        self.assertFalse(any(r["id"] == "task.risky.floor" for r in db["rules"]))
+        from habitree.core.ruledb import RuleDB
+        live = RuleDB.load(self.root / ".habitree/rules.json")
+        self.assertTrue(any(r["id"] == "task.risky.floor" for r in live.rules))
+        code, findings = self.check_json()
+        self.assertEqual(self.ids(findings), [])  # models 절이 없으면 모델 점검을 건너뛴다
+        # 옮겨 적고 싶으면 init --packs로
+        code, out, err = self.cli("init", "--packs", "base", "task")
+        self.assertEqual(code, 0, err)
         db = json.loads(self.read(".habitree/rules.json"))
         self.assertEqual(db["packs"]["task"], "0.3.0")
         self.assertIn("task.risky.floor", self.read(".habitree/RULES.md"))
-        code, findings = self.check_json()
-        self.assertEqual(self.ids(findings), [])  # models 절이 없으면 모델 점검을 건너뛴다
-        self.assertIn("high:high", self.read("AGENTS.md"))  # 하한(필수 규칙)이 AI 지침 요약에 들어간다
 
     def test_show_and_pick(self):
         code, out, err = self.cli("models")

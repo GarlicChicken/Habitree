@@ -1,14 +1,7 @@
 """Habitree 실행 입구: habitree <명령>. / Entry point: habitree <command>."""
-import argparse
-import importlib
 import sys
 
-from . import __version__
-from .commands import COMMANDS
-from .core import HabitreeError
 from .core import io as hio
-from .core.config import Context
-from .core.i18n import LANGS, tr
 
 DESC = {"ko": "Habitree: AI와 일하는 습관을 나무처럼 키운다. 피드백은 규칙으로, 반복은 모듈로.",
         "en": "Habitree: grow good habits for AI coding. Feedback becomes rules, repetition becomes modules."}
@@ -26,10 +19,16 @@ def _peek(argv, *names):
 
 
 def load_command(name):
+    import importlib
     return importlib.import_module(f".commands.{name.replace('-', '_')}", __package__)
 
 
 def build_parser(lang):
+    import argparse
+
+    from . import __version__
+    from .commands import COMMANDS
+    from .core.i18n import LANGS, tr
     p = argparse.ArgumentParser(prog="habitree", description=tr(DESC, lang), epilog=tr(USAGE_TAIL, lang))
     p.add_argument("--version", action="version", version=f"habitree {__version__}")
     p.add_argument("-C", "--path", help="프로젝트 폴더 / project folder (default: current)")
@@ -52,6 +51,9 @@ def main(argv=None):
         # / Hooks must be fast and never fail: skip loading other commands, exit 0 even on broken config.
         from .commands import hook
         return hook.entry(argv[1:])
+    from .core import HabitreeError
+    from .core.config import Context
+    from .core.i18n import tr
     try:
         ctx = Context.load(_peek(argv, "-C", "--path"), _peek(argv, "--lang"))
     except Exception:  # 설정이 깨져도 도움말은 보이게

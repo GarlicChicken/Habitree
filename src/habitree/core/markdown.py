@@ -1,5 +1,4 @@
 """Markdown 읽기: 링크, 제목 앵커, 생성 구역. / Links, heading anchors and managed blocks."""
-import hashlib
 import re
 import unicodedata
 
@@ -109,4 +108,5 @@ def put_block(text, name, content, where="end"):
 
 
 def digest(content):
+    import hashlib
     return hashlib.sha256((content or "").strip().encode("utf-8")).hexdigest()[:16]

@@ -2,6 +2,18 @@
 
 새 버전을 위에 씁니다.
 
+## 0.7.0 (2026-10-28)
+
+기능을 더하느라 도구 자신이 무거워지면 효율과 재사용이라는 목표가 흔들립니다. 그래서 이번 버전은 덜어내는 데 썼습니다.
+
+- 훅이 도구를 쓸 때마다 붙이던 시간을 줄였습니다. 훅 경로는 명령줄 해석기, 규칙 DB 검사기, 임시 파일·암호 해시 모듈을 불러오지 않고, 정규식은 처음 쓸 때 만듭니다. 이 개발 컴퓨터(Windows)에서 전후 버전을 번갈아 25번씩 잰 중앙값으로, 훅 한 번에 Python 시작 말고 더해지는 시간이 약 165ms에서 약 115ms로 줄었습니다(약 30%). 부하가 적을 때 한 번 잰 값은 약 125ms에서 약 55ms였습니다. 컴퓨터와 부하에 따라 다릅니다.
+- `init`은 기본 규칙(`base`)만 프로젝트에 옮겨 적습니다. 작업 중 경고(`work`)와 모델 배분(`task`) 규칙은 패키지에서 바로 읽고, 반응하거나 고친 규칙만 프로젝트에 남깁니다. 새 프로젝트에 깔리는 규칙은 53개에서 16개, 규칙 DB는 약 97KB에서 약 24KB, RULES.md는 약 57KB에서 약 8KB, AGENTS.md는 약 2.6KB에서 약 1.8KB가 됐습니다.
+- RULES.md는 설정한 언어 한 벌로 만듭니다.
+- `habitree check`가 끝에 이 프로젝트의 무게(규칙 수, AI가 매번 읽는 지침 크기)를 한 줄로 보여 줍니다. 지침이나 규칙 수가 예산을 넘으면 `rules.weight`, 오래 반응 없는 직접 규칙은 `rules.stale`로 알립니다.
+- 기본 규칙 `work.cycle.trim`과 작업 순환 안내에 '쌓는 만큼 덜어낸다'를 넣었고, 방법 명세에 같은 절을 더했습니다.
+- AI가 매번 읽는 분량, 세션 시작 글, 경고 한 건의 길이, 훅 경로의 모듈에 상한을 두고 시험으로 지킵니다.
+- 꾸러미 규칙이 사용자가 손댄 것인지 가리는 해시가 빈 칸을 잘못 다뤄, 다시 `init`해도 새 규칙을 못 받던 문제를 고쳤습니다.
+
 ## 0.6.0 (2026-10-28)
 
 문제를 찾는 데서 그치지 않고 어떻게 정리할지 제안하는 버전입니다. 나누기만 권하면 오히려 체계가 무거워지므로, 같은 문제라면 지우고 합치는 해법을 먼저 보여 줍니다.
@@ -65,6 +77,18 @@
 ## English
 
 Newest first.
+
+### 0.7.0 (2026-10-28)
+
+When a tool grows heavy from its own features, its goal of efficiency and reuse starts to wobble. This release was spent taking weight off.
+
+- Hooks add less time to every tool call. The hook path no longer loads the argument parser, the rule DB validator or the tempfile and cryptographic hash modules, and regexes are compiled on first use. On the development machine (Windows), medians of 25 interleaved runs of the old and new versions show the time a hook adds on top of starting Python going from about 165 ms to about 115 ms (about 30%). A single run on a quieter machine showed about 125 ms to about 55 ms. Results depend on the machine and its load.
+- `init` copies only the base rules into the project. The rules for in-flight warnings (`work`) and model allocation (`task`) are read straight from the package, and only rules you react to or edit are kept in the project. For a new project, installed rules went from 53 to 16, the rule DB from about 97 KB to about 24 KB, RULES.md from about 57 KB to about 8 KB and AGENTS.md from about 2.6 KB to about 1.8 KB.
+- RULES.md is generated in the configured language only.
+- `habitree check` ends with a line showing the project's weight (rules, size of instructions read every session). `rules.weight` warns when a budget is exceeded, and `rules.stale` notes your own rules that have gone quiet for a long time.
+- The base rule `work.cycle.trim` and the work cycle text now say "trim as much as you grow", and the method spec has a section on it.
+- Tests now hold limits on what the agent reads every session, the session-start text, the length of a warning and the modules loaded on the hook path.
+- Fixed the hash that tells whether a pack rule was edited: it mishandled empty fields, so rerunning `init` did not deliver updated rules.
 
 ### 0.6.0 (2026-10-28)
 

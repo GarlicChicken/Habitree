@@ -6,7 +6,7 @@ minLength, pattern, minimum, maximum, anyOf, oneOf, $ref(#/$defs/...).
 """
 import json
 import re
-from importlib import resources
+from pathlib import Path
 
 _TYPES = {
     "object": dict, "array": list, "string": str, "boolean": bool, "null": type(None),
@@ -81,5 +81,5 @@ def validate(data, schema, root=None, path="$"):
 
 def load_schema(name):
     """패키지에 들어 있는 스키마. / Schema bundled with the package."""
-    text = resources.files("habitree.data").joinpath("schema", name).read_text(encoding="utf-8")
-    return json.loads(text)
+    path = Path(__file__).resolve().parent.parent / "data" / "schema" / name
+    return json.loads(path.read_bytes().decode("utf-8"))

@@ -6,10 +6,11 @@
 - 위임 중에도 위험한 일(지우기·배포·외부로 보내기·결제·비밀 정보·작업 폴더 밖)은 묻는다.
 - 인용("'알아서 해'라고 하면?"), 질문, 남의 말("팀장님이 알아서 하래")은 위임으로 보지 않는다.
 """
-import hashlib
 import re
 
 from ..core.paths import nfc
+from ..core.fast import short
+from ..core.fast import lazy_re
 from ..core.textsim import tokens
 from ..core.timeutil import now_iso
 
@@ -31,18 +32,18 @@ CANCEL = [
     r"\bask\s+me\s+(?:first|before|again)\b", r"\bcheck\s+with\s+me\b", r"\bstop\s+delegating\b",
     r"\bcancel\s+(?:the\s+)?delegation\b", r"\bdon'?t\s+decide\s+for\s+me\b",
 ]
-CONTINUE = re.compile(r"^(?:계속|이어서|마저|go on|continue|keep going)", re.I)
-COMMAND = re.compile(r"^/(?:habitree:)?delegate\b\s*(.*)$", re.I | re.S)
-_QUOTES = re.compile(r"'[^'\n]*'|\"[^\"\n]*\"|‘[^’\n]*’|“[^”\n]*”|「[^」\n]*」|『[^』\n]*』|`[^`\n]*`")
-_REPORTED_AFTER = re.compile(r"^\s*(?:래|라고|라더|라네|란다|라\s*했|라고\s*했)")
-_REPORTED_BEFORE = re.compile(r"\b(?:said|says|told\s+me|told\s+us)\b[^.!?]{0,20}$", re.I)
-_NEG_AFTER = re.compile(r"^\s*(?:지\s*마|지\s*말|진\s*마)")
-_SENT_END = re.compile(r"[.!?\n。]")
+CONTINUE = lazy_re(r"^(?:계속|이어서|마저|go on|continue|keep going)", re.I)
+COMMAND = lazy_re(r"^/(?:habitree:)?delegate\b\s*(.*)$", re.I | re.S)
+_QUOTES = lazy_re(r"'[^'\n]*'|\"[^\"\n]*\"|‘[^’\n]*’|“[^”\n]*”|「[^」\n]*」|『[^』\n]*』|`[^`\n]*`")
+_REPORTED_AFTER = lazy_re(r"^\s*(?:래|라고|라더|라네|란다|라\s*했|라고\s*했)")
+_REPORTED_BEFORE = lazy_re(r"\b(?:said|says|told\s+me|told\s+us)\b[^.!?]{0,20}$", re.I)
+_NEG_AFTER = lazy_re(r"^\s*(?:지\s*마|지\s*말|진\s*마)")
+_SENT_END = lazy_re(r"[.!?\n。]")
 
 # 경계: "~지는 마", "~하지 말고", "don't …". 묻기에 대한 말은 위임 그 자체라 뺀다.
-_BOUND_KO = re.compile(r"([^.,!?\n]{1,40}?(?:지는|지|진)\s*(?:마|말아|말고|마세요|말아요|마라))(?![가-힣])")
-_BOUND_EN = re.compile(r"\b(?:but\s+)?(?:don'?t|do\s+not|never)\s+([^,.;!?\n]{2,60})", re.I)
-_ASKING = re.compile(r"(묻|물어|질문|확인\s*받|확인\s*하|ask|check\s+with|confirm)", re.I)
+_BOUND_KO = lazy_re(r"([^.,!?\n]{1,40}?(?:지는|지|진)\s*(?:마|말아|말고|마세요|말아요|마라))(?![가-힣])")
+_BOUND_EN = lazy_re(r"\b(?:but\s+)?(?:don'?t|do\s+not|never)\s+([^,.;!?\n]{2,60})", re.I)
+_ASKING = lazy_re(r"(묻|물어|질문|확인\s*받|확인\s*하|ask|check\s+with|confirm)", re.I)
 
 # 경계·위험 범주 낱말(경계 문장을 범주로 나눌 때). / Words that map a boundary to a category.
 BOUND_WORDS = {
@@ -136,7 +137,7 @@ def start(state, phrase, prompt, by="natural", scope_paths=None, task=None, boun
     """상태에 위임을 기록한다. / Record the delegation in the session state."""
     task = (task if task is not None else " ".join(nfc(prompt or "").split()))[:120]
     bounds = boundaries(prompt or "") if bounds is None else [b[:80] for b in bounds]
-    did = hashlib.sha1(f"{now_iso()}{task}".encode("utf-8")).hexdigest()[:8]
+    did = short(f"{now_iso()}{task}", 8)
     state["delegation"] = {
         "id": did, "active": True, "scope": "task", "task": task, "phrase": phrase or "", "granted_by": by,
         "started": now_iso(), "paths": list(scope_paths or []),

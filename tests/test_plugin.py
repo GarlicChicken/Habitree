@@ -62,7 +62,7 @@ class TestPluginFiles(unittest.TestCase):
 class TestWorkPack(unittest.TestCase):
     def test_pack_rules(self):
         pack = load_pack("work")
-        self.assertEqual(pack["version"], "0.6.0")
+        self.assertRegex(pack["version"], r"^\d+\.\d+\.\d+$")
         db = RuleDB({"scopes": {}, "aspects": {}, "contexts": {}, "rules": []})
         db.merge_pack(load_pack("base"))
         db.merge_pack(pack)
@@ -132,11 +132,25 @@ class TestInitHooks(TempProject):
         self.assertIn("전역", err)
         self.assertFalse((self.root / ".claude/settings.json").exists())
 
-    def test_init_adds_work_pack(self):
+    def test_work_pack_is_live(self):
+        # 감지 규칙은 프로젝트 DB에 옮겨 적지 않아도 훅과 명령이 패키지에서 읽는다
         self.init()
         db = json.loads(self.read(".habitree/rules.json"))
-        self.assertIn("work", db["packs"])
-        self.assertIn("work.loop.same-call", self.read(".habitree/RULES.md"))
+        self.assertNotIn("work", db.get("packs", {}))
+        self.assertNotIn("work.loop.same-call", self.read(".habitree/RULES.md"))
+        code, out, err = self.cli("rules", "brief", "work/loop", "--json")
+        self.assertEqual(code, 0, err)
+        self.assertIn("work.loop.same-call", out)
+        # 반응하면 그 규칙 하나만 프로젝트 DB에 남는다
+        code, out, err = self.cli("rules", "miss", "work.loop.same-call", "--feedback", "이번엔 잔소리")
+        self.assertEqual(code, 0, err)
+        db = json.loads(self.read(".habitree/rules.json"))
+        ids = [r["id"] for r in db["rules"]]
+        self.assertIn("work.loop.same-call", ids)
+        self.assertFalse(any(i.startswith("work.") and i != "work.loop.same-call" and not i.startswith("work.cycle")
+                             and not i.startswith("work.verify") for i in ids))
+        code, findings = self.check_json()
+        self.assertNotIn("rules.invalid", self.ids(findings))
 
 
 if __name__ == "__main__":

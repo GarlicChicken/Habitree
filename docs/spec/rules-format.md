@@ -48,6 +48,12 @@
 
 위반은 `rules.auto.<규칙 id>`로 보고됩니다. 필수 규칙이면 오류, 권장 규칙이면 경고입니다. 글롭은 `**`를 지원하고, 경로는 NFC로 맞춰 비교합니다.
 
+## 패키지에서 바로 읽는 꾸러미
+
+`init`은 기본 꾸러미 `base`만 프로젝트 규칙 DB에 옮겨 적습니다. 작업 중 경고(`work`)와 모델 배분(`task`) 꾸러미는 옮겨 적지 않고, 규칙 DB를 읽을 때 패키지에서 메모리에만 얹습니다. 쓰지 않는 기능의 규칙이 프로젝트를 무겁게 만들지 않게 하려는 것입니다.
+
+그 규칙에 반응하거나(`rules hit`, `rules miss`) 고치면(`rules edit`, `models set` 등) 그 규칙 하나만 프로젝트 DB에 남습니다. 꾸러미를 통째로 옮겨 적고 싶으면 `habitree init --packs base work task`를 씁니다. 다른 위치의 DB를 `--db`로 다룰 때는 꾸러미를 얹지 않습니다.
+
 ## 예전 형식
 
 Habitree가 나오기 전 Open Prompt에서 쓰던 형식(같은 칸에서 `packs`, `detect` 등이 없는 것)도 그대로 읽습니다. 다른 위치의 DB는 `habitree rules --db 경로 brief …`로 다룰 수 있습니다.
@@ -103,6 +109,12 @@ This is the "automatic check" rung of the ladder, and it works the same whatever
 | `timeout` | Command time limit in seconds (default 120) |
 
 Violations are reported as `rules.auto.<rule id>`: errors for must rules, warnings for should rules. Globs support `**`, and paths are compared in NFC.
+
+### Packs read straight from the package
+
+`init` copies only the `base` pack into the project's rule DB. The in-flight warning (`work`) and model allocation (`task`) packs are not copied; they are overlaid in memory from the package whenever the DB is read, so rules for features you do not use add no weight to the project.
+
+When you react to one of those rules (`rules hit`, `rules miss`) or edit it (`rules edit`, `models set` and so on), that single rule is kept in the project DB. To copy whole packs, run `habitree init --packs base work task`. A DB handled with `--db` gets no overlay.
 
 ### The earlier format
 

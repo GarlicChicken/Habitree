@@ -13,6 +13,7 @@ from ..core.config import CONFIG_REL, Context
 from ..core.i18n import LANGS, tr
 from ..core.markdown import links
 from ..core.paths import top_dirs
+from ..core import packs as _packs
 from ..core.ruledb import RuleDB, available_packs, load_pack
 from ..core.timeutil import local_date
 from ..guard import install as hooks_install
@@ -21,7 +22,7 @@ from . import export
 SUMMARY = {"ko": "프로젝트에 Habitree 뼈대 깔기(다시 실행하면 업그레이드)",
            "en": "Install the Habitree skeleton (run again to upgrade)"}
 
-DEFAULT_PACKS = ["base", "work", "task"]
+DEFAULT_PACKS = list(_packs.INSTALLED)  # 나머지 꾸러미(work, task)는 패키지에서 바로 읽는다
 
 README_NEW = """# {name}
 
@@ -113,7 +114,7 @@ def run(args, ctx):
         fresh = False
     else:
         db = RuleDB({"version": 2, "about": {"ko": "이 프로젝트의 규칙", "en": "Rules of this project"},
-                     "scopes": {}, "aspects": {}, "contexts": {}, "rules": []}, db_path)
+                     "scopes": {}, "aspects": {}, "contexts": {}, "rules": []}, db_path).add_live_packs()
         fresh = True
     packs = args.packs or sorted(set(DEFAULT_PACKS) | set(db.data.get("packs", {})))
     unknown = [p for p in packs if p not in available_packs()]

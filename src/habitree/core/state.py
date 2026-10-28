@@ -7,7 +7,6 @@
 - 파일 키는 core/paths.path_key(NFC, 대소문자 무시 파일 시스템이면 casefold)를 쓴다.
 - 사용자 요청 원문은 남기지 않는다. 낱말 묶음(토큰)과 길이만 남긴다.
 """
-import hashlib
 import json
 import os
 import re
@@ -16,6 +15,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from . import io as hio
+from .fast import short
 from .paths import case_insensitive, path_key
 from .timeutil import now_iso
 
@@ -36,7 +36,7 @@ def safe_id(session_id):
     if not raw:
         return "default"
     if sid != raw:  # 바꾼 글자가 있으면 원래 id의 해시를 붙여 서로 겹치지 않게 한다
-        sid = f"{sid[:60]}-{hashlib.sha1(raw.encode('utf-8')).hexdigest()[:8]}".lstrip("-.")
+        sid = f"{sid[:60]}-{short(raw, 8)}".lstrip("-.")
     return sid
 
 

@@ -14,6 +14,7 @@ import time
 from pathlib import Path
 
 from ..core import io as hio
+from ..core.fast import lazy_re
 from ..core.i18n import tr
 from ..core.paths import iter_files
 from ..core.state import file_key, push
@@ -32,7 +33,7 @@ DEDUP_SPAN = 20       # 규칙 사이 겹침을 보는 호출 거리 / call dist
 FILES_CACHE = "cache/files.json"
 FILES_CACHE_AGE = 3600
 FILES_CACHE_MAX = 20000
-MUTATING = re.compile(
+MUTATING = lazy_re(
     r"(?:>|\bmv\b|\bcp\b|\brm\b|\bmkdir\b|\btouch\b|\bsed\s+-i|\bgit\s+(?:add|commit|mv|rm|checkout|apply|merge|"
     r"rebase|reset|restore|stash|switch)\b|\bhabitree\s+(?:init|export|rules\s+(?:add|hit|miss|edit|retire|pause|"
     r"resume|demote|doc))\b|\b(?:npm|pnpm|yarn)\s+(?:install|i|add)\b|\bpip\s+install\b|\buv\s+(?:add|sync)\b|"
