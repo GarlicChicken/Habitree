@@ -404,8 +404,12 @@ class RuleDB:
             except ValueError:
                 link = Path(db_path).name
         L = ["# 규칙" if ko else "# Rules", "",
-             (f"> [{Path(link).name}]({link})에서 만든 문서입니다. 고칠 때는 `habitree rules`를 쓰세요." if ko else
-              f"> Generated from [{Path(link).name}]({link}). Use `habitree rules` to change it."), ""]
+             (f"> [{Path(link).name}]({link})에서 만든 문서입니다. 고칠 때는 `habitree rules`를 씁니다. "
+              "사용자가 바로잡은 것은 `habitree rules add --scope … --aspect … --rule \"…\" --why \"…\" --feedback \"…\"`로 남기고, "
+              "같은 뜻 규칙이 이미 있으면 `habitree rules hit <id> --feedback \"…\"`." if ko else
+              f"> Generated from [{Path(link).name}]({link}). Use `habitree rules` to change it. "
+              "Record a user's correction with `habitree rules add --scope … --aspect … --rule \"…\" --why \"…\" --feedback \"…\"`, "
+              "or `habitree rules hit <id> --feedback \"…\"` when a rule with the same meaning exists."), ""]
         fb = sum(len(r.get("feedback", [])) for r in rules)
         L.append(f"- 규칙 {len(rules)}개 · 피드백 {fb}건 · 마지막 피드백 {max(dates) if dates else '-'}" if ko else
                  f"- {len(rules)} rules · {fb} feedback entries · last feedback {max(dates) if dates else '-'}")

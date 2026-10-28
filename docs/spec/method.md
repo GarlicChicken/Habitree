@@ -66,7 +66,16 @@ Habitree 자신에게도 같은 기준을 둡니다. AI가 매번 읽는 지침�
 
 ## AI가 읽는 분량
 
-AI가 매번 읽는 파일(AGENTS.md, CLAUDE.md)은 짧게 유지합니다. 작업 순환과 필수 규칙 요약만 넣고, 나머지는 `habitree rules brief`로 필요한 범위만 꺼내 읽게 합니다. 이 파일들은 한 언어로만 만들어서 같은 내용을 두 번 읽지 않게 합니다. 여러 도구가 읽는 AGENTS.md는 32KiB 안쪽, Claude Code가 읽는 CLAUDE.md는 200줄 안쪽을 기준으로 삼습니다.
+이 문서의 작업 순환은 사람을 위한 설명입니다. AI가 매번 읽는 지침(AGENTS.md, CLAUDE.md)에는 이것을 그대로 옮기지 않습니다.
+
+같은 과제를 지침을 켜고 끈 채 여러 번 돌려 보니, 여섯 단계 작업 순환과 일반 규칙 요약을 실은 지침은 정답률을 올리지 못한 채 토큰과 시간만 늘렸습니다. AI가 작은 수정에도 변경 기록을 읽고 고치고 전체 점검까지 돌렸기 때문입니다. 반대로 그 프로젝트에서 실제로 받은 피드백 규칙은 정답률을 크게 바꿨습니다. 그래서 AI 지침에는 꼭 필요한 것만 둡니다.
+
+- 있는 것을 먼저 찾아 쓰라는 한 줄. 파일이 많은 프로젝트에서만 `habitree map find` 안내를 붙입니다.
+- 검증 명령이 등록돼 있으면 그 명령을 끝내기 전에 돌리라는 한 줄.
+- 바로잡은 것은 규칙으로 남기라는 한 줄.
+- 그리고 이 프로젝트에서 쌓인 규칙.
+
+모델이 이미 잘 지키는 일반 규칙(비밀값을 넣지 않기 등)은 AI 지침에 싣지 않고 기계 점검과 훅이 지킵니다. 여섯 단계 판이 필요하면 설정 `export.style`을 `full`로 바꿉니다. 이 파일들은 한 언어로만 만들고, AGENTS.md는 32KiB, CLAUDE.md는 200줄 안쪽을 한도로 삼습니다.
 
 ---
 
@@ -138,4 +147,13 @@ Habitree holds itself to the same standard. The instructions read every session,
 
 ### What the AI reads
 
-Keep the files an agent reads on every session (AGENTS.md, CLAUDE.md) short: the work cycle and a summary of must rules, with everything else pulled per scope through `habitree rules brief`. These files are generated in one language so the same content is not read twice. The working limits are 32 KiB for AGENTS.md, which several tools read, and 200 lines for CLAUDE.md.
+The work cycle in this document is an explanation for people. It is not copied as is into the instructions an agent reads every session (AGENTS.md, CLAUDE.md).
+
+Running the same tasks many times with and without the instructions showed that the version carrying the six-step cycle and a summary of generic rules raised tokens and time without raising the pass rate: the agent read and updated the change log and ran a full check even for a small fix. The feedback rules this project had actually received, on the other hand, changed the pass rate a great deal. So the agent instructions keep only what is needed:
+
+- One line to look for what already exists and reuse it, with a `habitree map find` hint only in projects with many files.
+- One line to run the registered verify commands before finishing, only if there are any.
+- One line to record corrections as rules.
+- The rules this project has grown.
+
+Generic rules a model already follows well (such as keeping secrets out) are left out of the instructions and enforced by checks and hooks. Set `export.style` to `full` if you want the six-step version. These files are generated in one language, with limits of 32 KiB for AGENTS.md and 200 lines for CLAUDE.md.

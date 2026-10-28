@@ -90,6 +90,16 @@ Habitree는 Python 표준 라이브러리만으로 돌고, 어떤 언어의 프�
 
 두 언어로 쓴 설명(`한국어 / English`)은 설정 언어 쪽만 보여 줍니다.
 
+## AI가 먼저 찾게 하기
+
+색인이 있어도 AI가 부르지 않으면 소용없습니다. 실제로 AI는 습관대로 파일을 통째로 열거나 넓게 검색하는 경우가 많습니다. 그래서 새 장치를 만들지 않고 이미 있는 자리 세 곳에 한 줄씩 이었습니다.
+
+- AGENTS.md의 작업 순환 첫 단계: "코드는 `habitree map find <말>`로 위치부터 찾고 필요한 부분만 연다."
+- 큰 결과 알림(`work.context.big-output`)의 제안: "`habitree map find <말>`이나 검색으로 위치부터 찾기".
+- MCP 서버: 플러그인에 함께 들어 있고, 플러그인 없이 쓸 때는 `habitree init --mcp`.
+
+이것이 실제로 토큰을 줄이는지는 `habitree bench`의 `find-in-tree` 과제로 잽니다.
+
 ## 찾기와 한국어
 
 `map find`는 이름, 설명, 경로, 시그니처를 함께 봅니다.
@@ -125,7 +135,7 @@ Habitree는 Python 표준 라이브러리만으로 돌고, 어떤 언어의 프�
 - 서버는 메모리에 색인을 두고, 도구를 부를 때마다 바뀐 파일만 다시 읽습니다.
 - 판은 `initialize`로 시작하는 방식(2024-11-05, 2025-03-26, 2025-06-18, 2025-11-25)을 따릅니다. 클라이언트가 보낸 `protocolVersion`을 지원하면 그대로, 아니면 이 중 최신을 돌려줍니다. 2026-07-28 판의 요청마다 판을 싣는 방식(`server/discover`, `_meta`)은 아직 따르지 않습니다. 명세상 두 방식을 다 아는 클라이언트는 `server/discover`가 `-32601`로 끝나면 `initialize`로 돌아옵니다.
 
-연결하는 법. 프로젝트 루트의 [.mcp.json](../../.mcp.json)이 예시입니다. Claude Code는 이 파일의 서버를 대화형 세션에서 처음 쓰기 전에 사용자에게 묻습니다.
+연결하는 법. Claude Code 플러그인으로 설치하면 이 서버도 함께 등록됩니다(플러그인 루트의 [.mcp.json](../../.mcp.json)). 플러그인 없이 쓰려면 `habitree init --mcp`가 프로젝트의 `.mcp.json`에 서버를 더합니다(이미 있는 다른 서버는 그대로 둡니다). Claude Code는 이 파일의 서버를 대화형 세션에서 처음 쓰기 전에 사용자에게 묻습니다.
 
 ```json
 {"mcpServers": {"habitree": {"type": "stdio", "command": "habitree", "args": ["mcp"]}}}
@@ -237,6 +247,16 @@ The index is a single `.habitree/state/map.json` and is not committed. File keys
 
 Bilingual descriptions (`한국어 / English`) show only the side for the configured language.
 
+### Getting the agent to look first
+
+An index is useless if the agent never calls it, and agents often fall back on opening whole files or searching broadly. So instead of adding a new mechanism, one line was added in three existing places:
+
+- The first step of the work cycle in AGENTS.md: "For code, locate it with `habitree map find <word>` and open only what you need."
+- The suggestion of the large-output note (`work.context.big-output`): "Find the spot first with `habitree map find <word>` or a search".
+- The MCP server: bundled with the plugin, or added with `habitree init --mcp` without it.
+
+Whether this actually saves tokens is measured by the `find-in-tree` task of `habitree bench`.
+
 ### Search and Korean
 
 `map find` looks at names, descriptions, paths and signatures together.
@@ -272,7 +292,7 @@ Bilingual descriptions (`한국어 / English`) show only the side for the config
 - The server keeps the index in memory and re-reads only changed files on each tool call.
 - It speaks the protocol revisions that open with `initialize` (2024-11-05, 2025-03-26, 2025-06-18, 2025-11-25). If the client's `protocolVersion` is supported it is echoed; otherwise the latest of these is returned. The 2026-07-28 style with the version on every request (`server/discover`, `_meta`) is not implemented yet. Per the specification, a client that knows both styles falls back to `initialize` when `server/discover` ends with `-32601`.
 
-How to connect. The [.mcp.json](../../.mcp.json) at the repository root is an example. In interactive sessions, Claude Code asks the user before it first uses a server from this file.
+How to connect. Installing the Claude Code plugin registers this server too (the plugin root's [.mcp.json](../../.mcp.json)). Without the plugin, `habitree init --mcp` adds the server to the project's `.mcp.json`, leaving other servers as they are. In interactive sessions, Claude Code asks the user before it first uses a server from this file.
 
 ```json
 {"mcpServers": {"habitree": {"type": "stdio", "command": "habitree", "args": ["mcp"]}}}

@@ -1,6 +1,6 @@
 {
   "pack": "work",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "about": {
     "ko": "작업 중 비효율을 먼저 알리는 감지 규칙과 위임 예외",
     "en": "Detection rules that warn about inefficient work early, and delegation"
@@ -461,8 +461,8 @@
         },
         "suggest": [
           {
-            "ko": "검색으로 위치 찾기",
-            "en": "Search for the location"
+            "ko": "`habitree map find <말>`이나 검색으로 위치부터 찾기",
+            "en": "Find the spot first with `habitree map find <word>` or a search"
           },
           {
             "ko": "그 부분만 범위를 정해 읽기",

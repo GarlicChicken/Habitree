@@ -50,7 +50,7 @@
 
 ## 패키지에서 바로 읽는 꾸러미
 
-`init`은 기본 꾸러미 `base`만 프로젝트 규칙 DB에 옮겨 적습니다. 작업 중 경고(`work`)와 모델 배분(`task`) 꾸러미는 옮겨 적지 않고, 규칙 DB를 읽을 때 패키지에서 메모리에만 얹습니다. 쓰지 않는 기능의 규칙이 프로젝트를 무겁게 만들지 않게 하려는 것입니다.
+`init`은 기본 꾸러미(`base`, `work`, `task`)를 프로젝트 규칙 DB에 옮겨 적지 않습니다. 규칙 DB를 읽을 때 패키지에서 메모리에만 얹습니다. 그래서 새 프로젝트는 규칙 0개로 시작하고, 프로젝트 DB에는 그 프로젝트에서 실제로 받은 피드백만 자랍니다. 꾸러미의 일반 규칙은 기계 점검, 훅, 리팩토링 기준값이 쓰고, AI가 매번 읽는 지침에는 싣지 않습니다.
 
 그 규칙에 반응하거나(`rules hit`, `rules miss`) 고치면(`rules edit`, `models set` 등) 그 규칙 하나만 프로젝트 DB에 남습니다. 꾸러미를 통째로 옮겨 적고 싶으면 `habitree init --packs base work task`를 씁니다. 다른 위치의 DB를 `--db`로 다룰 때는 꾸러미를 얹지 않습니다.
 
@@ -112,7 +112,7 @@ Violations are reported as `rules.auto.<rule id>`: errors for must rules, warnin
 
 ### Packs read straight from the package
 
-`init` copies only the `base` pack into the project's rule DB. The in-flight warning (`work`) and model allocation (`task`) packs are not copied; they are overlaid in memory from the package whenever the DB is read, so rules for features you do not use add no weight to the project.
+`init` does not copy the bundled packs (`base`, `work`, `task`) into the project's rule DB; they are overlaid in memory from the package whenever the DB is read. A new project therefore starts with zero rules, and its DB grows only from the feedback that project actually receives. Pack rules are used by checks, hooks and refactoring thresholds, and are left out of the instructions the agent reads every session.
 
 When you react to one of those rules (`rules hit`, `rules miss`) or edit it (`rules edit`, `models set` and so on), that single rule is kept in the project DB. To copy whole packs, run `habitree init --packs base work task`. A DB handled with `--db` gets no overlay.
 

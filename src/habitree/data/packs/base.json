@@ -1,6 +1,6 @@
 {
   "pack": "base",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "about": {
     "ko": "작업 순환과 문서·코드의 기본 습관",
     "en": "Work cycle and basic habits for docs and code"
@@ -170,12 +170,12 @@
       "aspect": "docs",
       "level": "must",
       "rule": {
-        "ko": "바꾼 것은 이어진 문서(폴더 README, 지도, 변경 기록)에 함께 반영한다.",
-        "en": "Reflect every change in the linked docs (folder README, map, change log)."
+        "ko": "구조나 쓰는 법이 바뀌면 이어진 문서(폴더 README, 지도, 변경 기록)에 함께 반영한다. 작은 수정은 기록하지 않는다.",
+        "en": "When structure or usage changes, reflect it in the linked docs (folder README, map, change log). Small fixes need no record."
       },
       "why": {
-        "ko": "문서가 실제와 어긋나면 다음 작업이 틀린 지도를 읽는다.",
-        "en": "When docs drift from reality, the next task reads a wrong map."
+        "ko": "문서가 실제와 어긋나면 다음 작업이 틀린 지도를 읽는다. 다만 작은 수정까지 기록하면 그 자체가 토큰과 시간을 쓴다.",
+        "en": "When docs drift from reality, the next task reads a wrong map. Recording every small fix, though, costs tokens and time in itself."
       },
       "check": {
         "type": "review",
@@ -212,8 +212,8 @@
       "aspect": "quality",
       "level": "must",
       "rule": {
-        "ko": "끝내기 전에 `habitree check`와 등록한 검증 명령(테스트·빌드)을 실행하고, 나온 문제를 고친 뒤 끝낸다.",
-        "en": "Before finishing, run `habitree check` and the registered verify commands (tests, build), and fix what they report."
+        "ko": "끝내기 전에 등록한 검증 명령(테스트·빌드)을 돌리고 나온 문제를 고친다. 문서나 구조를 바꿨으면 `habitree check`도 돌린다.",
+        "en": "Before finishing, run the registered verify commands (tests, build) and fix what they report. If you changed docs or structure, run `habitree check` too."
       },
       "why": {
         "ko": "사람이 검사기 역할을 하면 '됐어?'를 되풀이하며 시간과 토큰이 샌다.",

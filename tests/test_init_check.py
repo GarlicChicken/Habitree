@@ -34,7 +34,7 @@ class TestInit(TempProject):
 
     def test_export_keeps_hand_edit(self):
         self.init()
-        text = self.read("AGENTS.md").replace("1. 찾기", "1. 내가 고친 찾기")
+        text = self.read("AGENTS.md").replace("만들기 전에", "내가 고친 찾기: 만들기 전에")
         self.write("AGENTS.md", text)
         code, findings = self.check_json()
         self.assertIn("generated.edited", self.ids(findings))
@@ -44,10 +44,46 @@ class TestInit(TempProject):
         code, out, _ = self.cli("export", "--force")
         self.assertNotIn("내가 고친 찾기", self.read("AGENTS.md"))
 
+    def test_lean_and_full_styles(self):
+        # 걷어낸 판(기본): 핵심 세 줄 + 이 프로젝트에서 쌓인 규칙만. 꾸러미의 일반 규칙은 싣지 않는다
+        self.init()
+        agents = self.read("AGENTS.md")
+        self.assertNotIn("security.no-secrets", agents)
+        self.assertNotIn("API 키", agents)
+        self.assertEqual(self.read("CLAUDE.md").count("@AGENTS.md"), 1)
+        code, out, err = self.cli("rules", "add", "--scope", "code", "--aspect", "structure", "--level", "must",
+                                  "--rule", "금액 표시는 format_won()을 쓴다", "--why", "팀 규칙", "--feedback", "지적")
+        self.assertEqual(code, 0, err)
+        self.cli("export")
+        self.assertIn("format_won", self.read("AGENTS.md"))
+        # 여섯 단계 판은 설정으로
+        cfg = json.loads(self.read(".habitree/config.json"))
+        cfg["export"] = {"style": "full"}
+        self.write(".habitree/config.json", json.dumps(cfg))
+        self.cli("export", "--force")
+        self.assertIn("1. 찾기", self.read("AGENTS.md"))
+
+    def test_mcp_option_keeps_other_servers(self):
+        self.write(".mcp.json", json.dumps({"mcpServers": {"other": {"command": "x"}}}))
+        code, out, err = self.cli("init", "--mcp")
+        self.assertEqual(code, 0, err)
+        servers = json.loads(self.read(".mcp.json"))["mcpServers"]
+        self.assertEqual(set(servers), {"other", "habitree"})
+        self.assertEqual(servers["habitree"]["args"], ["mcp"])
+        code, out, err = self.cli("init", "--mcp")
+        self.assertIn("이미", out)
+        # 작은 프로젝트는 grep으로 충분해서 색인 안내를 싣지 않는다(측정 결과). 파일이 많으면 싣는다
+        self.assertNotIn("habitree map find", self.read("AGENTS.md"))
+        cfg = json.loads(self.read(".habitree/config.json"))
+        cfg["export"] = {"map_hint_files": 1}
+        self.write(".habitree/config.json", json.dumps(cfg))
+        self.cli("export")
+        self.assertIn("habitree map find", self.read("AGENTS.md"))
+
     def test_english(self):
         code, out, err = self.cli("init", "--lang", "en")
         self.assertEqual(code, 0, err)
-        self.assertIn("Habitree work cycle", self.read("AGENTS.md"))
+        self.assertIn("Before building, look for what already exists", self.read("AGENTS.md"))
         self.assertEqual(json.loads(self.read(".habitree/config.json"))["lang"], "en")
 
 
@@ -108,7 +144,8 @@ class TestCheck(TempProject):
 
     def test_rules_doc_stale_and_invalid(self):
         db = json.loads(self.read(".habitree/rules.json"))
-        db["rules"][0]["scope"] = "없는/범위"
+        db["rules"].append({"id": "x.bad", "scope": "없는/범위", "aspect": "process", "level": "should", "rule": "r",
+                            "why": "w", "check": {"type": "review", "how": "h"}, "feedback": [], "history": []})
         self.write(".habitree/rules.json", json.dumps(db, ensure_ascii=False))
         code, findings = self.check_json()
         self.assertIn("rules.invalid", self.ids(findings))

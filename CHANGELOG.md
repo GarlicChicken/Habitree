@@ -2,6 +2,17 @@
 
 새 버전을 위에 씁니다.
 
+## 0.8.0 (2026-10-28)
+
+처음으로 실제 측정을 하고, 그 결과에 따라 AI가 매번 읽는 지침을 걷어낸 버전입니다. 자세한 것은 [bench/2026-10-28-first-measurement.md](bench/2026-10-28-first-measurement.md).
+
+- AI 지침의 기본을 걷어낸 판으로 바꿨습니다(`export.style: lean`). "있는 것을 먼저 찾아 쓴다", "바로잡힌 것은 규칙으로 남긴다"와 그 프로젝트에서 쌓인 규칙만 싣습니다. 검증 명령이 등록돼 있으면 그 명령을, 파일이 150개 이상이면 `habitree map find` 안내를 붙입니다. 늘 읽는 지침에는 도구 명령 이름을 쓰지 않고, 쓰는 법은 RULES.md 머리말에 둡니다. 여섯 단계 판은 `export.style: full`.
+- 새 프로젝트는 규칙 0개로 시작합니다. `base`·`work`·`task` 꾸러미 모두 패키지에서 바로 읽고, 반응하거나 고친 규칙만 프로젝트에 남깁니다.
+- 세션 시작 때 넣는 글도 같은 걷어낸 판을 씁니다.
+- 큰 결과 알림이 `habitree map find`로 위치부터 찾으라고 제안합니다. `habitree init --mcp`가 프로젝트 `.mcp.json`에 MCP 서버를 더합니다.
+- 측정 과제 `find-in-tree`(여러 폴더에서 고칠 곳 찾기)를 더했습니다.
+- 첫 측정: 작은 과제 3개, Sonnet, 66번 실행. 피드백 규칙이 있는 과제에서 Habitree 쪽 29/29 합격, 없는 쪽 0/14. 일반 절차를 실은 이전 지침은 정답률 변화 없이 토큰 11~21%를 더 썼습니다.
+
 ## 0.7.0 (2026-10-28)
 
 기능을 더하느라 도구 자신이 무거워지면 효율과 재사용이라는 목표가 흔들립니다. 그래서 이번 버전은 덜어내는 데 썼습니다.
@@ -77,6 +88,17 @@
 ## English
 
 Newest first.
+
+### 0.8.0 (2026-10-28)
+
+The first real measurement, and agent instructions trimmed according to it. Details: [bench/2026-10-28-first-measurement.md](bench/2026-10-28-first-measurement.md).
+
+- The default agent instructions are now the trimmed version (`export.style: lean`): "look for what exists first", "record corrections as rules" and the rules this project has grown, plus the registered verify commands when there are any and a `habitree map find` hint for projects with 150 or more files. Command names stay out of the always-read instructions; how-to lives at the head of RULES.md. The six-step version is `export.style: full`.
+- New projects start with zero rules. The `base`, `work` and `task` packs are all read straight from the package, and only rules you react to or edit are kept in the project.
+- The session-start text uses the same trimmed version.
+- The large-output note suggests locating code with `habitree map find` first, and `habitree init --mcp` adds the MCP server to the project's `.mcp.json`.
+- New benchmark task `find-in-tree` (finding the place to change among folders).
+- First measurement: three small tasks, Sonnet, 66 runs. On tasks with feedback rules, the Habitree side passed 29/29 and the other side 0/14. The previous instructions with generic procedure used 11 to 21% more tokens without changing accuracy.
 
 ### 0.7.0 (2026-10-28)
 

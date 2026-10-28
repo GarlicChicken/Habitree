@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "description": {
+    "ko": "여러 폴더에 흩어진 코드에서 고칠 곳을 찾고, 이미 있는 금액 표시 함수를 다시 쓰는가. 규칙 없이 찾기 도구(map)만 비교한다. Python.",
+    "en": "Does the agent find the place to change among scattered folders and reuse the existing money formatter? Compares only the search tool (map), no task rules. Python."
+  },
+  "lang": "ko",
+  "prompt": {
+    "ko": "주문 요약에 할인 금액도 보여 줘. 할인이 있으면 끝에 ' · 할인 5,000원'처럼 붙여 줘. 앞의 금액은 지금처럼 할인을 뺀 뒤의 결제 금액 그대로 둬.",
+    "en": "Show the discount in the order summary too. If there is a discount, append something like ' · 할인 5,000원' at the end. Keep the amount before it as it is now: the amount to pay after the discount."
+  },
+  "timeout": 600,
+  "max_turns": 20,
+  "allowed_tools": [
+    "Read",
+    "Edit",
+    "Write",
+    "Glob",
+    "Grep",
+    "Bash(python *)",
+    "Bash(habitree *)"
+  ],
+  "verify": [
+    [
+      "{python}",
+      "{task}/verify/check.py"
+    ]
+  ],
+  "rules": []
+}

@@ -478,8 +478,8 @@ class TestHookEndToEnd(GuardProject):
         (self.root / "CLAUDE.md").unlink()
         code, out, _ = self.run_hook("SessionStart", {"session_id": "s2", "source": "startup"})
         text = json.loads(out)["hookSpecificOutput"]["additionalContext"]
-        self.assertIn("작업 순환", text)
-        self.assertIn("필수 규칙", text)
+        self.assertIn("만들기 전에", text)        # 걷어낸 판: AGENTS.md와 같은 핵심 세 줄
+        self.assertNotIn("API 키", text)          # 꾸러미의 일반 규칙은 싣지 않는다
         self.assertLess(len(text), 3000)
 
     def test_pre_tool_output_shape(self):

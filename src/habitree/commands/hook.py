@@ -171,7 +171,10 @@ def session_text(ctx, db, st):
         return ""
     lang = ctx.lang
     parts = []
-    if mode == "full" or (mode == "auto" and not _agents_loaded(ctx)):
+    if (mode == "full" or (mode == "auto" and not _agents_loaded(ctx))) and ctx.get("export.style", "lean") == "lean":
+        from .export import lean_block  # AGENTS.md와 같은 글(핵심 세 줄 + 이 프로젝트의 규칙) / same as AGENTS.md
+        parts.append(lean_block(ctx, db))
+    elif mode == "full" or (mode == "auto" and not _agents_loaded(ctx)):
         parts.append(t("start.full", lang, map=ctx.get("docs.map"), log=ctx.get("docs.log")))
         brief = db.brief(["global"], must_only=True, budget=ctx.get("guard.session_budget", 1500), lang=lang,
                          compact=True, skip_scopes=("work/cycle",))

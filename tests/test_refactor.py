@@ -80,10 +80,12 @@ class TestConcentration(Base):
     def test_thresholds_come_from_rules(self):
         self.init()
         self.assertTrue(self.of(self.advise(), "concentration"))
-        db = json.loads(self.read(".habitree/rules.json"))
-        rule = next(r for r in db["rules"] if r["id"] == "code.structure.concentration")
-        rule["detect"]["params"].update(min_file_lines=5000, min_func_lines=500, min_symbols=500)
-        self.write(".habitree/rules.json", json.dumps(db, ensure_ascii=False))
+        from habitree.core.ruledb import RuleDB  # 꾸러미 규칙은 패키지에서 읽고, 고치면 프로젝트 DB에 남는다
+        db = RuleDB.load(self.root / ".habitree/rules.json")
+        db.find("code.structure.concentration")["detect"]["params"].update(
+            min_file_lines=5000, min_func_lines=500, min_symbols=500)
+        db.save()
+        self.assertIn("code.structure.concentration", self.read(".habitree/rules.json"))
         self.assertFalse(self.of(self.advise(), "concentration"))
         code, out, err = self.cli("rules", "pause", "code.structure.fragmentation", "--why", "시험")
         self.assertEqual(code, 0, out + err)

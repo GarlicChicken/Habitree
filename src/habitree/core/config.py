@@ -33,7 +33,9 @@ DEFAULTS = {
     },
     "export": {
         "targets": ["agents", "claude"],
-        "brief_budget": 3000,  # AGENTS.md 안에 넣는 필수 규칙 요약의 글자 예산
+        "style": "lean",       # lean: 핵심 몇 줄 + 이 프로젝트의 규칙만 / full: 여섯 단계 작업 순환 + 필수 규칙 요약
+        "map_hint_files": 150,  # 파일이 이만큼 이상일 때만 AI 지침에 `habitree map find` 안내를 싣는다(0이면 늘)
+        "brief_budget": 3000,  # AGENTS.md 안에 넣는 규칙 요약의 글자 예산
     },
     "map": {
         "exclude": [],  # 색인에서만 더 뺄 폴더·경로(위 exclude에 더함)

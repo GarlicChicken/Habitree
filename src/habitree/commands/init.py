@@ -4,6 +4,7 @@
 만드는 것(없을 때만): .habitree/config.json, .habitree/rules.json(+RULES.md), AGENTS.md·CLAUDE.md 생성 구역,
 README 지도(없으면 새로, 있으면 지도 절만 더함), LOG.md, .gitignore의 .habitree/state/.
 --hooks: 플러그인 없이 쓸 때 프로젝트 .claude/settings.json에 훅을 더한다(사용자 전역 설정은 건드리지 않음).
+--mcp: 플러그인 없이 쓸 때 프로젝트 .mcp.json에 habitree MCP 서버를 더한다(있는 서버는 그대로).
 사람이 쓴 내용은 지우지 않는다.
 """
 import shutil
@@ -72,6 +73,9 @@ def add_arguments(p):
     p.add_argument("--no-readme", action="store_true", help="README를 만들거나 고치지 않음")
     p.add_argument("--force", action="store_true", help="직접 고친 생성 구역·꾸러미 규칙도 새것으로")
     p.add_argument("--dry-run", action="store_true", help="쓰지 않고 할 일만 보기")
+    p.add_argument("--mcp", action="store_true",
+                   help="프로젝트 .mcp.json에 habitree MCP 서버를 더함(플러그인 없이 쓸 때) / "
+                        "add the habitree MCP server to the project .mcp.json (without the plugin)")
     p.add_argument("--hooks", action="store_true",
                    help="프로젝트 .claude/settings.json에 Claude Code 훅 연결(플러그인 없이 쓸 때) / "
                         "wire Claude Code hooks into the project settings (without the plugin)")
@@ -191,6 +195,20 @@ def run(args, ctx):
                       "`uv tool install git+https://github.com/GarlicChicken/habitree`로 설치하세요.",
                  "Note: habitree is not on PATH, so the hooks may not run. "
                  "Install it with `uv tool install git+https://github.com/GarlicChicken/habitree`.")
+
+    # 8. MCP 서버(선택). AI가 찾기·규칙·점검을 직접 부르게 한다.
+    if getattr(args, "mcp", False):
+        mcp_path = root / ".mcp.json"
+        cur = hio.load_json(mcp_path, {}) if mcp_path.exists() else {}
+        servers = cur.setdefault("mcpServers", {})
+        if "habitree" in servers:
+            _say(ctx, "그대로: .mcp.json에 habitree 서버가 이미 있음", "unchanged: .mcp.json already has the habitree server")
+        else:
+            servers["habitree"] = {"type": "stdio", "command": "habitree", "args": ["mcp"]}
+            if not dry:
+                hio.save_json(mcp_path, cur)
+            _say(ctx, "고침: .mcp.json에 habitree MCP 서버(map_find, map_show, rules_brief, check)",
+                 "updated: .mcp.json += habitree MCP server (map_find, map_show, rules_brief, check)")
 
     print("\n" + ("다음: README 지도의 '하는 일' 칸을 채우고, 설정 verify에 테스트·빌드 명령을 등록한 뒤 `habitree check`."
                   if lang == "ko" else

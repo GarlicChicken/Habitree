@@ -3,7 +3,7 @@
 AI와 함께 일하는 습관을 나무처럼 키우는 도구입니다. 피드백은 규칙으로, 되풀이는 모듈로 자라게 하고, 그렇게 자란 것이 짐이 되지 않게 함께 다듬습니다.
 
 - 마지막 갱신: 2026-10-28
-- 상태: v0.7 알파
+- 상태: v0.8 알파
 - 라이선스: [MIT](LICENSE)
 - [English](#english)
 
@@ -31,7 +31,32 @@ Habitree는 [Open Prompt](https://github.com/GarlicChicken)를 운영하며 쓰�
 
 **어떤 언어, 어떤 환경에서도.** 규칙과 설정은 JSON과 Markdown으로 된 명세이고, 이 엔진은 그 명세를 따르는 참조 구현입니다. 프로젝트가 어떤 언어로 짜였든, Windows든 macOS든 Linux든, Claude Code든 Codex든 Cursor든 같은 원본을 씁니다. 한글 파일 이름과 한국어 검색도 처음부터 챙겼습니다. 개발자가 아니어도 AI에게 무언가를 맡기는 사람이라면 쓸 수 있게 쉬운 말로 알려 주려고 합니다.
 
-**재지 않은 숫자는 말하지 않는다.** 토큰을 몇 퍼센트 줄인다는 식의 말은, 같은 과제를 규칙을 켜고 끈 채 여러 번 돌려 재고 그 과정까지 공개하기 전에는 하지 않습니다.
+**재지 않은 숫자는 말하지 않는다.** 토큰을 몇 퍼센트 줄인다는 식의 말은, 같은 과제를 규칙을 켜고 끈 채 여러 번 돌려 재고 그 과정까지 공개하기 전에는 하지 않습니다. 처음 잰 결과는 바로 아래에 있습니다.
+
+## 무엇을 보고 이렇게 정했나
+
+### 남의 연구와 오픈소스에서 배운 것
+
+만들기 전에 비슷한 일을 하는 오픈소스와 연구를 여섯 갈래로 나눠 실제 저장소 단위로 읽었습니다. 그중 설계를 바꾼 발견만 추렸습니다. 출처는 [NOTICE.md](NOTICE.md)에 있습니다.
+
+| 본 것 | 그래서 정한 것 |
+|---|---|
+| 피드백을 배우는 도구 대부분은 지침 파일에 한 줄씩 덧붙입니다. 한 도구(claude-reflect)는 쌓인 후보 102개 중 다시 쓸 만한 규칙이 16개 남짓이었고 검토 대기열이 끝내 비워지지 않았다고 스스로 밝혔습니다 | 규칙은 범위별 DB에 두고, 같은 뜻끼리 묶어 여러 번 나온 것부터 단단하게 합니다 |
+| 코드 색인의 절감 수치는 대부분 만든 사람의 좁은 측정이었습니다. 조건을 밝힌 한 연구는 토큰을 10배 줄였지만 정답률이 92%에서 83%로 떨어졌고(codebase-memory-mcp), 다른 하나는 토큰 39% 감소에 정답률이 같았습니다(claude-context) | 무거운 색인 대신 표준 라이브러리만 쓰는 가벼운 색인을 두고, 효과는 늘 정답률과 함께 잽니다 |
+| 학습형 모델 라우터는 넓은 비교에서 단순한 기준을 안정적으로 넘지 못했고(LLMRouterBench), 단계식 승격은 판정 오류율이 0.2를 넘으면 급격히 나빠졌습니다(RouterBench). 반면 낮은 강도로 먼저 돌리고 실패만 높은 강도로 다시 돌린 쪽이 더 싸고 정확했습니다(Anthropic 측정, 약 97%·$0.17 대 95.3%·$0.29) | 라우터를 만들지 않습니다. 테스트 같은 기계 검증이 있는 작업만 한 칸씩 올립니다 |
+| 막힘을 감지하는 에이전트들은 같은 호출, 같은 오류 3번을 기준으로 씁니다(Cline, OpenHands, Gemini CLI). Google은 '쓸모없었다'는 반응 비율로 경고를 조정했습니다(Tricorder, 10%·25%) | 작업 중 알림의 기준값과, 반응으로 기준을 고치는 방식 |
+| 같은 정보를 여러 턴에 나눠 주면 15개 모델에서 결과가 평균 39% 나빠졌습니다(Laban 외, 2025) | 요청이 잘게 나뉘어 오면 한 번에 모아 달라고 알립니다 |
+| Claude Code 세션 기록은 응답 하나를 여러 줄에 나눠 같은 사용량을 되풀이합니다. 그냥 더하면 입력 토큰이 약 2.2배로 부풀었습니다(우리 기록으로 확인) | 세션 분석은 응답 단위로 한 번만 셉니다 |
+
+### 우리가 직접 잰 것
+
+2026-10-28에 작은 과제 세 개를 Habitree를 깐 프로젝트와 깔지 않은 프로젝트에서 여러 번 돌렸습니다(Claude Sonnet, 66번 실행). 결과를 보고 AI 지침을 걷어내고 다시 재기를 여섯 회차 되풀이했습니다.
+
+- 그 프로젝트에서 받은 피드백 규칙이 있는 과제에서는 Habitree를 깐 쪽이 29번 모두 합격했고, 깔지 않은 쪽은 14번 모두 실패했습니다. 가치는 여기서 나왔습니다.
+- 반면 여섯 단계 작업 순환과 일반 규칙을 실은 지침은 정답률을 올리지 못한 채 토큰을 11~21% 더 썼습니다. 작은 수정에도 변경 기록을 고치고 전체 점검을 돌렸기 때문입니다.
+- 늘 읽는 지침에 도구 명령 이름이 보이면, AI는 쓸 일이 없어도 그 도구부터 살펴봤습니다(한 회차 6번 중 4번).
+
+그래서 AI가 매번 읽는 지침을 걷어냈습니다. 이제는 "있는 것을 먼저 찾아 쓴다", "바로잡힌 것은 규칙으로 남긴다", 그리고 그 프로젝트에서 쌓인 규칙만 싣습니다. 새 프로젝트는 규칙 0개로 시작하고, 일반 규칙은 기계 점검과 훅이 지킵니다. 걷어낸 판의 덧비용은 1~12%로 줄었지만, 반복이 적어 이 차이는 아직 확정적이지 않습니다. 조건과 한계, 회차별 표는 [bench/2026-10-28-first-measurement.md](bench/2026-10-28-first-measurement.md)에 있습니다.
 
 ## 언제 무엇을 돕나
 
@@ -53,7 +78,7 @@ Python 3.9 이상에서 돌고, 바깥 패키지에 기대지 않습니다. [uv]
 ```
 uv tool install git+https://github.com/GarlicChicken/habitree
 cd 내-프로젝트
-habitree init       # 지도, 기본 규칙, AI 지침 파일을 깐다
+habitree init       # 지도와 AI 지침 파일을 깐다(규칙은 0개에서 시작)
 habitree check      # 지도·문서·규칙이 실제와 맞는지 본다
 ```
 
@@ -64,7 +89,7 @@ claude plugin marketplace add GarlicChicken/habitree
 claude plugin install habitree@habitree
 ```
 
-`init`은 이미 있는 파일에서 사람이 쓴 내용을 지우지 않습니다. AGENTS.md와 CLAUDE.md에는 표시된 생성 구역 하나만 두고, 나중에 다시 실행하면 새로 생긴 기본 규칙만 더합니다. 프로젝트에 옮겨 적는 것은 기본 규칙뿐이고, 작업 중 경고와 모델 배분의 규칙은 쓸 때 패키지에서 바로 읽습니다.
+`init`은 이미 있는 파일에서 사람이 쓴 내용을 지우지 않습니다. AGENTS.md와 CLAUDE.md에는 표시된 생성 구역 하나만 두고, 나중에 다시 실행하면 새로 생긴 기본 규칙만 더합니다. 새 프로젝트는 규칙 0개로 시작합니다. 일반 규칙은 패키지에서 바로 읽어 기계 점검과 훅이 쓰고, 프로젝트에는 그 프로젝트에서 받은 피드백만 규칙으로 자랍니다.
 
 ## 피드백을 규칙으로
 
@@ -90,6 +115,7 @@ habitree rules miss <id> --feedback "이번 경고는 틀렸음"  # 규칙이나
 | v0.5 | 세션 기록 분석, 전후 비교 측정 | 완료 |
 | v0.6 | 리팩토링 제안(합치기와 덜어내기 먼저) | 완료 |
 | v0.7 | 가볍게: 훅 비용과 기본 설치를 줄이고, 쓰는 프로젝트의 무게도 보여 주기 | 완료 |
+| v0.8 | 첫 측정, 측정에 따라 AI 지침 걷어내기, 먼저 찾게 하는 연결 | 완료 |
 
 ## 문서와 지도
 
@@ -146,7 +172,32 @@ spoken feedback → should rule → must rule → automatic check → blocked in
 
 **Any language, any environment.** Rules and settings are a JSON and Markdown specification, and this engine is a reference implementation of it. Whatever language your project uses, whether you are on Windows, macOS or Linux, and whether you work with Claude Code, Codex or Cursor, they share one source. Korean file names and Korean search were handled from the start, and we try to speak in plain words so that anyone who hands work to an AI can use it, not only developers.
 
-**No numbers we have not measured.** Claims such as "saves N% of tokens" wait until the same tasks have been run several times with the rules on and off, and the process is published.
+**No numbers we have not measured.** Claims such as "saves N% of tokens" wait until the same tasks have been run several times with the rules on and off, and the process is published. The first measurement is right below.
+
+### What we based this on
+
+#### What we learned from others
+
+Before building, we read existing open source and research in six areas, repository by repository. These are the findings that changed the design; sources are in [NOTICE.md](NOTICE.md).
+
+| What we saw | What we decided |
+|---|---|
+| Most feedback-learning tools append a line to an instruction file. One of them (claude-reflect) reported that only about 16 of 102 queued candidates were reusable rules and the review queue was never emptied | Rules live in a scoped DB, grouped by meaning, and the ones that come back most often harden first |
+| Savings claims for code indexes were mostly narrow measurements by their authors. One study with stated conditions cut tokens tenfold but answer quality fell from 92% to 83% (codebase-memory-mcp); another cut tokens by 39% at equal accuracy (claude-context) | A light, standard-library index instead of a heavy one, always measured together with accuracy |
+| Learned model routers did not reliably beat simple baselines in a broad comparison (LLMRouterBench), and stepwise escalation degrades sharply once judgment error passes 0.2 (RouterBench). Running at low effort first and retrying only failures at high effort was cheaper and more accurate (Anthropic's measurement, about 97% at $0.17 vs 95.3% at $0.29) | No router. Only work with machine verification such as tests moves up one step at a time |
+| Agents that detect being stuck use three identical calls or three identical errors as the threshold (Cline, OpenHands, Gemini CLI). Google tuned warnings by the rate of "not useful" reactions (Tricorder, 10% and 25%) | The thresholds of in-flight warnings and how reactions tune them |
+| Spreading the same information over several turns made results 39% worse on average across 15 models (Laban et al., 2025) | A note asking to gather requests that arrive in small pieces |
+| Claude Code transcripts split one response over several lines and repeat the same usage; summing them inflated input tokens about 2.2 times (checked on our own logs) | Session audits count each response once |
+
+#### What we measured ourselves
+
+On 2026-10-28 we ran three small tasks many times in projects with and without Habitree (Claude Sonnet, 66 runs), trimming the agent instructions and measuring again over six rounds.
+
+- On tasks where the project had received feedback rules, the Habitree side passed all 29 runs and the other side failed all 14. That is where the value came from.
+- Instructions carrying the six-step cycle and generic rules used 11 to 21% more tokens without raising accuracy, because the agent updated the change log and ran a full check even for small fixes.
+- When command names appeared in the always-read instructions, the agent explored the tool even with no need for it (four of six runs in one round).
+
+So the instructions the agent reads every session were trimmed to "look for what exists first", "record corrections as rules" and the rules this project has grown. New projects start with zero rules, and generic rules are enforced by checks and hooks. The trimmed version's overhead fell to 1 to 12%, though with few runs this difference is not conclusive yet. Conditions, limits and per-round tables are in [bench/2026-10-28-first-measurement.md](bench/2026-10-28-first-measurement.md).
 
 ### What it helps with
 
@@ -168,7 +219,7 @@ Runs on Python 3.9+ with no third-party dependencies. With [uv](https://docs.ast
 ```
 uv tool install git+https://github.com/GarlicChicken/habitree
 cd your-project
-habitree init       # install the map, default rules and agent instruction files
+habitree init       # install the map and agent instruction files (rules start at zero)
 habitree check      # check that map, docs and rules match reality
 ```
 
@@ -179,7 +230,7 @@ claude plugin marketplace add GarlicChicken/habitree
 claude plugin install habitree@habitree
 ```
 
-`init` never deletes what you wrote in existing files. AGENTS.md and CLAUDE.md get a single marked managed block, and running `init` again later only adds new default rules. Only the base rules are copied into the project; the rules for in-flight warnings and model allocation are read straight from the package when used.
+`init` never deletes what you wrote in existing files. AGENTS.md and CLAUDE.md get a single marked managed block, and running `init` again later only adds new default rules. A new project starts with zero rules: generic rules are read straight from the package for checks and hooks, and only the feedback that project receives grows into its own rules.
 
 ### Turning feedback into rules
 
@@ -196,6 +247,7 @@ When you correct the AI, record the correction as a rule while fixing it; AGENTS
 | v0.5 | Session audit, before/after benchmark | Done |
 | v0.6 | Refactoring suggestions (merging and removing first) | Done |
 | v0.7 | Lighter: smaller hook cost and default install, and showing the weight of the project that uses it | Done |
+| v0.8 | First measurement, trimming agent instructions by the results, links that make the agent look first | Done |
 
 ### Made by
 
