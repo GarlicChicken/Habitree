@@ -13,6 +13,10 @@
 사용자 피드백은 고치는 것과 동시에 규칙으로 남긴다. 같은 뜻 규칙이 있으면 `habitree rules hit <id> --feedback "…"`, 없으면 `habitree rules add --scope … --aspect … --rule "…" --why "…" --feedback "…"`. 전체 규칙: [.habitree/RULES.md](.habitree/RULES.md).
 
 ### 필수 규칙 (요약)
+[work/delegate] 위임: 맡긴 작업의 범위와 경계, 끝 보고
+- [필수·security] 맡긴 작업 중에도 지우기, 배포·올리기, 외부로 보내기, 결제, 비밀 정보, 작업 폴더 밖 수정은 사용자 확인을 받는다.
+- [필수·process] 맡긴 작업을 마치면 대신 정한 것, 미뤄 둔 알림, 실행한 검사 결과를 모아 보고한다.
+
 [docs] 문서와 지도
 - [필수·docs] 같은 내용을 여러 곳에 복사하지 않고 원본 한 곳에 두고 링크한다.
 - [필수·docs] 도구가 만든 파일과 구역(habitree:begin/end 사이)은 직접 고치지 않는다. 원본을 고친 뒤 도구로 다시 만든다.

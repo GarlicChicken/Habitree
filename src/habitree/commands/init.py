@@ -3,8 +3,11 @@
 
 만드는 것(없을 때만): .habitree/config.json, .habitree/rules.json(+RULES.md), AGENTS.md·CLAUDE.md 생성 구역,
 README 지도(없으면 새로, 있으면 지도 절만 더함), LOG.md, .gitignore의 .habitree/state/.
+--hooks: 플러그인 없이 쓸 때 프로젝트 .claude/settings.json에 훅을 더한다(사용자 전역 설정은 건드리지 않음).
 사람이 쓴 내용은 지우지 않는다.
 """
+import shutil
+
 from ..core import io as hio
 from ..core.config import CONFIG_REL, Context
 from ..core.i18n import LANGS, tr
@@ -12,12 +15,13 @@ from ..core.markdown import links
 from ..core.paths import top_dirs
 from ..core.ruledb import RuleDB, available_packs, load_pack
 from ..core.timeutil import local_date
+from ..guard import install as hooks_install
 from . import export
 
 SUMMARY = {"ko": "프로젝트에 Habitree 뼈대 깔기(다시 실행하면 업그레이드)",
            "en": "Install the Habitree skeleton (run again to upgrade)"}
 
-DEFAULT_PACKS = ["base"]
+DEFAULT_PACKS = ["base", "work"]
 
 README_NEW = """# {name}
 
@@ -67,6 +71,9 @@ def add_arguments(p):
     p.add_argument("--no-readme", action="store_true", help="README를 만들거나 고치지 않음")
     p.add_argument("--force", action="store_true", help="직접 고친 생성 구역·꾸러미 규칙도 새것으로")
     p.add_argument("--dry-run", action="store_true", help="쓰지 않고 할 일만 보기")
+    p.add_argument("--hooks", action="store_true",
+                   help="프로젝트 .claude/settings.json에 Claude Code 훅 연결(플러그인 없이 쓸 때) / "
+                        "wire Claude Code hooks into the project settings (without the plugin)")
 
 
 def _say(ctx, ko, en):
@@ -168,6 +175,21 @@ def run(args, ctx):
         print(f"  {rel} [{name}]: {tr(export.LABEL[action], lang)}")
     if not dry:
         export.apply(ctx, steps)
+
+    # 7. Claude Code 훅(선택). 사용자 전역 설정은 건드리지 않는다.
+    if args.hooks:
+        added = hooks_install.merge_settings(root, dry)
+        rel = hooks_install.SETTINGS_REL
+        if added:
+            _say(ctx, f"고침: {rel}에 훅 {len(added)}개 ({', '.join(added)})",
+                 f"updated: {rel} += {len(added)} hooks ({', '.join(added)})")
+        else:
+            _say(ctx, f"그대로: {rel}에 Habitree 훅이 이미 있음", f"unchanged: {rel} already has the Habitree hooks")
+        if not shutil.which(hooks_install.COMMAND):
+            _say(ctx, "주의: habitree 명령이 PATH에 없어 훅이 돌지 않을 수 있습니다. "
+                      "`uv tool install git+https://github.com/GarlicChicken/habitree`로 설치하세요.",
+                 "Note: habitree is not on PATH, so the hooks may not run. "
+                 "Install it with `uv tool install git+https://github.com/GarlicChicken/habitree`.")
 
     print("\n" + ("다음: README 지도의 '하는 일' 칸을 채우고, 설정 verify에 테스트·빌드 명령을 등록한 뒤 `habitree check`."
                   if lang == "ko" else

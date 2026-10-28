@@ -2,6 +2,18 @@
 
 새 버전을 위에 씁니다.
 
+## 0.2.0 (2026-10-28)
+
+끝난 뒤가 아니라 일하는 도중에 알려 주는 버전입니다.
+
+- `habitree hook <이벤트>`: Claude Code 훅 입구(SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, PostToolUseFailure, Stop). 훅 안에서 오류가 나도 작업은 막지 않습니다.
+- 감지 규칙 14개(`work` 꾸러미, `init`이 기본으로 넣음): 같은 호출, 같은 오류, 제자리 돌기, 잔수정, 파일 커짐, 복사 코드, 큰 결과, 요청 쪼개기, 거듭된 정정, 섞인 주제, 검증 없이 끝내기, 위임. 반복 제한과 세션별 끄기가 있고, 반응(`hit`, `miss`)으로 기준이 조정됩니다.
+- 위임 예외: "알아서 해 줘"나 `/habitree:delegate`로 맡기면 그 작업만 되묻지 않고 진행합니다. 경계를 기억하고, 위험한 일은 그때도 묻고, 끝에 보고합니다.
+- 끝낼 때 빠른 점검: 오류가 있으면 한 번 더 일하게 합니다.
+- `habitree guard`: status, explain, off·on, report, delegate.
+- `habitree init --hooks`: 프로젝트 `.claude/settings.json`에 훅을 병합합니다. 사용자 전역 설정은 건드리지 않습니다.
+- Claude Code 플러그인과 같은 리포의 마켓플레이스, 스킬 세 개, 명세 `docs/spec/guard.md`.
+
 ## 0.1.0 (2026-10-28)
 
 첫 버전입니다. 피드백을 규칙으로 쌓고, 프로젝트의 지도와 문서가 실제와 맞는지 확인하는 기반을 만들었습니다.
@@ -17,6 +29,18 @@
 ## English
 
 Newest first.
+
+### 0.2.0 (2026-10-28)
+
+The release that speaks up during the work rather than afterwards.
+
+- `habitree hook <event>`: the entry point for Claude Code hooks (SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, PostToolUseFailure, Stop). Errors inside a hook never block the work.
+- 14 detection rules (the `work` pack, installed by `init`): repeated calls, repeated errors, loops, small edits, growing files, copied code, large outputs, split requests, repeated corrections, mixed topics, finishing without verification, delegation. Repeats are capped, warnings can be muted per session, and votes (`hit`, `miss`) tune the thresholds.
+- Delegation: hand over a task with "just do it" or `/habitree:delegate` and it proceeds without questions for that task only, remembering boundaries, still confirming risky actions, and reporting at the end.
+- A quick check at Stop that sends the agent back once when errors remain.
+- `habitree guard`: status, explain, off/on, report, delegate.
+- `habitree init --hooks` merges the hooks into the project's `.claude/settings.json`, never the user's global settings.
+- The Claude Code plugin with a marketplace in the same repository, three skills and the spec `docs/spec/guard.md`.
 
 ### 0.1.0 (2026-10-28)
 

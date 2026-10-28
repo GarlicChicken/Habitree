@@ -64,11 +64,16 @@ def case_insensitive(root):
             pass
 
 
-def path_key(root, path):
-    """상태·색인에 쓰는 파일 키. / Stable key for state and indexes."""
+def path_key(root, path, ci=None):
+    """상태·색인에 쓰는 파일 키. / Stable key for state and indexes.
+
+    ci: 대소문자 무시 여부를 이미 알면 넘긴다(훅처럼 자주 부를 때 매번 확인하지 않게).
+    / Pass ci when already known, so frequent callers such as hooks skip the probe."""
     k = rel(root, path) if os.path.isabs(str(path)) else nfc(str(path).replace("\\", "/"))
     k = re.sub(r"^\./", "", k)
-    return k.casefold() if case_insensitive(str(Path(root).resolve())) else k
+    if ci is None:
+        ci = case_insensitive(str(Path(root).resolve()))
+    return k.casefold() if ci else k
 
 
 def _glob_regex(pattern):

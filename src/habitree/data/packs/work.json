@@ -1,0 +1,318 @@
+{
+  "pack": "work",
+  "version": "0.2.0",
+  "about": {"ko": "작업 중 비효율을 먼저 알리는 감지 규칙과 위임 예외", "en": "Detection rules that warn about inefficient work early, and delegation"},
+  "scopes": {
+    "global": {"ko": "모든 작업", "en": "All work"},
+    "work": {"ko": "AI가 일하는 방식", "en": "How the AI works"},
+    "work/loop": {"ko": "제자리 돌기: 같은 호출·같은 오류·고리·잔수정", "en": "Going in circles: same call, same error, cycles, small edits"},
+    "work/request": {"ko": "요청 주고받기: 쪼개 보내기, 거듭 정정", "en": "Requests: split messages, repeated corrections"},
+    "work/context": {"ko": "대화 기록 아끼기: 큰 결과, 섞인 주제", "en": "Context thrift: large results, mixed topics"},
+    "work/verify": {"ko": "검증: 기계로 확인하고 끝내기", "en": "Verification: machine checks before finishing"},
+    "work/delegate": {"ko": "위임: 맡긴 작업의 범위와 경계, 끝 보고", "en": "Delegation: scope, boundaries and the end report"},
+    "code": {"ko": "코드", "en": "Code"},
+    "code/structure": {"ko": "코드 구조(모듈, 파일 크기, 중복)", "en": "Code structure (modules, file size, duplication)"}
+  },
+  "aspects": {
+    "process": {"ko": "절차와 작업 순서", "en": "Process and order of work"},
+    "structure": {"ko": "구조와 나누기", "en": "Structure and modularity"},
+    "quality": {"ko": "품질과 검증", "en": "Quality and verification"},
+    "security": {"ko": "보안과 개인정보", "en": "Security and privacy"}
+  },
+  "rules": [
+    {
+      "id": "work.loop.same-call",
+      "scope": "work/loop", "aspect": "process", "level": "should",
+      "rule": {"ko": "도구를 똑같은 입력으로 잇달아 부르게 되면 그 호출을 멈추고, 마지막 결과를 다시 읽은 뒤 다른 방법을 고른다.",
+               "en": "When calling a tool again with the very same input, stop, reread the last result, and pick another approach."},
+      "why": {"ko": "입력이 같으면 결과도 같아서 부를 때마다 시간과 사용량만 든다.",
+              "en": "The same input gives the same result, so each call only costs time and usage."},
+      "check": {"type": "auto", "how": {"ko": "PreToolUse 훅이 도구 이름과 키를 정렬한 입력의 해시가 잇달아 같은 횟수를 센다.",
+                                        "en": "The PreToolUse hook counts consecutive calls whose tool name and key-sorted input hash match."}},
+      "detect": {"signal": "same_call_streak", "event": "PreToolUse", "threshold": 3, "stop_at": 5, "severity": "warn",
+                 "repeat": "once_per_streak", "max_per_session": 3, "audience": "ai"},
+      "message": {
+        "ai": {"ko": "{tool}을(를) 같은 입력으로 {n}번 잇달아 불렀다. 입력이 같으면 결과도 같다.",
+               "en": "{tool} was called {n} times in a row with the same input. The same input gives the same result."},
+        "user": {"ko": "같은 일을 같은 방법으로 {n}번째 하고 있어요. 결과가 달라지기 어려워요.",
+                 "en": "The same step has now run {n} times the same way. The result is unlikely to change."},
+        "suggest": [{"ko": "마지막 결과나 오류를 다시 읽기", "en": "Reread the last result or error"},
+                    {"ko": "다른 방법 하나 고르기", "en": "Pick one different approach"},
+                    {"ko": "그래도 막히면 방향을 묻기", "en": "If still stuck, ask for direction"}]
+      },
+      "on_delegate": "nudge"
+    },
+    {
+      "id": "work.loop.same-error",
+      "scope": "work/loop", "aspect": "process", "level": "should",
+      "rule": {"ko": "한 호출이 같은 오류로 거듭 실패하면 같은 시도를 다시 하지 않고, 오류 문장에서 원인부터 찾는다.",
+               "en": "When one call keeps failing with the same error, do not retry it as is; find the cause in the error text first."},
+      "why": {"ko": "같은 방법을 또 쓰면 같은 오류가 날 가능성이 크고, 실패가 쌓일수록 회복이 어려워진다.",
+              "en": "Retrying the same way likely fails the same way, and stacked failures make recovery harder."},
+      "check": {"type": "auto", "how": {"ko": "PostToolUse·PostToolUseFailure 훅이 같은 호출의 같은 오류를 세고, 다음 같은 호출 전에 멈춘다.",
+                                        "en": "Post-tool hooks count the same error for the same call and stop before the next identical call."}},
+      "detect": {"signal": "same_error_streak", "event": "PostToolUse|PreToolUse", "threshold": 3, "stop_at": 4,
+                 "severity": "warn", "repeat": "once_per_streak", "max_per_session": 3, "audience": "ai"},
+      "message": {
+        "ai": {"ko": "{tool}이(가) 같은 입력으로 같은 오류를 {n}번 냈다: {error}",
+               "en": "{tool} failed {n} times with the same input and the same error: {error}"},
+        "user": {"ko": "같은 오류가 {n}번 났어요. 같은 방법을 또 쓰면 같은 오류가 날 가능성이 커요.",
+                 "en": "The same error happened {n} times. Trying the same way again will likely fail again."},
+        "suggest": [{"ko": "오류 문장에서 원인 찾기", "en": "Find the cause in the error text"},
+                    {"ko": "입력을 고치거나 다른 길 고르기", "en": "Fix the input or take another route"},
+                    {"ko": "안 되면 멈추고 상황 알리기", "en": "If that fails, stop and report"}]
+      },
+      "on_delegate": "nudge"
+    },
+    {
+      "id": "work.loop.cycle",
+      "scope": "work/loop", "aspect": "process", "level": "should",
+      "rule": {"ko": "몇 단계가 같은 순서로 맴돌면 고치기를 멈추고, 지금까지 시도한 것과 원인 가설 하나를 먼저 적는다.",
+               "en": "When a few steps keep circling in the same order, stop editing and first write down what was tried and one hypothesis."},
+      "why": {"ko": "고치고 확인하기가 같은 결과로 맴돌면 진전 없이 대화 기록만 길어진다.",
+              "en": "Circling through fix-and-check with the same result only makes the history longer."},
+      "check": {"type": "auto", "how": {"ko": "PreToolUse 훅이 최근 호출에서 길이 1~5짜리 묶음이 같은 순서로 되풀이된 바퀴 수를 센다.",
+                                        "en": "The PreToolUse hook counts laps of a 1 to 5 call block repeating in order."}},
+      "detect": {"signal": "cycle", "event": "PreToolUse", "threshold": 5, "stop_at": 7, "severity": "warn",
+                 "repeat": "once_per_streak", "max_per_session": 2, "audience": "ai",
+                 "params": {"min_period": 1, "max_period": 5}},
+      "message": {
+        "ai": {"ko": "최근 도구 호출 {period}개 묶음이 같은 순서로 {n}바퀴 되풀이됐다.",
+               "en": "A block of {period} tool calls repeated {n} laps in the same order."},
+        "user": {"ko": "고치고 확인하기를 같은 순서로 {n}바퀴째 돌고 있어요.",
+                 "en": "Fix and check has gone around {n} times in the same order."},
+        "suggest": [{"ko": "시도한 것을 한 줄씩 적기", "en": "Write each attempt in one line"},
+                    {"ko": "원인 가설 하나와 확인할 검사 정하기", "en": "Pick one hypothesis and a check for it"},
+                    {"ko": "그다음 고치기", "en": "Then edit"}]
+      },
+      "on_delegate": "nudge"
+    },
+    {
+      "id": "work.loop.small-edits",
+      "scope": "work/loop", "aspect": "process", "level": "should",
+      "rule": {"ko": "짧은 고침이 한 파일에 잇달아 쌓이면 알린다. 남은 손질을 목록으로 묶어 한 번에 처리하길 제안한다.",
+               "en": "Note when short fixes pile up on one file, and suggest bundling the remaining touch-ups into one pass."},
+      "why": {"ko": "왕복할 때마다 대화 전체가 다시 읽힌다. 다만 한 파일 여러 곳을 차례로 고치는 것은 정상 작업이기도 해서 정보로만 알린다.",
+              "en": "Every round trip rereads the whole conversation. Fixing several spots in turn is also normal work, so this is only a note."},
+      "check": {"type": "auto", "how": {"ko": "PostToolUse 훅이 바뀐 줄 3줄 이하 수정을 파일별로 15분 창에서 센다. 검증 명령을 돌리면 다시 센다.",
+                                        "en": "The PostToolUse hook counts edits of 3 lines or fewer per file in a 15 minute window; a verify run resets it."}},
+      "detect": {"signal": "small_edits_same_file", "event": "PostToolUse", "threshold": 6, "severity": "info",
+                 "repeat": "once_per_streak", "max_per_session": 2, "audience": "ai",
+                 "params": {"small_lines": 3, "window_sec": 900}},
+      "message": {
+        "ai": {"ko": "{file}에 짧은 수정이 {minutes}분 안에 {n}번 있었다.",
+               "en": "{file} got {n} short edits within {minutes} minutes."},
+        "user": {"ko": "{file}을 짧게 {n}번 고쳤어요. 고칠 곳을 먼저 모아 한 번에 고치면 왕복이 줄어요.",
+                 "en": "{file} was edited {n} times in small steps. Collecting the spots first saves round trips."},
+        "suggest": [{"ko": "고칠 곳 목록 만들기", "en": "List the spots to change"},
+                    {"ko": "한 번에 고치기", "en": "Change them in one pass"},
+                    {"ko": "확인은 한 번", "en": "Check once"}]
+      },
+      "on_delegate": "skip"
+    },
+    {
+      "id": "code.structure.file-growth",
+      "scope": "code/structure", "aspect": "structure", "level": "should",
+      "rule": {"ko": "한 세션 안에서 기존 파일이 거의 더하기만으로 크게 불어나면, 새 기능은 따로 파일이나 함수로 떼어 낸다.",
+               "en": "When an existing file balloons within one session through additions alone, move the new feature into its own file or function."},
+      "why": {"ko": "덧붙이기로 커진 파일은 읽을 때마다 사용량이 많이 들고, 고칠 때 엉뚱한 곳이 깨지기 쉽다.",
+              "en": "A file grown by appending costs more to read every time and breaks in odd places when changed."},
+      "check": {"type": "auto", "how": {"ko": "PostToolUse 훅이 세션 처음 줄 수와 지금 줄 수, 더한 줄과 지운 줄을 파일별로 비교한다.",
+                                        "en": "The PostToolUse hook compares the start and current line count and the added and removed lines per file."}},
+      "detect": {"signal": "file_growth", "event": "PostToolUse", "threshold": 30, "severity": "warn",
+                 "repeat": "once_per_streak", "max_per_session": 3, "audience": "ai",
+                 "params": {"min_lines": 150, "ratio": 10}},
+      "message": {
+        "ai": {"ko": "{file}이(가) 이번 세션에서 {from}줄에서 {to}줄로 늘었다(더한 줄 {added}, 지운 줄 {removed}).",
+               "en": "{file} grew from {from} to {to} lines in this session ({added} added, {removed} removed)."},
+        "user": {"ko": "{file}이 이번 작업에서 {from}줄 → {to}줄로 커졌어요. 계속 덧붙이면 나중에 고치기 어려워질 수 있어요.",
+                 "en": "{file} grew from {from} to {to} lines in this task. Appending more may make it hard to change later."},
+        "suggest": [{"ko": "새 기능은 따로 파일이나 함수로", "en": "Put the new feature in its own file or function"},
+                    {"ko": "기존 코드는 옮기기만 하고 동작은 그대로", "en": "Only move existing code; keep behavior the same"},
+                    {"ko": "옮긴 뒤 검사 한 번", "en": "Run the checks once after moving"}]
+      },
+      "on_delegate": "nudge"
+    },
+    {
+      "id": "code.structure.copy-block",
+      "scope": "code/structure", "aspect": "structure", "level": "should",
+      "rule": {"ko": "새로 쓰는 줄 묶음이 다른 파일에 이미 있으면 붙여 넣지 말고, 있는 것을 불러 쓰거나 공통 함수로 뺀다.",
+               "en": "If newly written lines already exist in another file, do not paste them; call the existing code or extract a shared function."},
+      "why": {"ko": "복사본은 따로 낡아서 고칠 곳이 늘어난다.",
+              "en": "Copies go stale separately, so there are more places to fix."},
+      "check": {"type": "auto", "how": {"ko": "PostToolUse 훅이 새로 들어간 줄을 공백을 정리해 6줄씩 해시하고 다른 파일과 비교한다(탐색 파일 수·크기 상한).",
+                                        "en": "The PostToolUse hook hashes new lines in 6 line windows after trimming whitespace and compares other files (with file count and size limits)."}},
+      "detect": {"signal": "copy_block", "event": "PostToolUse", "threshold": 6, "severity": "warn",
+                 "repeat": "once_per_streak", "max_per_session": 3, "audience": "ai",
+                 "params": {"min_chars": 80, "max_files": 400, "max_file_bytes": 262144, "max_total_bytes": 8388608}},
+      "message": {
+        "ai": {"ko": "{file}에 새로 넣은 {n}줄 이상이 {other}:{line}에 이미 있는 내용과 같다.",
+               "en": "{n} or more new lines in {file} match existing content at {other}:{line}."},
+        "user": {"ko": "비슷한 코드가 {other}에 이미 있어요. 한 곳에 두고 불러 쓰면 고칠 때 한 번만 고치면 돼요.",
+                 "en": "Similar code already exists in {other}. Keeping it in one place means fixing it once."},
+        "suggest": [{"ko": "있는 코드를 먼저 보기", "en": "Look at the existing code first"},
+                    {"ko": "공통 부분을 함수로 빼서 불러 쓰기", "en": "Extract the shared part and call it"}]
+      },
+      "on_delegate": "nudge"
+    },
+    {
+      "id": "work.context.big-output",
+      "scope": "work/context", "aspect": "process", "level": "should",
+      "rule": {"ko": "도구 결과가 아주 길면 통째로 읽지 말고, 검색으로 위치를 찾은 뒤 필요한 범위만 읽는다.",
+               "en": "When a tool result is very long, do not read it whole; search for the spot and read only the range you need."},
+      "why": {"ko": "긴 결과는 대화 기록에 남아 다음 요청마다 다시 읽힌다.",
+              "en": "Long results stay in the history and are read again on every later request."},
+      "check": {"type": "auto", "how": {"ko": "PostToolUse 훅이 도구 결과의 글자 수를 잰다.",
+                                        "en": "The PostToolUse hook measures the characters in each tool result."}},
+      "detect": {"signal": "big_output", "event": "PostToolUse", "threshold": 20000, "severity": "warn",
+                 "repeat": "once_per_streak", "max_per_session": 3, "audience": "ai"},
+      "message": {
+        "ai": {"ko": "{tool} 결과가 {chars}자였다. 긴 결과는 대화 기록에 남아 매번 다시 읽힌다.",
+               "en": "The {tool} result was {chars} characters. Long results stay in the history and are reread."},
+        "user": {"ko": "결과가 {chars}자로 길었어요. 필요한 부분만 읽으면 사용량이 줄어요.",
+                 "en": "The result was {chars} characters long. Reading only the needed part uses less."},
+        "suggest": [{"ko": "검색으로 위치 찾기", "en": "Search for the location"},
+                    {"ko": "그 부분만 범위를 정해 읽기", "en": "Read only that range"}]
+      },
+      "on_delegate": "nudge"
+    },
+    {
+      "id": "work.request.split",
+      "scope": "work/request", "aspect": "process", "level": "should",
+      "rule": {"ko": "원하는 것, 조건, 끝나는 기준은 한 메시지에 모아 보낸다. 짧은 요청이 잇달아 오면 모아 달라고 제안한다.",
+               "en": "Send what you want, the conditions and the finish line in one message. When short requests keep coming, suggest bundling them."},
+      "why": {"ko": "AI는 앞 문장만 보고 짐작해 시작했다가 되돌리기 쉽다. 여러 턴에 나눠 준 지시는 한 번에 준 것보다 결과가 크게 나빴다는 연구가 있다(Laban 외 2025).",
+              "en": "The AI tends to start from a guess on the first line and backtrack. A study found much worse results when instructions were split over turns (Laban et al. 2025)."},
+      "check": {"type": "auto", "how": {"ko": "UserPromptSubmit 훅이 5분 안에 들어온 40자 이하 요청을 센다(대답·승인 한 마디와 / 명령은 뺀다).",
+                                        "en": "The UserPromptSubmit hook counts prompts of 40 characters or fewer within 5 minutes (acknowledgements and / commands excluded)."}},
+      "detect": {"signal": "request_split", "event": "UserPromptSubmit", "threshold": 3, "severity": "warn",
+                 "repeat": "once_per_streak", "max_per_session": 2, "audience": "user",
+                 "params": {"max_chars": 40, "window_sec": 300}},
+      "message": {
+        "ai": {"ko": "사용자가 {minutes}분 안에 짧은 요청 {n}개를 나눠 보냈다. 앞 요청들을 하나로 묶어 이해하고 진행한다.",
+               "en": "The user sent {n} short requests within {minutes} minutes. Read them together as one request."},
+        "user": {"ko": "요청이 {n}번에 나뉘어 왔어요. AI는 앞 문장만 보고 짐작해 시작했다가 되돌리기 쉬워요. 원하는 것과 끝나는 기준을 한 메시지에 모아 주시면 더 정확해요.",
+                 "en": "The request arrived in {n} pieces. The AI tends to guess from the first piece and backtrack. One message with what you want and when it is done works better."},
+        "suggest": [{"ko": "원하는 것·조건·끝나는 기준을 한 메시지로", "en": "One message: goal, conditions, finish line"},
+                    {"ko": "정리가 어려우면 '질문해서 정리해 줘'라고 하기", "en": "If that is hard, say 'ask me questions to sort it out'"}]
+      },
+      "on_delegate": "skip"
+    },
+    {
+      "id": "work.request.repeat-correction",
+      "scope": "work/request", "aspect": "process", "level": "should",
+      "rule": {"ko": "같은 점을 두 번 바로잡아도 안 되면 세 번째 정정 대신, 알게 된 것을 담아 새로 시작한다.",
+               "en": "If the same point was corrected twice without success, start fresh with what was learned instead of a third correction."},
+      "why": {"ko": "실패한 시도가 대화 기록에 남아 계속 다시 읽힌다. Claude Code 공식 모범 사례도 두 번 실패한 정정 뒤에는 /clear를 권한다.",
+              "en": "Failed attempts stay in the history and keep being reread. Claude Code's best practices also suggest /clear after two failed corrections."},
+      "check": {"type": "auto", "how": {"ko": "UserPromptSubmit 훅이 정정 표현(아니, 그게 아니라, 말했잖아 / no, that's not, I said 등)이 같은 주제로 이어지는지 본다.",
+                                        "en": "The UserPromptSubmit hook looks for correction phrases on the same topic in a row."}},
+      "detect": {"signal": "repeat_correction", "event": "UserPromptSubmit", "threshold": 2, "severity": "warn",
+                 "repeat": "once_per_streak", "max_per_session": 2, "audience": "user",
+                 "params": {"min_overlap": 0.1, "lookback": 10}},
+      "message": {
+        "ai": {"ko": "사용자가 같은 주제를 {n}번 바로잡았다. 실패한 시도가 대화 기록에 남아 계속 다시 읽힌다. 되풀이될 지적이면 규칙으로 남긴다.",
+               "en": "The user corrected the same topic {n} times. Failed attempts stay in the history. Record it as a rule if it will recur."},
+        "user": {"ko": "같은 점을 바로잡는 정정이 {n}번 나왔어요. 세 번째 정정보다 새로 시작하는 편이 대개 빨라요.",
+                 "en": "The same point has been corrected {n} times. Starting fresh is usually faster than a third correction."},
+        "suggest": [{"ko": "알게 된 것을 담아 요청을 새로 쓰기", "en": "Rewrite the request with what you learned"},
+                    {"ko": "/clear 뒤 그 요청을 한 번에 보내기", "en": "Run /clear and send that request once"},
+                    {"ko": "되풀이될 지적이면 habitree rules add로 규칙 남기기", "en": "If it will recur, record it with habitree rules add"}]
+      },
+      "on_delegate": "skip"
+    },
+    {
+      "id": "work.context.topic-mix",
+      "scope": "work/context", "aspect": "process", "level": "should",
+      "rule": {"ko": "관련 없는 새 작업은 새 대화에서 시작한다.",
+               "en": "Start unrelated new work in a new conversation."},
+      "why": {"ko": "앞 작업의 기록이 다음 요청마다 함께 읽혀 느려지고 사용량이 는다. 단어 겹침으로 대략 판단하므로 틀릴 수 있어 정보로만 알린다.",
+              "en": "Earlier work is reread with every later request, which is slower and uses more. The word-overlap guess can be wrong, so it is only a note."},
+      "check": {"type": "auto", "how": {"ko": "UserPromptSubmit 훅이 긴 세션(30턴 이상 또는 기록 1MB 이상)에서 새 요청 낱말이 앞 요청들과 거의 안 겹치는지 본다.",
+                                        "en": "In long sessions (30+ turns or a 1 MB transcript) the UserPromptSubmit hook checks whether the new prompt shares almost no words with earlier ones."}},
+      "detect": {"signal": "topic_mix", "event": "UserPromptSubmit", "threshold": 30, "severity": "info",
+                 "repeat": "once_per_session", "audience": "user",
+                 "params": {"max_overlap": 0.1, "min_chars": 20, "transcript_bytes": 1000000}},
+      "message": {
+        "ai": {"ko": "새 요청이 이 세션의 앞 요청들과 거의 겹치지 않는다(대화 {turns}턴째).",
+               "en": "The new request shares almost nothing with earlier requests in this session (turn {turns})."},
+        "user": {"ko": "새 주제 같아요. 앞 작업 기록이 계속 함께 읽혀서 느려지고 사용량이 늘어요. 새 대화로 시작해 보세요.",
+                 "en": "This looks like a new topic. The earlier history keeps being read along, which is slower and uses more. Consider a new conversation."},
+        "suggest": [{"ko": "앞 작업을 마무리하고 기록하기", "en": "Wrap up and record the earlier work"},
+                    {"ko": "/clear 뒤 새 주제 시작", "en": "Run /clear and start the new topic"}]
+      },
+      "on_delegate": "skip"
+    },
+    {
+      "id": "work.verify.run-before-done",
+      "scope": "work/verify", "aspect": "quality", "level": "should",
+      "rule": {"ko": "파일을 바꾼 세션이 등록한 검증 명령을 한 번도 돌리지 않은 채 끝나면 알린다.",
+               "en": "Note when a session that changed files ends without running any registered verify command."},
+      "why": {"ko": "통과·실패로 답하는 검사가 돌지 않으면 사람이 눈으로 확인해야 한다.",
+              "en": "Without a pass or fail check, a person has to confirm by eye."},
+      "check": {"type": "auto", "how": {"ko": "Stop 훅이 이번 세션의 수정 횟수와 설정 verify 명령의 실행 횟수를 본다.",
+                                        "en": "The Stop hook compares edits in this session with runs of the configured verify commands."}},
+      "detect": {"signal": "no_verify", "event": "Stop", "threshold": 1, "severity": "info",
+                 "repeat": "once_per_session", "audience": "user"},
+      "message": {
+        "ai": {"ko": "이번 세션에 수정이 {n}번 있었는데 검증 명령({names})을 한 번도 돌리지 않았다.",
+               "en": "There were {n} edits in this session but no verify command ({names}) was run."},
+        "user": {"ko": "수정이 {n}번 있었는데 검증 명령({names})은 아직 안 돌았어요. 끝내기 전에 한 번 돌리면 눈으로 확인할 일이 줄어요.",
+                 "en": "There were {n} edits but the verify command ({names}) has not run. Running it once saves checking by eye."},
+        "suggest": [{"ko": "검증 명령 한 번 실행", "en": "Run the verify command once"},
+                    {"ko": "결과를 끝 보고에 넣기", "en": "Put the result in the final report"}]
+      },
+      "on_delegate": "skip"
+    },
+    {
+      "id": "work.delegate.declare",
+      "scope": "work/delegate", "aspect": "process", "level": "should",
+      "rule": {"ko": "'알아서 해 줘'처럼 맡기면 범위를 한 줄로 되말하고, 그 작업에 한해 되묻지 않고 추천안대로 진행한다.",
+               "en": "When told 'just do it', restate the scope in one line and, for that task only, proceed with the recommended option without asking."},
+      "why": {"ko": "맡긴 뜻을 따르되, 범위를 되말해야 잘못 알아들었을 때 사용자가 바로 바로잡을 수 있다.",
+              "en": "Following the delegation while restating the scope lets the user correct a misunderstanding right away."},
+      "check": {"type": "auto", "how": {"ko": "UserPromptSubmit 훅이 위임 표현을 찾아 세션 상태에 범위와 경계를 적고 AI 맥락에 알린다(인용·질문·남의 말은 뺀다).",
+                                        "en": "The UserPromptSubmit hook finds delegation phrases, records scope and boundaries in the session state, and tells the AI (quotes, questions and reported speech excluded)."}},
+      "detect": {"signal": "delegation", "event": "UserPromptSubmit", "severity": "warn", "repeat": "always", "audience": "ai"},
+      "message": {
+        "ai": {"ko": "사용자가 이 작업을 맡겼다(\"{phrase}\"). 답의 첫 줄에서 '이 작업에 한해서는 되묻기 없이 추천안대로 진행하겠다'고 범위를 밝히면 된다. 지우기·배포·외부로 보내기·결제·개인정보는 그때도 확인을 받는다. 대신 정한 것(무엇·왜·다른 안·되돌리는 법)은 기억해 두었다가 끝에 모아 보고한다.{boundaries}",
+               "en": "The user delegated this task (\"{phrase}\"). The first line of the reply can state that, for this task only, it will proceed with the recommended options without asking. Deleting, deploying, sending outside, payments and personal data still need confirmation. Keep track of each decision made (what, why, alternative, how to undo) for a final report.{boundaries}"}
+      },
+      "on_delegate": "nudge"
+    },
+    {
+      "id": "work.delegate.risky-ask",
+      "scope": "work/delegate", "aspect": "security", "level": "must",
+      "rule": {"ko": "맡긴 작업 중에도 지우기, 배포·올리기, 외부로 보내기, 결제, 비밀 정보, 작업 폴더 밖 수정은 사용자 확인을 받는다.",
+               "en": "Even in a delegated task, deleting, deploying or pushing, sending outside, payments, secrets and changes outside the project need the user's confirmation."},
+      "why": {"ko": "되돌릴 수 없거나 밖으로 나가는 일은 '알아서'로 풀리지 않는다. 사용자가 함께 정한 경계도 위임 중에 그대로 지킨다.",
+              "en": "Irreversible or outward actions are not unlocked by 'just do it'. Boundaries the user set are kept during delegation."},
+      "check": {"type": "auto", "how": {"ko": "위임 중 PreToolUse 훅이 명령·도구 이름·파일 경로로 위험한 일을 찾아 permissionDecision ask로 확인을 받는다.",
+                                        "en": "While delegated, the PreToolUse hook spots risky actions by command, tool name and path, and asks via permissionDecision ask."}},
+      "detect": {"signal": "risky_action", "event": "PreToolUse", "severity": "warn", "repeat": "always", "audience": "user"},
+      "message": {
+        "ai": {"ko": "이 호출은 맡긴 범위에서도 확인이 필요한 일({category})이라 사용자 확인을 받는다.",
+               "en": "This call is something that needs confirmation even when delegated ({category}), so the user is asked."},
+        "user": {"ko": "맡긴 작업이지만 확인이 필요한 일({category})이라 여쭤요: {what}",
+                 "en": "This is a delegated task, but it needs your confirmation ({category}): {what}"}
+      },
+      "on_delegate": "ask"
+    },
+    {
+      "id": "work.delegate.end-report",
+      "scope": "work/delegate", "aspect": "process", "level": "must",
+      "rule": {"ko": "맡긴 작업을 마치면 대신 정한 것, 미뤄 둔 알림, 실행한 검사 결과를 모아 보고한다.",
+               "en": "When a delegated task is done, report the decisions made, the notes held back, and the checks run."},
+      "why": {"ko": "묻지 않고 정한 것은 사용자가 끝에서라도 보고 바로잡을 수 있어야 한다. 바로잡은 것은 규칙으로 쌓인다.",
+              "en": "Decisions made without asking must be visible at the end so the user can correct them. Corrections become rules."},
+      "check": {"type": "auto", "how": {"ko": "위임 중 Stop 훅이 한 번 막고 끝 보고를 받은 뒤 위임을 끝낸다.",
+                                        "en": "While delegated, the Stop hook blocks once to get the end report, then ends the delegation."}},
+      "detect": {"signal": "delegate_report", "event": "Stop", "severity": "warn", "repeat": "once_per_streak", "audience": "ai"},
+      "message": {
+        "ai": {"ko": "맡긴 작업(\"{task}\")을 마치기 전에 끝 보고를 한다: 대신 정한 것마다 무엇·왜·다른 안·되돌리는 법, 실행한 검사와 그 결과, 확인이 필요한 것.{suppressed}",
+               "en": "Before finishing the delegated task (\"{task}\"), give the end report: each decision made with what, why, the alternative and how to undo it; the checks run with results; anything that needs confirmation.{suppressed}"}
+      },
+      "on_delegate": "nudge"
+    }
+  ]
+}

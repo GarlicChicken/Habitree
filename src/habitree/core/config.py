@@ -34,7 +34,17 @@ DEFAULTS = {
     },
     "verify": {},  # 이름 → 명령 배열. 예: {"test": ["pytest", "-q"]}. 종료 코드 0이 합격
     "checks": {"disable": [], "custom": []},
-    "guard": {"enabled": True},
+    "guard": {
+        "enabled": True,
+        "stop_check": True,        # Stop 때 빠른 점검, 오류면 한 번 더 일하게 / quick check at Stop
+        "stop_check_max": 3,       # 세션당 점검으로 막는 최대 횟수 / max check blocks per session
+        "session_start": "auto",   # auto | full | short | off: 세션 시작 때 넣는 글 / session start context
+        "session_budget": 1500,    # 세션 시작 글의 필수 규칙 글자 예산 / char budget for must rules
+        "relay": "always",         # always | never: 사용자 알림을 AI도 함께 전하게 / AI relays user notes
+        "history": 40,             # 남기는 최근 호출·결과 수 / recent calls and results kept
+        "state_days": 7,           # 세션 상태를 지우기까지 날짜 / days before session state is removed
+        "delegate": {"natural": True, "max_tools": 200},  # 말로 한 위임 감지, 위임 한도 / delegation
+    },
 }
 
 

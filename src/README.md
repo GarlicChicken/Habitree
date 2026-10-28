@@ -9,7 +9,8 @@ habitree/
 ├── cli.py            # 실행 입구 (habitree, ht)
 ├── commands/         # 명령 하나에 모듈 하나
 │   ├── __init__.py   # 등록부 COMMANDS
-│   └── init.py  rules.py  check.py  export.py
+│   ├── init.py  rules.py  check.py  export.py
+│   └── hook.py  guard.py   # 작업 중 경고(v0.2)
 ├── core/             # 여러 명령이 함께 쓰는 코드
 │   ├── io.py         # UTF-8·LF 원자적 쓰기, 표준 입출력
 │   ├── paths.py      # NFC 경로 키, 글롭, git 파일 목록
@@ -19,7 +20,9 @@ habitree/
 │   ├── ruledb.py     # 규칙 DB
 │   ├── textsim.py    # 같은 뜻 규칙 찾기
 │   ├── markdown.py   # 링크, 앵커, 생성 구역
-│   └── timeutil.py   # UTC 저장, 지역 시각 표시
+│   ├── timeutil.py   # UTC 저장, 지역 시각 표시
+│   └── state.py      # 세션 상태 파일(훅이 씀)
+├── guard/            # 감지기, 위임, Claude Code 훅 어댑터
 └── data/
     ├── schema/       # JSON Schema (명세의 일부)
     └── packs/        # 기본 규칙 꾸러미

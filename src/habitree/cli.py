@@ -47,6 +47,11 @@ def build_parser(lang):
 def main(argv=None):
     hio.setup_stdio()
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv[:1] == ["hook"]:
+        # 훅은 빠르고 절대 실패하지 않아야 한다: 다른 명령을 불러오지 않고, 설정이 깨져도 0으로 끝낸다.
+        # / Hooks must be fast and never fail: skip loading other commands, exit 0 even on broken config.
+        from .commands import hook
+        return hook.entry(argv[1:])
     try:
         ctx = Context.load(_peek(argv, "-C", "--path"), _peek(argv, "--lang"))
     except Exception:  # 설정이 깨져도 도움말은 보이게

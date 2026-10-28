@@ -94,6 +94,7 @@
             "severity": {"enum": ["info", "warn", "stop"]},
             "repeat": {"enum": ["once_per_session", "once_per_streak", "always"]},
             "max_per_session": {"type": "integer", "minimum": 1},
+            "audience": {"description": "누구에게 먼저 알리나. ai: AI 맥락(사용자는 답 끝에 모아 봄), user: 사용자 화면에 바로, both. / Who hears it first.", "enum": ["ai", "user", "both"]},
             "params": {"type": "object"}
           }
         },

@@ -30,7 +30,7 @@
 | `history` | `{date, change}` 목록. 규칙이 바뀐 기록 |
 | `status` | `active`, `paused`, `retired`. 폐기한 규칙도 지우지 않고 이유와 함께 남깁니다 |
 | `origin`, `origin_hash` | 기본 꾸러미에서 온 규칙의 출처와 원래 내용의 해시. 사용자가 고쳤는지 알아보는 데 씁니다 |
-| `detect`, `message`, `votes`, `on_delegate` | 작업 중 감지 규칙에 쓰는 칸(v0.2) |
+| `detect`, `message`, `votes`, `on_delegate` | 작업 중 감지 규칙에 쓰는 칸(v0.2). 뜻은 [guard.md](guard.md#규칙-db에-얹기) |
 | `cell`, `max_cell`, `verify` | 모델 배분 규칙에 쓰는 칸(v0.3) |
 | `retire_when` | 바깥 사정이 바뀌면 다시 볼 조건 |
 
@@ -86,7 +86,7 @@ Text fields hold either a single string or `{"ko": "…", "en": "…"}`. Bundled
 | `history` | List of `{date, change}`: how the rule changed |
 | `status` | `active`, `paused` or `retired`. Retired rules stay, with the reason |
 | `origin`, `origin_hash` | Pack origin and a hash of the original content, used to detect user edits |
-| `detect`, `message`, `votes`, `on_delegate` | Fields for in-flight detection rules (v0.2) |
+| `detect`, `message`, `votes`, `on_delegate` | Fields for in-flight detection rules (v0.2); see [guard.md](guard.md#on-the-rule-db) |
 | `cell`, `max_cell`, `verify` | Fields for model allocation rules (v0.3) |
 | `retire_when` | When to revisit the rule if outside conditions change |
 

@@ -1,0 +1,12 @@
+{
+  "name": "habitree",
+  "description": "Habitree 플러그인 마켓플레이스(같은 리포) / Habitree plugin marketplace (same repository)",
+  "owner": {"name": "GarlicChicken", "url": "https://github.com/GarlicChicken"},
+  "plugins": [
+    {
+      "name": "habitree",
+      "source": "./",
+      "description": "작업 중 비효율 경고, 피드백을 규칙으로, 위임 예외 / In-flight warnings, feedback to rules, delegation"
+    }
+  ]
+}

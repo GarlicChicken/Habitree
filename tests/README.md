@@ -14,6 +14,8 @@ python -m unittest discover -s tests -t tests
 | `test_core.py` | 경로, 글롭, Markdown, 같은 뜻 찾기, 스키마, 인코딩 |
 | `test_rules.py` | 규칙 DB와 `rules` 명령 |
 | `test_init_check.py` | `init`·`export`·`check`를 처음부터 끝까지 |
+| `test_guard.py` | 감지기, 반복 제한, 위임, Stop 점검, 훅 처음부터 끝까지, 경로 키, 상태 파일 |
+| `test_plugin.py` | 플러그인·마켓플레이스·훅·스킬 파일, `init --hooks`, work 꾸러미 |
 | `test_conformance.py` | [conformance/](../conformance/)의 사례 |
 
 사용자 환경에서 가장 먼저 문제가 나는 곳이 경로라서, 임시 프로젝트 이름에 일부러 한글과 공백을 넣었습니다. 네트워크나 유료 API를 쓰는 시험은 두지 않습니다.

@@ -3,7 +3,7 @@
 AI와 코딩할 때 토큰은 줄이고 재사용은 늘리도록 돕는 도구입니다. 피드백은 규칙으로, 반복은 모듈로 자라게 합니다.
 
 - 마지막 갱신: 2026-10-28
-- 상태: v0.1 알파
+- 상태: v0.2 알파
 - 라이선스: [MIT](LICENSE)
 - [English](#english)
 
@@ -48,6 +48,15 @@ habitree check                # 지도·문서·규칙 점검
 habitree rules brief global   # 작업 전에 읽을 규칙
 ```
 
+Claude Code를 쓴다면 플러그인도 함께 설치하세요. 작업 도중에 경고를 보내는 훅과 스킬이 들어옵니다.
+
+```
+claude plugin marketplace add GarlicChicken/habitree
+claude plugin install habitree@habitree
+```
+
+플러그인 없이 훅만 프로젝트에 연결하려면 `habitree init --hooks`를 쓰면 됩니다.
+
 `init`은 아래 파일을 만듭니다. 이미 있는 파일에서 사람이 쓴 내용은 지우지 않고, 나중에 다시 실행하면 새로 생긴 기본 규칙만 더합니다.
 
 | 파일 | 하는 일 |
@@ -89,6 +98,16 @@ habitree rules similar "커밋 메시지 언어"               # 같은 뜻 규�
 
 규칙에 `check.run`을 적어 두면 사다리의 '자동 검사' 칸이 실제로 돌아갑니다. 명령(종료 코드 0이면 합격), 금지할 형식, 있어야 할 형식, 줄 수 한도 중에서 고를 수 있습니다. 프로젝트가 어떤 언어로 짜여 있든 똑같이 쓸 수 있습니다. 전체 목록은 [docs/spec/check.md](docs/spec/check.md)에 있습니다.
 
+## 일하는 도중에 알려 주기
+
+낭비는 대개 끝난 뒤에야 보입니다. 같은 명령을 다섯 번 돌렸고, 같은 오류에 같은 수정을 되풀이했고, 파일 하나가 덧붙이기만으로 두 배가 됐다는 사실을 세션 기록을 읽고 나서야 알게 됩니다.
+
+Habitree는 이것을 일하는 도중에 알려 줍니다. 같은 명령을 세 번째 돌리거나, 같은 오류에 같은 수정을 되풀이하거나, 파일 하나를 덧붙이기만으로 키우고 있으면 그 자리에서 AI에게 한 줄을 건네 방향을 바꾸게 합니다. 그래도 계속되면 멈추고 사람에게 묻습니다. 감지는 도구 호출과 파일 변화 같은 행동만 보기 때문에 어떤 언어로 짠 프로젝트에도 똑같이 통합니다.
+
+경고도 규칙 DB의 규칙입니다. "이 경고 맞았어", "잔소리야" 같은 반응(`rules hit`, `rules miss`)이 쌓여 기준이 조정되고, 같은 경고는 반복 횟수를 제한하며, 세션 단위로 끌 수도 있습니다(`habitree guard off <id>`).
+
+"알아서 해 줘"라고 맡기면 그 작업에 한해서는 되묻지 않고 추천안대로 진행합니다. 다만 지우기, 배포, 외부로 보내기, 결제, 개인정보처럼 되돌리기 어려운 일은 그때도 묻고, 끝에 대신 정한 것과 미뤄 둔 경고를 모아 보고합니다. 자세한 것은 [docs/spec/guard.md](docs/spec/guard.md)에 있습니다.
+
 ## 방향
 
 - **어떤 언어, 어떤 환경에서도.** 규칙과 설정은 JSON과 Markdown으로 된 명세이고, 이 엔진은 그 명세의 참조 구현입니다. Windows, macOS, Linux에서 같은 명령으로 돌고, 한글 파일 이름과 공백이 든 경로도 처리합니다. 다른 언어로 엔진을 새로 만들어도 [적합성 시험](docs/spec/conformance.md)을 통과하면 같은 규칙 DB를 쓸 수 있습니다.
@@ -101,7 +120,7 @@ habitree rules similar "커밋 메시지 언어"               # 같은 뜻 규�
 | 버전 | 내용 | 상태 |
 |---|---|---|
 | v0.1 | 규칙 DB, `init`·`rules`·`check`·`export`, 적합성 시험, 세 OS CI | 완료 |
-| v0.2 | 작업 중 비효율 경고(`guard`), 훅, 위임 예외, Claude Code 플러그인 | 진행 중 |
+| v0.2 | 작업 중 비효율 경고(`guard`), 훅, 위임 예외, Claude Code 플러그인 | 완료 |
 | v0.3 | 모델 배분(`models`), 검증 명령(`verify`) | 진행 중 |
 | v0.4 | 코드 색인(`map`), MCP 서버 | 진행 중 |
 | v0.5 | 세션 기록 분석(`audit`), 전후 비교 측정(`bench`) | 예정 |
@@ -113,6 +132,7 @@ habitree rules similar "커밋 메시지 언어"               # 같은 뜻 규�
 | 작업 순환, 지도, 규칙 사다리 | [docs/spec/method.md](docs/spec/method.md) |
 | 규칙 DB 형식 | [docs/spec/rules-format.md](docs/spec/rules-format.md) |
 | 점검 항목 | [docs/spec/check.md](docs/spec/check.md) |
+| 작업 중 경고와 위임 | [docs/spec/guard.md](docs/spec/guard.md) |
 | 적합성 시험 | [docs/spec/conformance.md](docs/spec/conformance.md) |
 | 구조와 기여 방법 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 바뀐 것 | [CHANGELOG.md](CHANGELOG.md) |
@@ -126,6 +146,9 @@ habitree rules similar "커밋 메시지 언어"               # 같은 뜻 규�
 | [docs/](docs/) | 명세 |
 | [tests/](tests/) | 시험 |
 | [conformance/](conformance/) | 적합성 시험 사례 |
+| [skills/](skills/) | 필요할 때 불러 읽는 짧은 절차(작업 순환, 피드백을 규칙으로, 위임) |
+| [hooks/](hooks/) | Claude Code 플러그인 훅 |
+| [.claude-plugin/](.claude-plugin/) | Claude Code 플러그인과 마켓플레이스 정의 |
 
 ## 만든 곳
 
@@ -178,6 +201,15 @@ habitree check                # check map, docs and rules
 habitree rules brief global   # rules to read before working
 ```
 
+If you use Claude Code, install the plugin too. It adds the hooks that warn you during work, plus a few skills.
+
+```
+claude plugin marketplace add GarlicChicken/habitree
+claude plugin install habitree@habitree
+```
+
+To wire only the hooks into a project without the plugin, use `habitree init --hooks`.
+
 `init` creates the files below. It never deletes what you wrote in existing files, and running it again later only adds new default rules.
 
 | File | Purpose |
@@ -208,6 +240,16 @@ Rules sit on a scope tree (`work` → `work/cycle`), and child scopes inherit th
 
 Add `check.run` to a rule and the "automatic check" rung of the ladder actually runs: a command (exit 0 passes), a forbidden pattern, a required pattern or a line limit. It works the same whatever language your project is written in.
 
+### Warnings while you work
+
+Waste usually shows up only afterwards. You learn from the session log that the same command ran five times, the same fix was retried on the same error, or one file doubled in size by appending alone.
+
+Habitree points these out while the work is happening. When the same command runs a third time, the same fix is retried on the same error, or a file keeps growing by appending alone, it hands the AI one line so it can change course. If that does not help, it stops and asks you. Detection looks only at behavior such as tool calls and file changes, so it works the same for a project in any language.
+
+Warnings are rules in the rule DB too. Reactions such as "that was right" or "that was noise" (`rules hit`, `rules miss`) adjust the thresholds, repeated warnings are capped, and you can mute one for the session (`habitree guard off <id>`).
+
+When you hand over a task with "just do it", the agent goes with the recommended options without asking, for that task only. It still asks before anything hard to undo, such as deleting, deploying, sending data outside, payments or personal data, and at the end it reports the decisions it made and the warnings it held back. See [docs/spec/guard.md](docs/spec/guard.md).
+
 ### Direction
 
 - **Any language, any environment.** Rules and settings are a JSON and Markdown specification, and this engine is its reference implementation. The same commands run on Windows, macOS and Linux, including Korean file names and paths with spaces. An engine written in another language can share the same rule DB once it passes the [conformance suite](docs/spec/conformance.md).
@@ -220,7 +262,7 @@ Add `check.run` to a rule and the "automatic check" rung of the ladder actually 
 | Version | Contents | Status |
 |---|---|---|
 | v0.1 | Rule DB, `init`/`rules`/`check`/`export`, conformance suite, CI on three OSes | Done |
-| v0.2 | In-flight warnings (`guard`), hooks, delegation, Claude Code plugin | In progress |
+| v0.2 | In-flight warnings (`guard`), hooks, delegation, Claude Code plugin | Done |
 | v0.3 | Model allocation (`models`), verify commands (`verify`) | In progress |
 | v0.4 | Code index (`map`), MCP server | In progress |
 | v0.5 | Session audit (`audit`), before/after benchmark (`bench`) | Planned |

@@ -7,7 +7,7 @@
 Habitree에서 가장 먼저 지키려는 것은 명세입니다. [docs/spec/](docs/spec/)의 문서와 [JSON Schema](src/habitree/data/schema/)가 약속이고, 이 Python 엔진은 그 약속을 따르는 참조 구현입니다. 그래서 동작을 바꿀 때는 명세와 시험을 같은 커밋에서 함께 고칩니다.
 
 - 명령 하나는 모듈 하나입니다. `src/habitree/commands/<이름>.py`에 `SUMMARY`, `add_arguments(p)`, `run(args, ctx)`를 두고 `commands/__init__.py`의 `COMMANDS`에 등록합니다.
-- 여러 명령이 함께 쓰는 코드는 `core/`에 둡니다. `run`이 받는 `ctx`에는 프로젝트 루트, 설정, 언어가 들어 있습니다.
+- 여러 명령이 함께 쓰는 코드는 `core/`에 둡니다. `run`이 받는 `ctx`에는 프로젝트 루트, 설정, 언어가 들어 있습니다. 명령끼리는 서로 부르지 않는 것이 원칙이고, 예외는 정해 둔 도우미뿐입니다(`export.plan`·`export.apply`, 훅의 빠른 점검이 쓰는 `check.collect`).
 - 기본 규칙 꾸러미는 `src/habitree/data/packs/`에 있습니다. 꾸러미를 고치면 `version`을 올려 주세요. `init`을 다시 돌린 사용자는 자기가 손대지 않은 규칙만 새것으로 받습니다.
 
 ## 세 OS에서 같게
@@ -48,7 +48,7 @@ Issues and pull requests are welcome: rough edges you ran into, problems with ot
 The specification comes first. The documents in [docs/spec/](docs/spec/) and the [JSON Schemas](src/habitree/data/schema/) are the contract, and this Python engine is a reference implementation of it. When behavior changes, the spec and the tests change in the same commit.
 
 - One command, one module: `src/habitree/commands/<name>.py` with `SUMMARY`, `add_arguments(p)` and `run(args, ctx)`, registered in `COMMANDS` in `commands/__init__.py`.
-- Code shared by several commands lives in `core/`. The `ctx` passed to `run` carries the project root, the settings and the language.
+- Code shared by several commands lives in `core/`. The `ctx` passed to `run` carries the project root, the settings and the language. Commands do not call each other, except through a few agreed helpers (`export.plan`/`export.apply`, and `check.collect` for the quick check in hooks).
 - Bundled rule packs live in `src/habitree/data/packs/`. Bump a pack's `version` when you change it; users who rerun `init` receive new versions only of the rules they have not edited.
 
 ### Same results on three operating systems

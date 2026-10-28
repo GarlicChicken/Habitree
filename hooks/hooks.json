@@ -1,0 +1,95 @@
+{
+  "description": "Habitree: 작업 중 비효율을 먼저 알리고, 위임을 기록하고, 끝내기 전에 점검한다. / Warns about inefficient work early, records delegation, checks before finishing.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "habitree",
+            "args": [
+              "hook",
+              "SessionStart"
+            ],
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "habitree",
+            "args": [
+              "hook",
+              "UserPromptSubmit"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "habitree",
+            "args": [
+              "hook",
+              "PreToolUse"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "habitree",
+            "args": [
+              "hook",
+              "PostToolUse"
+            ],
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "habitree",
+            "args": [
+              "hook",
+              "PostToolUseFailure"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "habitree",
+            "args": [
+              "hook",
+              "Stop"
+            ],
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
