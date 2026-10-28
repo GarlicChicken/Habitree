@@ -19,6 +19,7 @@ python -m unittest discover -s tests -t tests
 | `test_models.py` | 모델 대응표, 칸, 승격, 조정, 내보내기(`models`), 검증 명령(`verify`), 점검 연동 |
 | `test_map.py` | 코드 색인: 여러 언어의 심볼, 증분 색인, 글자 예산, 한국어 찾기, 중복, git 기록 |
 | `test_mcp.py` | MCP 서버를 따로 띄워 줄 단위 JSON-RPC로 주고받기 |
+| `test_refactor.py` | 정리 제안: 몰림·중복·흩어짐·덜어내기, 작은 단계와 큰 정리 고르기, JSON 단계, 규칙 기준값, git 유무 |
 | `test_conformance.py` | [conformance/](../conformance/)의 사례 |
 | `test_audit.py` | 세션 기록 읽기(중복 제거, 프로젝트 판정, 모르는 형식), 비용, 낭비 신호, 규칙 후보(`audit`) |
 | `test_bench.py` | fake 실행기로 `bench run`과 `report`, 계획 보기, 결과 읽기, 예제 과제의 채점 |

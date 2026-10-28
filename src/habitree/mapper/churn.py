@@ -17,22 +17,36 @@ def _records(out):
         yield head.decode("utf-8", errors="replace"), [x for x in items if x]
 
 
-def history(root, max_commits=2000):
-    """{파일: [변경 횟수, 바뀐 줄 합]} 또는 None(git 없음). / Per-file change counts, or None without git."""
+def commits(root, max_commits=2000):
+    """[[(파일, 바뀐 줄), …] 커밋마다, 최근 것부터] 또는 None(git 없음). / Files per commit, newest first."""
     out = git(root, "-c", "core.quotepath=false", "log", "--relative", "--no-renames", "--numstat",
               f"--max-count={int(max_commits)}", "--format=%x01%H", "-z", timeout=120)
     if out is None:
         return None
-    stats = defaultdict(lambda: [0, 0])
+    rows = []
     for _, items in _records(out):
+        files = []
         for item in items:
             parts = item.split(b"\t", 2)
             if len(parts) != 3:
                 continue
             added, deleted, path = parts
-            st = stats[nfc(path.decode("utf-8", errors="replace"))]
-            st[0] += 1
-            st[1] += (int(added) if added.isdigit() else 0) + (int(deleted) if deleted.isdigit() else 0)
+            files.append((nfc(path.decode("utf-8", errors="replace")),
+                          (int(added) if added.isdigit() else 0) + (int(deleted) if deleted.isdigit() else 0)))
+        rows.append(files)
+    return rows
+
+
+def history(root, max_commits=2000):
+    """{파일: [변경 횟수, 바뀐 줄 합]} 또는 None(git 없음). / Per-file change counts, or None without git."""
+    rows = commits(root, max_commits)
+    if rows is None:
+        return None
+    stats = defaultdict(lambda: [0, 0])
+    for files in rows:
+        for path, changed in files:
+            stats[path][0] += 1
+            stats[path][1] += changed
     return dict(stats)
 
 

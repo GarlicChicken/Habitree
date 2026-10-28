@@ -2159,12 +2159,200 @@
       "status": "active",
       "origin": "pack:task@0.3.0",
       "origin_hash": "0742455a9a66aa2e"
+    },
+    {
+      "id": "code.structure.concentration",
+      "scope": "code/structure",
+      "aspect": "structure",
+      "level": "should",
+      "rule": {
+        "ko": "코드가 파일 하나나 함수 하나에 몰려 있으면 먼저 덜어 낼 것을 덜고, 그다음 이미 있는 경계(클래스, 같은 접두어 묶음)를 따라 한 걸음씩 옮긴다.",
+        "en": "When code piles up in one file or function, first remove what can go, then move it piece by piece along seams that already exist (classes, groups sharing a prefix)."
+      },
+      "why": {
+        "ko": "몰린 코드는 고칠 때마다 통째로 읽혀 토큰이 들고, 한 곳을 고치다 엉뚱한 곳이 깨지기 쉽다. 새 층을 더하는 정리는 읽을 곳을 오히려 늘린다.",
+        "en": "Piled-up code is read whole on every change and breaks in odd places. A cleanup that adds a new layer only adds more to read."
+      },
+      "check": {
+        "type": "auto",
+        "how": {
+          "ko": "`habitree refactor`가 파일·함수 줄 수를 프로젝트 중앙값과 견주고, git 변경 횟수로 순서를 정한다.",
+          "en": "`habitree refactor` compares file and function lengths with the project median and orders them by git change counts."
+        }
+      },
+      "detect": {
+        "signal": "refactor_concentration",
+        "event": "refactor",
+        "threshold": 4,
+        "severity": "warn",
+        "params": {
+          "min_file_lines": 300,
+          "min_func_lines": 50,
+          "min_symbols": 40,
+          "bold_spread": 3,
+          "fan_in_max": 5,
+          "busy_top": 10
+        }
+      },
+      "message": {
+        "ai": {
+          "ko": "이 코드를 고칠 때마다 {n}줄이 읽힌다. 몰린 코드는 한 곳을 고칠 때 다른 곳이 깨지기 쉽다.",
+          "en": "Every change here reads {n} lines. Piled-up code breaks elsewhere when one spot changes."
+        },
+        "user": {
+          "ko": "고칠 때마다 이 {n}줄을 다시 읽어야 해서 토큰이 들고, 한 곳을 고치다 다른 곳이 깨지기 쉬워요.",
+          "en": "Every change rereads these {n} lines, which costs tokens, and one fix can break another spot."
+        },
+        "suggest": [
+          {
+            "ko": "먼저 덜어 내기: 안 쓰는 것, 한 곳에서만 쓰는 짧은 층",
+            "en": "Remove first: unused code and short layers used in one place"
+          },
+          {
+            "ko": "있는 경계를 따라 한 묶음씩 옮기기",
+            "en": "Move one group at a time along existing seams"
+          },
+          {
+            "ko": "한 걸음마다 habitree verify",
+            "en": "Run habitree verify after every step"
+          }
+        ]
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.6.0",
+      "origin_hash": "3fa8a16056bd4fda"
+    },
+    {
+      "id": "code.structure.duplication",
+      "scope": "code/structure",
+      "aspect": "structure",
+      "level": "should",
+      "rule": {
+        "ko": "같은 코드가 이미 여러 곳에 있으면 한 곳을 남기고 나머지가 그곳을 부르게 바꾼 뒤 복사본을 지운다. 새 층은 남길 곳이 없을 때만 만든다.",
+        "en": "When the same code already sits in several places, keep one, make the rest call it, and delete the copies. Add a new layer only when no place can serve as the keeper."
+      },
+      "why": {
+        "ko": "복사본은 따로 낡아서 고칠 곳이 늘고, AI는 같은 코드를 여러 번 읽는다.",
+        "en": "Copies drift apart, so there are more places to fix, and the AI reads the same code several times."
+      },
+      "check": {
+        "type": "auto",
+        "how": {
+          "ko": "`habitree refactor`가 `map dupes`의 같은 몸통과 같은 글(기준 줄 수 이상)을 묶어 본다.",
+          "en": "`habitree refactor` groups the same bodies and repeated text from `map dupes` (at least the threshold lines)."
+        }
+      },
+      "detect": {
+        "signal": "refactor_duplication",
+        "event": "refactor",
+        "threshold": 6,
+        "severity": "warn",
+        "params": {
+          "bold_spread": 3,
+          "fan_in_max": 5,
+          "busy_top": 10
+        }
+      },
+      "message": {
+        "ai": {
+          "ko": "같은 코드가 {k}곳에 있다. 고칠 때 {k}곳을 다 고쳐야 하고, 하나를 빠뜨리면 따로 낡는다.",
+          "en": "The same code is in {k} places. Every fix must reach all {k}; a missed one drifts."
+        },
+        "user": {
+          "ko": "같은 코드가 {k}곳에 있어요. 고칠 때 {k}곳을 다 찾아 고쳐야 하고, 하나를 빠뜨리면 따로 낡아요.",
+          "en": "The same code lives in {k} places. Every fix has to find all {k}, and a missed one drifts apart."
+        },
+        "suggest": [
+          {
+            "ko": "남길 한 곳을 정하기",
+            "en": "Pick the one place to keep"
+          },
+          {
+            "ko": "나머지가 그곳을 부르게 바꾸고 복사본 지우기",
+            "en": "Make the rest call it and delete the copies"
+          }
+        ]
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.6.0",
+      "origin_hash": "1119cac29b990e70"
+    },
+    {
+      "id": "code.structure.fragmentation",
+      "scope": "code/structure",
+      "aspect": "structure",
+      "level": "should",
+      "rule": {
+        "ko": "한 기능이 여러 파일에 흩어졌거나 쓰이지 않는 코드, 한 곳에서만 쓰는 짧은 층이 있으면 나누기보다 합치기와 지우기를 먼저 검토한다.",
+        "en": "When one feature is scattered over many files, or there is unused code or a short layer used in one place, consider merging and deleting before splitting further."
+      },
+      "why": {
+        "ko": "조각이 많을수록 한 기능을 보려고 여러 파일을 열어야 하고, 쓰이지 않는 코드도 읽을 때마다 토큰이 든다. 정적 분석이라 확실하지 않아 정보로 알린다.",
+        "en": "The more pieces, the more files to open for one feature, and unused code still costs tokens to read. Static analysis cannot be sure, so these are notes."
+      },
+      "check": {
+        "type": "auto",
+        "how": {
+          "ko": "`habitree refactor`가 참조 그래프(들어오는 참조 수, 서로 참조)와 git의 함께 바뀐 기록, 같은 이름 정의를 본다.",
+          "en": "`habitree refactor` reads the reference graph (incoming references, mutual references), git co-changes and same-name definitions."
+        }
+      },
+      "detect": {
+        "signal": "refactor_fragmentation",
+        "event": "refactor",
+        "threshold": 5,
+        "severity": "info",
+        "params": {
+          "min_revs": 5,
+          "min_coupling": 30,
+          "max_changeset": 30,
+          "max_defs": 5,
+          "tiny_lines": 20,
+          "tiny_group": 3,
+          "wrapper_lines": 2,
+          "bold_spread": 3,
+          "fan_in_max": 5,
+          "busy_top": 10
+        }
+      },
+      "message": {
+        "ai": {
+          "ko": "이 기능을 보려면 {k}곳을 열어야 하거나, 쓰이지 않는 코드 {n}줄이 읽힌다.",
+          "en": "Seeing this feature takes opening {k} places, or {n} lines of unused code get read."
+        },
+        "user": {
+          "ko": "조각난 코드와 쓰이지 않는 코드는 읽을 때마다 토큰만 들어요. 합치거나 지우면 읽을 곳이 줄어요.",
+          "en": "Scattered and unused code costs tokens every time it is read. Merging or deleting means less to read."
+        },
+        "suggest": [
+          {
+            "ko": "합치기·지우기를 먼저",
+            "en": "Merge or delete first"
+          },
+          {
+            "ko": "지우기 전에 문자열로 부르는 곳까지 찾아보기",
+            "en": "Before deleting, search for calls by string too"
+          }
+        ]
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.6.0",
+      "origin_hash": "0dc328b1aeb8676f"
     }
   ],
   "parents": {},
   "packs": {
-    "base": "0.1.0",
-    "work": "0.2.0",
+    "base": "0.6.0",
+    "work": "0.6.0",
     "task": "0.3.0"
   }
 }

@@ -2,6 +2,15 @@
 
 새 버전을 위에 씁니다.
 
+## 0.6.0 (2026-10-28)
+
+문제를 찾는 데서 그치지 않고 어떻게 정리할지 제안하는 버전입니다. 나누기만 권하면 오히려 체계가 무거워지므로, 같은 문제라면 지우고 합치는 해법을 먼저 보여 줍니다.
+
+- `habitree refactor`: 코드 색인을 읽어 한곳에 몰린 코드, 여러 곳의 같은 코드, 흩어진 기능, 덜어 낼 수 있는 코드를 찾고 정리 계획을 냅니다. 기본은 한 걸음씩 하는 작은 단계이고, 검증 수단이 있고 쓰는 곳이 적을 때만 큰 정리를 권하며 이유를 함께 적습니다. 단계마다 `habitree verify`로 확인하게 합니다. 코드는 고치지 않습니다.
+- 기본 규칙에 몰림·중복·흩어짐 기준을 더했습니다(흩어짐과 덜어내기는 정보로만). 기준값은 규칙에 있어 반응에 따라 조정됩니다.
+- 파일 커짐, 복사 코드, 잔수정 알림이 정리 계획(`habitree refactor --focus <파일>`)으로 이어집니다.
+- 명세 `docs/spec/refactor.md`.
+
 ## 0.5.0 (2026-10-28)
 
 재지 않은 숫자는 말하지 않기 위해, 실제로 어디에 토큰을 썼는지 읽고 효과를 재는 도구를 더했습니다. 둘 다 부를 때만 돕니다.
@@ -56,6 +65,15 @@
 ## English
 
 Newest first.
+
+### 0.6.0 (2026-10-28)
+
+Beyond finding problems, this release suggests how to clean them up. Advice that only says "split it" makes a structure heavier, so for the same problem the removing and merging fix comes first.
+
+- `habitree refactor` reads the code index to find code piled up in one place, the same code in several places, scattered features and code that could simply go, and proposes a cleanup plan. The default is a small step at a time; a bold cleanup is suggested only when verification exists and few places depend on the code, with the reasons shown. Each step ends with `habitree verify`. No code is changed.
+- The base rules gain thresholds for piling up, duplication and scattering (scattering and removal at info level only). The thresholds live in rules, so they adjust to feedback.
+- File-growth, copied-code and small-edit warnings now point to the cleanup plan (`habitree refactor --focus <file>`).
+- The spec `docs/spec/refactor.md`.
 
 ### 0.5.0 (2026-10-28)
 

@@ -62,7 +62,7 @@ class TestPluginFiles(unittest.TestCase):
 class TestWorkPack(unittest.TestCase):
     def test_pack_rules(self):
         pack = load_pack("work")
-        self.assertEqual(pack["version"], "0.2.0")
+        self.assertEqual(pack["version"], "0.6.0")
         db = RuleDB({"scopes": {}, "aspects": {}, "contexts": {}, "rules": []})
         db.merge_pack(load_pack("base"))
         db.merge_pack(pack)

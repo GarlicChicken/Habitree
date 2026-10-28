@@ -45,6 +45,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 | '없다'와 '못 읽었다'를 나누고, 빈 결과 대신 다음에 할 일을 알려 주기 | [llm-context.py](https://github.com/cyberchitta/llm-context.py), [jCodeMunch-MCP](https://github.com/jgravelle/jcodemunch-mcp)(공개 설명만 참고) |
 | 코드가 바뀌면 그 코드를 설명한 글을 낡았을 수 있다고 알리기 | [code-graph-rag](https://github.com/vitali87/code-graph-rag), [contextful](https://github.com/Inferensys/contextful) |
 | 표준 입출력 MCP 서버, 도구는 몇 개만 | [MCP 명세](https://modelcontextprotocol.io/specification) |
+| 줄 수 × 변경 횟수로 정리할 곳의 순서 정하기(핫스팟) | Adam Tornhill, *Your Code as a Crime Scene* |
+| 늘 함께 바뀌는 파일의 정의와 기본 기준(코드는 GPL이라 생각만 참고) | [code-maat](https://github.com/adamtornhill/code-maat) |
+| 파일 300줄, 함수 50줄을 출발 기준으로 | [ESLint](https://eslint.org) `max-lines`, `max-lines-per-function` 기본값 |
+| 고치기 전에 지금 동작을 붙잡는 시험부터 | Michael Feathers, *Working Effectively with Legacy Code* |
+| 작은 단계로 바꾸고 단계마다 확인하기, 옛 길을 둔 채 새 길로 옮기기 | Martin Fowler, *Refactoring*, Strangler Fig |
+| 큰 정리를 막는 것부터 거꾸로 풀어 가는 계획 | Mikado 방법(Ellnestam, Brolund) |
 | 세션 기록에서 응답 하나를 한 번만 세기(`message.id`·`requestId` 묶음), 도구 호출은 `tool_use.id` 단위 | [ccusage](https://github.com/ccusage/ccusage), [tokscale](https://github.com/junhoyeo/tokscale), [Harbor](https://github.com/harbor-framework/harbor) |
 | 큰 결과 × 남은 요청 수로 다시 청구되는 비용 매기기 | [claude-context-optimizer](https://github.com/egorfedorov/claude-context-optimizer), [tokenwise](https://github.com/lohani-mohit/tokenwise), [cctx](https://github.com/jacquardlabs/cctx) |
 | 낭비 유형마다 고정 처방을 두고 규칙 후보로 잇기 | [cctx](https://github.com/jacquardlabs/cctx) |
@@ -89,6 +95,12 @@ The values in the model vendor table (`src/habitree/data/vendors.json`) were rea
 | Telling "not there" from "could not read", and giving next steps instead of empty results | llm-context.py, jCodeMunch-MCP |
 | Flagging descriptions as possibly stale when the code they describe changes | code-graph-rag, contextful |
 | A stdio MCP server with only a few tools | MCP specification |
+| Ordering cleanup by lines times changes (hotspots) | Adam Tornhill, Your Code as a Crime Scene |
+| The definition and default thresholds of files that change together (ideas only; the code is GPL) | code-maat |
+| 300-line files and 50-line functions as starting thresholds | ESLint defaults |
+| Pinning current behavior with tests before changing it | Michael Feathers, Working Effectively with Legacy Code |
+| Small verified steps, and moving to a new path while the old one stays | Martin Fowler, Refactoring, Strangler Fig |
+| Planning a big cleanup backwards from what blocks it | The Mikado method (Ellnestam, Brolund) |
 | Counting each response once in transcripts (`message.id` and `requestId`), tool calls by `tool_use.id` | ccusage, tokscale, Harbor |
 | Pricing large results by the number of later requests that bill them again | claude-context-optimizer, tokenwise, cctx |
 | A fixed prescription per waste type, linked to rule candidates | cctx |

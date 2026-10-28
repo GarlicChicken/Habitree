@@ -1,6 +1,6 @@
 {
   "pack": "work",
-  "version": "0.2.0",
+  "version": "0.6.0",
   "about": {"ko": "작업 중 비효율을 먼저 알리는 감지 규칙과 위임 예외", "en": "Detection rules that warn about inefficient work early, and delegation"},
   "scopes": {
     "global": {"ko": "모든 작업", "en": "All work"},
@@ -106,7 +106,8 @@
                  "en": "{file} was edited {n} times in small steps. Collecting the spots first saves round trips."},
         "suggest": [{"ko": "고칠 곳 목록 만들기", "en": "List the spots to change"},
                     {"ko": "한 번에 고치기", "en": "Change them in one pass"},
-                    {"ko": "확인은 한 번", "en": "Check once"}]
+                    {"ko": "확인은 한 번", "en": "Check once"},
+                    {"ko": "`habitree refactor --focus \"{file}\"`로 정리 계획 보기", "en": "See a cleanup plan with `habitree refactor --focus \"{file}\"`"}]
       },
       "on_delegate": "skip"
     },
@@ -129,7 +130,8 @@
                  "en": "{file} grew from {from} to {to} lines in this task. Appending more may make it hard to change later."},
         "suggest": [{"ko": "새 기능은 따로 파일이나 함수로", "en": "Put the new feature in its own file or function"},
                     {"ko": "기존 코드는 옮기기만 하고 동작은 그대로", "en": "Only move existing code; keep behavior the same"},
-                    {"ko": "옮긴 뒤 검사 한 번", "en": "Run the checks once after moving"}]
+                    {"ko": "옮긴 뒤 검사 한 번", "en": "Run the checks once after moving"},
+                    {"ko": "`habitree refactor --focus \"{file}\"`로 정리 계획 보기", "en": "See a cleanup plan with `habitree refactor --focus \"{file}\"`"}]
       },
       "on_delegate": "nudge"
     },
@@ -151,7 +153,8 @@
         "user": {"ko": "비슷한 코드가 {other}에 이미 있어요. 한 곳에 두고 불러 쓰면 고칠 때 한 번만 고치면 돼요.",
                  "en": "Similar code already exists in {other}. Keeping it in one place means fixing it once."},
         "suggest": [{"ko": "있는 코드를 먼저 보기", "en": "Look at the existing code first"},
-                    {"ko": "공통 부분을 함수로 빼서 불러 쓰기", "en": "Extract the shared part and call it"}]
+                    {"ko": "공통 부분을 함수로 빼서 불러 쓰기", "en": "Extract the shared part and call it"},
+                    {"ko": "`habitree refactor --focus \"{file}\"`로 정리 계획 보기", "en": "See a cleanup plan with `habitree refactor --focus \"{file}\"`"}]
       },
       "on_delegate": "nudge"
     },

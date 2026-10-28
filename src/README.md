@@ -13,7 +13,8 @@ habitree/
 │   ├── hook.py  guard.py   # 작업 중 경고(v0.2)
 │   ├── models.py  verify.py  # 모델 배분과 검증(v0.3)
 │   ├── map.py  mcp.py        # 코드 색인과 MCP 서버(v0.4)
-│   └── audit.py  bench.py    # 세션 기록 분석과 전후 측정(v0.5)
+│   ├── audit.py  bench.py    # 세션 기록 분석과 전후 측정(v0.5)
+│   └── refactor.py           # 리팩토링 제안(v0.6)
 ├── core/             # 여러 명령이 함께 쓰는 코드
 │   ├── io.py         # UTF-8·LF 원자적 쓰기, 표준 입출력
 │   ├── paths.py      # NFC 경로 키, 글롭, git 파일 목록
@@ -28,7 +29,7 @@ habitree/
 │   ├── vendors.py    # 회사별 모델 대응표와 가격
 │   └── modelpolicy.py  # 작업별 칸, 승격, 조정
 ├── guard/            # 감지기, 위임, Claude Code 훅 어댑터
-├── mapper/           # 코드 색인: 언어 판정, 심볼, 순위, 찾기, 중복, 변경 기록
+├── mapper/           # 코드 색인: 언어 판정, 심볼, 순위, 찾기, 중복, 변경 기록, 정리 제안 판단
 ├── sessions/         # 세션 기록 읽기(응답 단위 중복 제거), 사용량과 비용, 낭비 신호
 └── data/
     ├── schema/       # JSON Schema (명세의 일부)

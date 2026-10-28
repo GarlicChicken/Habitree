@@ -122,10 +122,10 @@ def pagerank(nodes, edges, personal, out_total=None, damping=DAMPING, iters=60, 
     return {n: r[idx[n]] for n in nodes}
 
 
-def rank(index, focus=None):
-    """(정의 목록[(점수, 파일, 심볼)], 파일 순위, 초점이 맞은 파일 수). / Ranked definitions."""
+def uses(index):
+    """(점, [(쓰는 파일, 이름, 쓴 횟수, 정의한 파일들)]): 순위와 refactor가 함께 쓰는 참조 그래프의 선.
+    / (nodes, [(user, name, count, definers)]): reference edges shared by ranking and refactor."""
     files = index.get("files", {})
-    paths, words = parse_focus(index, focus)
     defs = defaultdict(set)
     for rel, rec in files.items():
         for s in rec.get("symbols", ()):
@@ -133,8 +133,7 @@ def rank(index, focus=None):
                 defs[s["name"]].add(rel)
     nodes = sorted(rel for rel, rec in files.items()
                    if any(s["kind"] != "section" for s in rec.get("symbols", ())) or rec.get("refs"))
-    edges, by_edge, out_total = defaultdict(float), defaultdict(dict), defaultdict(float)
-    common = spec()["common_names"]
+    out = []
     for src in nodes:
         for name, cnt in files[src].get("refs", {}).items():
             dsts = defs.get(name)
@@ -144,13 +143,25 @@ def rank(index, focus=None):
                 dsts = {d for d in dsts if not is_test_path(d)}
                 if not dsts:
                     continue
-            raw = _name_weight(name, len(dsts), words) * math.sqrt(cnt)
-            w = raw * (COMMON_DAMP if name in common and not word_hit(name, words) else 1.0)
-            for dst in dsts:
-                if dst != src:
-                    out_total[src] += raw
-                    edges[(src, dst)] += w
-                    by_edge[(src, dst)][name] = by_edge[(src, dst)].get(name, 0.0) + w
+            out.append((src, name, cnt, dsts))
+    return nodes, out
+
+
+def rank(index, focus=None):
+    """(정의 목록[(점수, 파일, 심볼)], 파일 순위, 초점이 맞은 파일 수). / Ranked definitions."""
+    files = index.get("files", {})
+    paths, words = parse_focus(index, focus)
+    nodes, used = uses(index)
+    edges, by_edge, out_total = defaultdict(float), defaultdict(dict), defaultdict(float)
+    common = spec()["common_names"]
+    for src, name, cnt, dsts in used:
+        raw = _name_weight(name, len(dsts), words) * math.sqrt(cnt)
+        w = raw * (COMMON_DAMP if name in common and not word_hit(name, words) else 1.0)
+        for dst in dsts:
+            if dst != src:
+                out_total[src] += raw
+                edges[(src, dst)] += w
+                by_edge[(src, dst)][name] = by_edge[(src, dst)].get(name, 0.0) + w
     hits = 0
     personal = {}
     for rel in nodes:

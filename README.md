@@ -88,7 +88,7 @@ habitree rules miss <id> --feedback "이번 경고는 틀렸음"  # 규칙이나
 | v0.3 | 모델 배분, 검증 명령 | 완료 |
 | v0.4 | 코드 색인, MCP 서버 | 완료 |
 | v0.5 | 세션 기록 분석, 전후 비교 측정 | 완료 |
-| v0.6 | 리팩토링 제안(합치기와 덜어내기 먼저) | 진행 중 |
+| v0.6 | 리팩토링 제안(합치기와 덜어내기 먼저) | 완료 |
 | v0.7 | 가볍게: 훅 비용과 기본 설치를 줄이고, 쓰는 프로젝트의 무게도 보여 주기 | 예정 |
 
 ## 문서와 지도
@@ -194,7 +194,7 @@ When you correct the AI, record the correction as a rule while fixing it; AGENTS
 | v0.3 | Model allocation, verify commands | Done |
 | v0.4 | Code index, MCP server | Done |
 | v0.5 | Session audit, before/after benchmark | Done |
-| v0.6 | Refactoring suggestions (merging and removing first) | In progress |
+| v0.6 | Refactoring suggestions (merging and removing first) | Done |
 | v0.7 | Lighter: smaller hook cost and default install, and showing the weight of the project that uses it | Planned |
 
 ### Made by

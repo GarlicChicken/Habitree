@@ -3,8 +3,8 @@
 > 이 문서는 [rules.json](rules.json)에서 자동으로 만든다. 직접 고치지 말고 `habitree rules`로 고친다.
 > Generated from [rules.json](rules.json). Do not edit by hand; use `habitree rules`.
 
-- 규칙 50개 · 피드백 0건 · 마지막 피드백 -
-- 50 rules · 0 feedback entries · last feedback -
+- 규칙 53개 · 피드백 0건 · 마지막 피드백 -
+- 53 rules · 0 feedback entries · last feedback -
 
 ## 범위 · Scopes
 
@@ -20,7 +20,7 @@
 | 　　`work/delegate` | 위임: 맡긴 작업의 범위와 경계, 끝 보고 · Delegation: scope, boundaries and the end report | 3 |
 | 　`docs` | 문서와 지도 · Docs and map | 2 |
 | 　`code` | 코드 · Code | 0 |
-| 　　`code/structure` | 코드 구조(모듈, 파일 크기, 중복) · Code structure (modules, file size, duplication) | 3 |
+| 　　`code/structure` | 코드 구조(모듈, 파일 크기, 중복) · Code structure (modules, file size, duplication) | 6 |
 | 　`security` | 보안과 개인정보 · Security and privacy | 1 |
 | 　`task` | 작업 유형(모델 배분) · Task types (model allocation) | 6 |
 | 　　`task/explore` | 탐색·검색 · Exploration and search | 1 |
@@ -47,7 +47,7 @@
 | 관점 · Aspect | 뜻 · Meaning | 규칙 · Rules |
 |---|---|---|
 | `process` | 절차와 작업 순서 · Process and order of work | 13 |
-| `structure` | 구조와 나누기 · Structure and modularity | 4 |
+| `structure` | 구조와 나누기 · Structure and modularity | 7 |
 | `quality` | 품질과 검증 · Quality and verification | 3 |
 | `docs` | 문서와 기록 · Docs and records | 4 |
 | `security` | 보안과 개인정보 · Security and privacy | 2 |
@@ -191,16 +191,31 @@
 
 ### `code/structure` · 코드 구조(모듈, 파일 크기, 중복) · Code structure (modules, file size, duplication)
 
+- **[권장 · should · structure] 코드가 파일 하나나 함수 하나에 몰려 있으면 먼저 덜어 낼 것을 덜고, 그다음 이미 있는 경계(클래스, 같은 접두어 묶음)를 따라 한 걸음씩 옮긴다. / When code piles up in one file or function, first remove what can go, then move it piece by piece along seams that already exist (classes, groups sharing a prefix).**
+  - 이유 · Why: 몰린 코드는 고칠 때마다 통째로 읽혀 토큰이 들고, 한 곳을 고치다 엉뚱한 곳이 깨지기 쉽다. 새 층을 더하는 정리는 읽을 곳을 오히려 늘린다. / Piled-up code is read whole on every change and breaks in odd places. A cleanup that adds a new layer only adds more to read.
+  - 점검 · Check (자동 · auto): `habitree refactor`가 파일·함수 줄 수를 프로젝트 중앙값과 견주고, git 변경 횟수로 순서를 정한다. / `habitree refactor` compares file and function lengths with the project median and orders them by git change counts.
+  - 감지 · Detect: `refactor_concentration` · refactor · threshold 4 · warn
+  - 피드백 · feedback 0 · `pack:base@0.6.0` · `code.structure.concentration`
 - **[권장 · should · structure] 새로 쓰는 줄 묶음이 다른 파일에 이미 있으면 붙여 넣지 말고, 있는 것을 불러 쓰거나 공통 함수로 뺀다. / If newly written lines already exist in another file, do not paste them; call the existing code or extract a shared function.**
   - 이유 · Why: 복사본은 따로 낡아서 고칠 곳이 늘어난다. / Copies go stale separately, so there are more places to fix.
   - 점검 · Check (자동 · auto): PostToolUse 훅이 새로 들어간 줄을 공백을 정리해 6줄씩 해시하고 다른 파일과 비교한다(탐색 파일 수·크기 상한). / The PostToolUse hook hashes new lines in 6 line windows after trimming whitespace and compares other files (with file count and size limits).
   - 감지 · Detect: `copy_block` · PostToolUse · threshold 6 · warn
   - 피드백 · feedback 0 · `pack:work@0.2.0` · `code.structure.copy-block`
+- **[권장 · should · structure] 같은 코드가 이미 여러 곳에 있으면 한 곳을 남기고 나머지가 그곳을 부르게 바꾼 뒤 복사본을 지운다. 새 층은 남길 곳이 없을 때만 만든다. / When the same code already sits in several places, keep one, make the rest call it, and delete the copies. Add a new layer only when no place can serve as the keeper.**
+  - 이유 · Why: 복사본은 따로 낡아서 고칠 곳이 늘고, AI는 같은 코드를 여러 번 읽는다. / Copies drift apart, so there are more places to fix, and the AI reads the same code several times.
+  - 점검 · Check (자동 · auto): `habitree refactor`가 `map dupes`의 같은 몸통과 같은 글(기준 줄 수 이상)을 묶어 본다. / `habitree refactor` groups the same bodies and repeated text from `map dupes` (at least the threshold lines).
+  - 감지 · Detect: `refactor_duplication` · refactor · threshold 6 · warn
+  - 피드백 · feedback 0 · `pack:base@0.6.0` · `code.structure.duplication`
 - **[권장 · should · structure] 한 세션 안에서 기존 파일이 거의 더하기만으로 크게 불어나면, 새 기능은 따로 파일이나 함수로 떼어 낸다. / When an existing file balloons within one session through additions alone, move the new feature into its own file or function.**
   - 이유 · Why: 덧붙이기로 커진 파일은 읽을 때마다 사용량이 많이 들고, 고칠 때 엉뚱한 곳이 깨지기 쉽다. / A file grown by appending costs more to read every time and breaks in odd places when changed.
   - 점검 · Check (자동 · auto): PostToolUse 훅이 세션 처음 줄 수와 지금 줄 수, 더한 줄과 지운 줄을 파일별로 비교한다. / The PostToolUse hook compares the start and current line count and the added and removed lines per file.
   - 감지 · Detect: `file_growth` · PostToolUse · threshold 30 · warn
   - 피드백 · feedback 0 · `pack:work@0.2.0` · `code.structure.file-growth`
+- **[권장 · should · structure] 한 기능이 여러 파일에 흩어졌거나 쓰이지 않는 코드, 한 곳에서만 쓰는 짧은 층이 있으면 나누기보다 합치기와 지우기를 먼저 검토한다. / When one feature is scattered over many files, or there is unused code or a short layer used in one place, consider merging and deleting before splitting further.**
+  - 이유 · Why: 조각이 많을수록 한 기능을 보려고 여러 파일을 열어야 하고, 쓰이지 않는 코드도 읽을 때마다 토큰이 든다. 정적 분석이라 확실하지 않아 정보로 알린다. / The more pieces, the more files to open for one feature, and unused code still costs tokens to read. Static analysis cannot be sure, so these are notes.
+  - 점검 · Check (자동 · auto): `habitree refactor`가 참조 그래프(들어오는 참조 수, 서로 참조)와 git의 함께 바뀐 기록, 같은 이름 정의를 본다. / `habitree refactor` reads the reference graph (incoming references, mutual references), git co-changes and same-name definitions.
+  - 감지 · Detect: `refactor_fragmentation` · refactor · threshold 5 · info
+  - 피드백 · feedback 0 · `pack:base@0.6.0` · `code.structure.fragmentation`
 - **[권장 · should · structure] 기능을 더할 때 기존 함수·파일에 덧대지 말고 역할별 모듈·함수로 나눈다. 한 파일이 계속 커지면 나눌 때다. / When adding features, split by responsibility into modules and functions instead of patching onto existing ones. A file that keeps growing is due for a split.**
   - 이유 · Why: 덧대기로 커진 코드는 읽을 때마다 토큰이 많이 들고, 고칠 때 엉뚱한 곳이 깨진다. / Patched-up code costs more tokens to read and breaks in unexpected places when changed.
   - 점검 · Check (눈으로 · review): 이번에 크게 늘어난 파일이 있는지, 비슷한 코드가 복사됐는지 본다. / Did any file grow a lot, or was similar code copied?

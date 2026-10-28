@@ -14,6 +14,7 @@ Habitree가 어떻게 일하는지를 정한 문서입니다. 코드는 이 문�
 | [spec/map.md](spec/map.md) | 코드 색인과 MCP 서버 |
 | [spec/audit.md](spec/audit.md) | 세션 기록 분석 |
 | [spec/bench.md](spec/bench.md) | 규칙을 켜고 끈 전후 비교 측정 |
+| [spec/refactor.md](spec/refactor.md) | 리팩토링 제안: 덜어내기 먼저, 규모는 상황에 맞춰 |
 | [spec/conformance.md](spec/conformance.md) | 적합성 시험 |
 
 ---
@@ -32,4 +33,5 @@ The documents that define how Habitree works. The code follows them, and they ar
 | [spec/map.md](spec/map.md) | Code index and MCP server |
 | [spec/audit.md](spec/audit.md) | Session audit |
 | [spec/bench.md](spec/bench.md) | Before/after benchmark with rules on and off |
+| [spec/refactor.md](spec/refactor.md) | Refactoring suggestions: removing first, scale fitted to the situation |
 | [spec/conformance.md](spec/conformance.md) | Conformance suite |

@@ -2,4 +2,4 @@
 / Command registry: one module per command with SUMMARY, add_arguments(p) and run(args, ctx)."""
 
 COMMANDS = ["init", "rules", "check", "export", "hook", "guard", "models", "verify", "map", "mcp",
-            "audit", "bench"]
+            "audit", "bench", "refactor"]

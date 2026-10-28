@@ -7,7 +7,8 @@
   rank     참조 그래프 + PageRank + 글자 예산 이진 탐색
   search   이름·설명 찾기(낱말 나눔, 앞부분 일치, 한국어 두 글자 묶음), 세 단계 결과
   dupes    같은 몸통, 창 단위 글 중복
-  churn    git 기록: 핫스팟, 파일별 마지막 커밋 시각
+  churn    git 기록: 핫스팟, 커밋별 파일, 파일별 마지막 커밋 시각
+  refactor 위 결과를 읽어 몰림·중복·흩어짐·덜어낼 곳과 정리 규모를 판단(habitree refactor)
 """
 from collections import defaultdict
 
