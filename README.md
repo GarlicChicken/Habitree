@@ -1,306 +1,201 @@
 # Habitree
 
-AI와 코딩할 때 토큰은 줄이고 재사용은 늘리도록 돕는 도구입니다. 피드백은 규칙으로, 반복은 모듈로 자라게 합니다.
+AI와 함께 일하는 습관을 나무처럼 키우는 도구입니다. 피드백은 규칙으로, 되풀이는 모듈로 자라게 하고, 그렇게 자란 것이 짐이 되지 않게 함께 다듬습니다.
 
 - 마지막 갱신: 2026-10-28
-- 상태: v0.4 알파
+- 상태: 알파(로드맵 참고)
 - 라이선스: [MIT](LICENSE)
 - [English](#english)
 
 ## 왜 만들었나
 
-AI에게 코딩을 맡기다 보면 같은 말을 여러 번 하게 됩니다. 지난주에 고쳐 달라고 한 버릇이 이번 주에 또 나오고, 이미 있는 함수를 모른 채 비슷한 함수를 새로 만들고, 같은 파일을 몇 번이고 다시 읽습니다. 그때마다 시간과 토큰이 샙니다.
+AI에게 일을 맡기다 보면 같은 말을 여러 번 하게 됩니다. 지난주에 고쳐 달라고 한 버릇이 이번 주에 또 나오고, 이미 있는 함수를 모른 채 비슷한 함수를 새로 만들고, 같은 파일을 몇 번이고 다시 읽습니다. 그때마다 시간과 토큰이 조금씩 샙니다. 하나하나는 작아 보여도 쌓이면 꽤 큽니다.
 
-이를 돕는 도구는 이미 많습니다. 다만 대부분은 지침 파일(CLAUDE.md 같은 것)에 한 줄을 덧붙이는 데서 끝납니다. 줄이 쌓일수록 파일은 커지고, AI는 매번 그 파일 전체를 읽습니다. 고치려던 낭비가 다른 모습으로 돌아오는 셈입니다.
+Habitree는 [Open Prompt](https://github.com/GarlicChicken)를 운영하며 쓰던 방식에서 나왔습니다. 그 프로젝트는 작업할 때마다 조금씩 나아지는 하나의 두뇌처럼 굴러갑니다. 일을 시작하면 지도부터 보고, 있는 것은 다시 쓰고, 없는 것은 되풀이될 것을 생각해 만들고, 바꾼 것은 기록하고, 받은 피드백은 그 자리에서 규칙으로 남깁니다. 그렇게 하니 같은 지적이 다시 나오는 일이 눈에 띄게 줄었습니다. 이 습관을 다른 프로젝트에서도 쓸 수 있게 꺼내 놓은 것이 Habitree입니다.
 
-Habitree는 피드백을 글이 아니라 구조로 쌓습니다. 규칙마다 범위(무엇에 대한 것인지), 관점, 상황이 붙어 있고, 지금 하는 작업에 맞는 범위의 규칙만 꺼내 읽게 합니다. 같은 지적이 다시 나오면 그 규칙이 단단해지고, 기계로 확인할 수 있는 것은 자동 검사로 옮겨 갑니다.
+목표는 처음부터 하나였습니다. **효율과 재사용.** 덜 읽고, 덜 되풀이하고, 이미 만든 것을 다시 쓰게 하는 것입니다.
+
+## 생각하는 방식
+
+**같은 피드백은 두 번 하지 않는다.** 피드백은 말로 들어옵니다. 같은 말이 또 나오면 그 규칙은 필수가 되고, 기계로 확인할 수 있으면 자동 검사가 되고, 그래도 되풀이되는 실수는 코드에서 막습니다. 규칙은 글 한 덩어리가 아니라 범위·관점·상황으로 나눠 쌓아서, AI는 지금 하는 일에 맞는 규칙만 꺼내 읽습니다.
 
 ```
 말로 한 피드백 → 권장 규칙 → 필수 규칙 → 자동 검사 → 코드에서 막기
 ```
 
-목표는 하나입니다. 같은 피드백을 두 번 하지 않게 하는 것.
+**만들기 전에 찾는다.** 낭비는 대개 "이미 있는 것을 몰라서" 생깁니다. 그래서 모든 작업은 찾는 것에서 시작합니다. 사람이 쓴 지도로 큰 그림을 보고, 코드 색인으로 함수 하나까지 찾고, 그다음에 만듭니다.
 
-## 하는 일
+**쌓는 만큼 덜어낸다.** 규칙과 도구와 모듈은 쌓을수록 좋은 것이 아닙니다. 한 번 쓰고 마는 도구, 아무도 다시 쓰지 않는 추상화, 끝없이 늘어나는 규칙은 그 자체로 짐입니다. 그래서 되풀이될 때만 도구로 만들고, 겹치거나 안 쓰이는 규칙은 합치거나 버리고, 정리를 권할 때도 더하는 해법보다 덜어내는 해법을 먼저 보여 줍니다. Habitree 자신도 마찬가지입니다. AI가 매번 읽는 분량과 훅이 붙이는 시간에는 예산이 있고, 무거운 기능은 쓸 때만 켭니다.
 
-- **규칙 DB:** 피드백을 범위 트리에 규칙으로 쌓고, 작업 전에 필요한 규칙만 정해진 분량 안에서 꺼냅니다. 새 규칙을 더하기 전에 같은 뜻의 규칙이 이미 있는지 먼저 찾아 줍니다.
-- **점검:** 지도(README)와 실제 폴더, 문서 링크, 규칙 DB가 서로 맞는지 AI 없이 확인합니다. 매번 같은 결과가 나오니 CI나 훅에 그대로 붙일 수 있습니다.
-- **지침 파일 생성:** 규칙에서 AGENTS.md와 CLAUDE.md를 만들어 냅니다. Codex, Cursor, Copilot, Gemini CLI, Claude Code가 같은 원본을 읽습니다. 사람이 쓴 부분은 건드리지 않습니다.
+**확인은 기계가, 결정은 사람이.** 점검은 AI에게 판단을 맡기지 않고 정해진 방식으로만 해서 매번 같은 결과가 나옵니다. 사람의 말은 믿을 만한 근거라 빠르게 반영하고, 자동 신호는 오탐이 섞이기 마련이라 천천히 반영합니다. 작업을 멈추게 하는 결정과 되돌리기 어려운 일은 늘 사람이 정합니다. "알아서 해 줘"라고 맡겨도 지우기, 배포, 외부로 보내기 같은 일은 그때 다시 묻습니다.
 
-## 설치
+**어떤 언어, 어떤 환경에서도.** 규칙과 설정은 JSON과 Markdown으로 된 명세이고, 이 엔진은 그 명세를 따르는 참조 구현입니다. 프로젝트가 어떤 언어로 짜였든, Windows든 macOS든 Linux든, Claude Code든 Codex든 Cursor든 같은 원본을 씁니다. 한글 파일 이름과 한국어 검색도 처음부터 챙겼습니다. 개발자가 아니어도 AI에게 무언가를 맡기는 사람이라면 쓸 수 있게 쉬운 말로 알려 주려고 합니다.
 
-Python 3.9 이상에서 돌아가고, 바깥 패키지에 의존하지 않습니다. [uv](https://docs.astral.sh/uv/)로 설치하면 컴퓨터에 Python이 없어도 uv가 알아서 준비합니다.
+**재지 않은 숫자는 말하지 않는다.** 토큰을 몇 퍼센트 줄인다는 식의 말은, 같은 과제를 규칙을 켜고 끈 채 여러 번 돌려 재고 그 과정까지 공개하기 전에는 하지 않습니다.
+
+## 언제 무엇을 돕나
+
+| 언제 | 하는 일 | 명령 |
+|---|---|---|
+| 작업 전 | 지켜야 할 규칙과 이미 있는 코드를 적은 분량으로 찾기 | `rules brief`, `map` |
+| 작업 중 | 같은 일을 맴돌거나 파일에 덧대기만 할 때 그 자리에서 알리기, 맡긴 일은 경계 안에서 | `hook`, `guard`(Claude Code 플러그인) |
+| 끝낼 때 | 지도·문서·규칙이 실제와 맞는지, 검증 명령이 통과하는지 확인 | `check`, `verify` |
+| 되돌아볼 때 | 어디서 토큰이 샜는지, 무엇을 합치고 덜어낼지 | `audit`, `refactor` |
+| 모델을 고를 때 | 일마다 알맞은 등급에서 시작하고, 검증이 실패할 때만 올리기 | `models` |
+| 효과를 잴 때 | 규칙을 켜고 끈 채 같은 과제를 여러 번 돌려 비교 | `bench` |
+
+각 기능이 왜 그렇게 동작하는지는 [docs/](docs/README.md)의 명세에 있습니다.
+
+## 시작하기
+
+Python 3.9 이상에서 돌고, 바깥 패키지에 기대지 않습니다. [uv](https://docs.astral.sh/uv/)로 설치하면 컴퓨터에 Python이 없어도 uv가 알아서 준비합니다.
 
 ```
 uv tool install git+https://github.com/GarlicChicken/habitree
-# 또는
-pipx install git+https://github.com/GarlicChicken/habitree
-```
-
-설치하면 `habitree` 명령과 짧은 별칭 `ht`가 생깁니다.
-
-## 빠른 시작
-
-```
 cd 내-프로젝트
-habitree init                 # 뼈대 깔기
-habitree check                # 지도·문서·규칙 점검
-habitree rules brief global   # 작업 전에 읽을 규칙
+habitree init       # 지도, 기본 규칙, AI 지침 파일을 깐다
+habitree check      # 지도·문서·규칙이 실제와 맞는지 본다
 ```
 
-Claude Code를 쓴다면 플러그인도 함께 설치하세요. 작업 도중에 경고를 보내는 훅과 스킬이 들어옵니다.
+Claude Code를 쓴다면 플러그인을 더하면 작업 도중 알림과 스킬이 들어옵니다.
 
 ```
 claude plugin marketplace add GarlicChicken/habitree
 claude plugin install habitree@habitree
 ```
 
-플러그인 없이 훅만 프로젝트에 연결하려면 `habitree init --hooks`를 쓰면 됩니다.
-
-`init`은 아래 파일을 만듭니다. 이미 있는 파일에서 사람이 쓴 내용은 지우지 않고, 나중에 다시 실행하면 새로 생긴 기본 규칙만 더합니다.
-
-| 파일 | 하는 일 |
-|---|---|
-| `.habitree/config.json` | 설정: 언어, 검증 명령 등 |
-| `.habitree/rules.json`, `.habitree/RULES.md` | 규칙 DB와 사람이 읽는 규칙 문서 |
-| `AGENTS.md`, `CLAUDE.md` | AI 도구가 읽는 지침. 표시된 생성 구역만 고칩니다 |
-| `README.md`의 지도 | 최상위 폴더 지도 초안 |
-| `LOG.md` | 변경 기록과 '손볼 것' |
+`init`은 이미 있는 파일에서 사람이 쓴 내용을 지우지 않습니다. AGENTS.md와 CLAUDE.md에는 표시된 생성 구역 하나만 두고, 나중에 다시 실행하면 새로 생긴 기본 규칙만 더합니다.
 
 ## 피드백을 규칙으로
 
-AI에게 같은 지적을 하게 되면, 고치는 것과 함께 규칙으로 남깁니다. AGENTS.md에 방법이 적혀 있어서 대개는 AI가 직접 기록합니다.
+AI의 결과를 바로잡을 때는 고치는 것과 함께 규칙으로 남깁니다. AGENTS.md에 방법이 적혀 있어서 대개는 AI가 직접 기록합니다.
 
 ```
 habitree rules add --scope work --aspect process \
   --rule "커밋 메시지는 한국어로 쓴다" --why "팀 규칙" --feedback "영어로 썼음"
-habitree rules hit <id> --feedback "또 영어로 씀"      # 같은 지적: 권장 → 필수
-habitree rules miss <id> --feedback "이번엔 틀린 경고"  # 규칙이나 경고가 틀렸을 때
-habitree rules similar "커밋 메시지 언어"               # 같은 뜻 규칙 찾기
+habitree rules hit <id> --feedback "또 영어로 씀"       # 같은 지적: 권장에서 필수로
+habitree rules miss <id> --feedback "이번 경고는 틀렸음"  # 규칙이나 경고가 틀렸을 때
 ```
 
-규칙은 범위 트리(`work` → `work/cycle`)에 놓이고, 아래 범위는 위 범위의 규칙을 물려받습니다. 사람의 피드백은 빠르게 올라가고, 내릴 때는 사람이 이유를 적어야 합니다(`demote`). 같은 뜻의 규칙이 둘로 갈라지면 지적 횟수가 흩어지기 때문에, `add`는 비슷한 규칙이 보이면 먼저 멈추고 알려 줍니다.
-
-## 점검
-
-`habitree check`는 정해진 방식으로만 확인합니다. 오류가 있으면 종료 코드 1을 돌려주고, `--json`으로 기계가 읽을 결과도 냅니다.
-
-| 점검 | 찾는 것 |
-|---|---|
-| `map.*` | 지도에 없는 폴더, README가 없는 폴더 |
-| `docs.link` | 깨진 상대 링크와 제목 앵커(한글 앵커 포함) |
-| `docs.updated`, `docs.log` | '마지막 갱신' 날짜, 변경 기록 |
-| `docs.instructions-size`, `docs.import` | AGENTS.md 32KiB 한도, CLAUDE.md 길이, `@import` 대상 |
-| `docs.hidden-unicode`, `docs.home-path` | 보이지 않는 제어 문자, 박혀 있는 개인 폴더 경로 |
-| `rules.*` | 규칙 DB 형식, RULES.md 동기화, 같은 뜻 규칙, 자동 검사 |
-| `generated.edited` | 생성 구역을 사람이 직접 고친 곳 |
-| `paths.collision` | 대소문자나 NFC·NFD만 다른 파일 이름 |
-
-규칙에 `check.run`을 적어 두면 사다리의 '자동 검사' 칸이 실제로 돌아갑니다. 명령(종료 코드 0이면 합격), 금지할 형식, 있어야 할 형식, 줄 수 한도 중에서 고를 수 있습니다. 프로젝트가 어떤 언어로 짜여 있든 똑같이 쓸 수 있습니다. 전체 목록은 [docs/spec/check.md](docs/spec/check.md)에 있습니다.
-
-## 만들기 전에 찾기
-
-작업 순환의 첫 단계는 찾기입니다. 그런데 사람이 쓴 README 지도만으로는 함수 하나하나까지 찾기 어렵고, AI는 결국 파일을 통째로 열어 보게 됩니다.
-
-`habitree map`은 프로젝트의 함수, 클래스, 모듈, 문서 구역의 이름과 시그니처, 첫 줄 설명만 모은 색인을 만들고, 다른 파일에서 많이 쓰이는 것부터 정한 글자 수 안에 담아 보여 줍니다. AI는 파일을 열기 전에 이 목록부터 보고, 필요한 것만 엽니다. 언어 판정, 줄 수, 중복, 변경 기록은 어떤 언어에도 같게 동작합니다. Python은 문법 분석으로 정확하게, 그 밖의 스무 개 남짓한 언어는 패턴으로 대략 뽑고, 결과마다 어느 쪽인지 표시합니다. 한국어는 조사가 붙어도 찾습니다.
-
-`habitree mcp`를 AI 도구에 연결하면 찾기, 규칙, 점검을 AI가 직접 부를 수 있습니다. 토큰을 얼마나 줄이는지는 아직 재지 않았고, 재면 조건과 함께 공개하겠습니다. 자세한 것은 [docs/spec/map.md](docs/spec/map.md)에 있습니다.
-
-## 일하는 도중에 알려 주기
-
-낭비는 대개 끝난 뒤에야 보입니다. 같은 명령을 다섯 번 돌렸고, 같은 오류에 같은 수정을 되풀이했고, 파일 하나가 덧붙이기만으로 두 배가 됐다는 사실을 세션 기록을 읽고 나서야 알게 됩니다.
-
-Habitree는 이것을 일하는 도중에 알려 줍니다. 같은 명령을 세 번째 돌리거나, 같은 오류에 같은 수정을 되풀이하거나, 파일 하나를 덧붙이기만으로 키우고 있으면 그 자리에서 AI에게 한 줄을 건네 방향을 바꾸게 합니다. 그래도 계속되면 멈추고 사람에게 묻습니다. 감지는 도구 호출과 파일 변화 같은 행동만 보기 때문에 어떤 언어로 짠 프로젝트에도 똑같이 통합니다.
-
-경고도 규칙 DB의 규칙입니다. "이 경고 맞았어", "잔소리야" 같은 반응(`rules hit`, `rules miss`)이 쌓여 기준이 조정되고, 같은 경고는 반복 횟수를 제한하며, 세션 단위로 끌 수도 있습니다(`habitree guard off <id>`).
-
-"알아서 해 줘"라고 맡기면 그 작업에 한해서는 되묻지 않고 추천안대로 진행합니다. 다만 지우기, 배포, 외부로 보내기, 결제, 개인정보처럼 되돌리기 어려운 일은 그때도 묻고, 끝에 대신 정한 것과 미뤄 둔 경고를 모아 보고합니다. 자세한 것은 [docs/spec/guard.md](docs/spec/guard.md)에 있습니다.
-
-## 일마다 알맞은 모델
-
-AI에게 일을 맡길 때 가장 비싼 모델을 늘 쓰면 돈이 새고, 가장 싼 모델을 늘 쓰면 틀린 결과를 고치느라 시간이 샙니다. 알맞은 모델을 고르는 것도 습관입니다.
-
-Habitree는 탐색, 요약, 코드 작성, 리뷰, 위험한 작업 같은 작업 유형마다 시작할 자리(등급과 추론 강도)를 정해 두고, 그 자리를 Anthropic, OpenAI, Google의 실제 모델 이름과 강도 값으로 옮겨 줍니다(`habitree models`). 싼 자리에서 시작한 일은 테스트나 빌드 같은 기계 검증(`habitree verify`)이 실패했을 때만 한 칸씩 올리고, 서버 장애 때는 등급을 올리지 않고 같은 등급의 다른 모델로 돌립니다. 인증, 결제, 배포 같은 위험한 작업에는 하한을 두어 자동으로 내려가지 않게 합니다.
-
-라우터를 따로 띄우지 않습니다. 정책 하나에서 Claude Code 서브에이전트, Codex, Aider, LiteLLM, opencode 설정을 만들어 냅니다. 모델 가격과 단종일은 출처, 확인한 날짜와 함께 대응표에 두고, 오래되면 `habitree check`가 알려 줍니다. 자세한 것은 [docs/spec/models.md](docs/spec/models.md)에 있습니다.
-
-## 방향
-
-- **어떤 언어, 어떤 환경에서도.** 규칙과 설정은 JSON과 Markdown으로 된 명세이고, 이 엔진은 그 명세의 참조 구현입니다. Windows, macOS, Linux에서 같은 명령으로 돌고, 한글 파일 이름과 공백이 든 경로도 처리합니다. 다른 언어로 엔진을 새로 만들어도 [적합성 시험](docs/spec/conformance.md)을 통과하면 같은 규칙 DB를 쓸 수 있습니다.
-- **AI가 읽는 분량은 작게.** 지침 파일에는 꼭 필요한 것만 넣고, 나머지는 필요할 때 범위별로 꺼내 읽게 합니다.
-- **사람이 쓴 것은 지킨다.** 도구는 자기가 만든 구역만 고치고, 사람이 손댄 생성 구역은 덮어쓰지 않습니다.
-- **재지 않은 숫자는 말하지 않는다.** 토큰을 몇 퍼센트 줄인다는 식의 말은 직접 재서 과정까지 공개하기 전에는 하지 않습니다.
+새 규칙을 더하기 전에 같은 뜻의 규칙이 이미 있는지 먼저 찾아 줍니다. 같은 뜻이 둘로 갈라지면 지적 횟수가 흩어져 규칙이 단단해지지 못하기 때문입니다.
 
 ## 로드맵
 
 | 버전 | 내용 | 상태 |
 |---|---|---|
-| v0.1 | 규칙 DB, `init`·`rules`·`check`·`export`, 적합성 시험, 세 OS CI | 완료 |
-| v0.2 | 작업 중 비효율 경고(`guard`), 훅, 위임 예외, Claude Code 플러그인 | 완료 |
-| v0.3 | 모델 배분(`models`), 검증 명령(`verify`) | 완료 |
-| v0.4 | 코드 색인(`map`), MCP 서버 | 완료 |
-| v0.5 | 세션 기록 분석(`audit`), 전후 비교 측정(`bench`) | 예정 |
+| v0.1 | 규칙 DB, 점검, 지침 파일 생성, 적합성 시험, 세 OS CI | 완료 |
+| v0.2 | 작업 중 알림, 훅, 위임, Claude Code 플러그인 | 완료 |
+| v0.3 | 모델 배분, 검증 명령 | 완료 |
+| v0.4 | 코드 색인, MCP 서버 | 완료 |
+| v0.5 | 세션 기록 분석, 전후 비교 측정 | 진행 중 |
+| v0.6 | 리팩토링 제안(합치기와 덜어내기 먼저) | 진행 중 |
+| v0.7 | 가볍게: 훅 비용과 기본 설치를 줄이고, 쓰는 프로젝트의 무게도 보여 주기 | 예정 |
 
-## 문서
+## 문서와 지도
 
 | 찾는 것 | 위치 |
 |---|---|
-| 작업 순환, 지도, 규칙 사다리 | [docs/spec/method.md](docs/spec/method.md) |
-| 규칙 DB 형식 | [docs/spec/rules-format.md](docs/spec/rules-format.md) |
-| 점검 항목 | [docs/spec/check.md](docs/spec/check.md) |
-| 작업 중 경고와 위임 | [docs/spec/guard.md](docs/spec/guard.md) |
-| 모델 배분과 검증 | [docs/spec/models.md](docs/spec/models.md) |
-| 코드 색인과 MCP 서버 | [docs/spec/map.md](docs/spec/map.md) |
-| 적합성 시험 | [docs/spec/conformance.md](docs/spec/conformance.md) |
+| 일하는 방법: 작업 순환, 지도, 규칙 사다리 | [docs/spec/method.md](docs/spec/method.md) |
+| 기능별 명세 | [docs/](docs/README.md) |
 | 구조와 기여 방법 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 바뀐 것 | [CHANGELOG.md](CHANGELOG.md) |
 | 빌려 온 생각과 출처 | [NOTICE.md](NOTICE.md) |
-
-## 지도
 
 | 폴더 | 하는 일 |
 |---|---|
 | [src/](src/) | 엔진 코드(`habitree` 패키지) |
 | [docs/](docs/) | 명세 |
 | [tests/](tests/) | 시험 |
-| [conformance/](conformance/) | 적합성 시험 사례 |
-| [skills/](skills/) | 필요할 때 불러 읽는 짧은 절차(작업 순환, 피드백을 규칙으로, 위임) |
+| [conformance/](conformance/) | 다른 구현과 결과를 맞추는 적합성 시험 사례 |
+| [skills/](skills/) | AI가 필요할 때만 불러 읽는 짧은 절차 |
 | [hooks/](hooks/) | Claude Code 플러그인 훅 |
 | [.claude-plugin/](.claude-plugin/) | Claude Code 플러그인과 마켓플레이스 정의 |
 
 ## 만든 곳
 
-[Open Prompt](https://github.com/GarlicChicken)의 첫 오픈소스입니다. Open Prompt는 누구나 AI를 쉽게 배우고 일상과 일에서 능률을 높이도록 돕는 프로젝트이고, 만든 것은 조건 없이 공개합니다.
+Habitree는 [Open Prompt](https://github.com/GarlicChicken)의 첫 오픈소스입니다. Open Prompt는 AI가 소수의 기술이 아니라 모두의 도구가 되도록, 누구나 AI를 쉽게 배우고 일상과 일에서 능률을 높이게 돕는 프로젝트입니다. 만든 것은 조건 없이 공개하고, 좋은 생각은 기꺼이 빌리되 어디서 왔는지 밝힙니다.
 
 ---
 
 ## English
 
-Habitree helps you spend fewer tokens and reuse more when coding with AI. Feedback grows into rules, and repetition grows into modules.
+Habitree grows your habits for working with AI, like a tree. Feedback grows into rules and repetition grows into modules, and what grows is trimmed so it never turns into a burden.
 
 ### Why
 
-When you hand coding work to an AI, you end up saying the same things again and again. A habit you corrected last week shows up again this week. A function that already exists gets written a second time. The same file gets read over and over. Each time, time and tokens leak away.
+When you hand work to an AI, you end up saying the same things again and again. A habit you corrected last week shows up again this week, a function that already exists gets written a second time, and the same file gets read over and over. Each time a little time and a few tokens leak away. Each leak looks small; together they add up.
 
-Plenty of tools try to help, but most stop at appending a line to an instruction file such as CLAUDE.md. The file keeps growing, and the AI reads all of it every time, so the waste you meant to remove comes back in another form.
+Habitree comes from the way we run [Open Prompt](https://github.com/GarlicChicken). That project works like a brain that gets a little better every time someone works on it: you start from the map, reuse what exists, build what is missing with repetition in mind, record what changed, and turn feedback into a rule on the spot. Doing that, the same correction came back noticeably less often. Habitree takes that habit out so other projects can use it.
 
-Habitree stores feedback as structure rather than prose. Every rule has a scope (what it is about), an aspect and an optional context, and the agent reads only the rules for the scopes the current task touches. When the same feedback comes back, the rule hardens, and whatever a machine can verify moves into an automatic check.
+The goal has been the same from the start: **efficiency and reuse.** Read less, repeat less, and use again what has already been built.
+
+### How we think about it
+
+**Never give the same feedback twice.** Feedback arrives as words. When the same words come back the rule becomes a must; when a machine can verify it, it becomes an automatic check; and mistakes that still repeat are blocked in code. Rules are stored by scope, aspect and context rather than as one block of prose, so the agent reads only the rules that fit the task at hand.
 
 ```
 spoken feedback → should rule → must rule → automatic check → blocked in code
 ```
 
-There is one goal: you should never have to give the same feedback twice.
+**Look before you build.** Most waste comes from not knowing what already exists, so every task starts with looking: the hand-written map for the big picture, the code index down to single functions, and only then building.
 
-### What it does
+**Trim as much as you grow.** More rules, tools and modules are not automatically better. A tool used once, an abstraction nobody reuses and a rule list that keeps growing are weight in themselves. So tools are made only when work actually repeats, overlapping or unused rules are merged or dropped, and cleanup suggestions show the subtracting fix before the adding one. The same goes for Habitree itself: what the agent reads every session and the time hooks add have budgets, and heavier features are switched on only when you use them.
 
-- **Rule DB:** grows feedback into rules on a scope tree and pulls only what a task needs, within a size budget. Before adding a rule it looks for one that already means the same thing.
-- **Checks:** verifies, without any AI, that the map (README), the real folders, the doc links and the rule DB agree. Results are the same every time, so they fit straight into CI or hooks.
-- **Instruction files:** generates AGENTS.md and CLAUDE.md from the rules, so Codex, Cursor, Copilot, Gemini CLI and Claude Code all read one source. Text you wrote yourself is left alone.
+**Machines check, people decide.** Checks never ask an AI to judge; they are deterministic and give the same result every time. Human words are strong evidence and take effect quickly, while automatic signals always carry some false positives and move slowly. Decisions that stop work, and anything hard to undo, are always made by a person. Even when you say "just do it", deleting, deploying or sending data outside is confirmed at that moment.
 
-### Install
+**Any language, any environment.** Rules and settings are a JSON and Markdown specification, and this engine is a reference implementation of it. Whatever language your project uses, whether you are on Windows, macOS or Linux, and whether you work with Claude Code, Codex or Cursor, they share one source. Korean file names and Korean search were handled from the start, and we try to speak in plain words so that anyone who hands work to an AI can use it, not only developers.
 
-Runs on Python 3.9+ with no third-party dependencies. If you install with [uv](https://docs.astral.sh/uv/), uv takes care of Python even when it is not on the machine.
+**No numbers we have not measured.** Claims such as "saves N% of tokens" wait until the same tasks have been run several times with the rules on and off, and the process is published.
+
+### What it helps with
+
+| When | What it does | Commands |
+|---|---|---|
+| Before work | Find the rules to follow and the code that already exists, in few tokens | `rules brief`, `map` |
+| During work | Point out going in circles or patching onto one file on the spot; keep delegated work inside its boundaries | `hook`, `guard` (Claude Code plugin) |
+| When finishing | Check that the map, docs and rules match reality and that verify commands pass | `check`, `verify` |
+| Looking back | See where tokens leaked and what to merge or remove | `audit`, `refactor` |
+| Choosing a model | Start each kind of work at a suitable tier and move up only when verification fails | `models` |
+| Measuring | Run the same tasks with the rules on and off and compare | `bench` |
+
+Why each feature behaves the way it does is explained in the specs under [docs/](docs/README.md).
+
+### Getting started
+
+Runs on Python 3.9+ with no third-party dependencies. With [uv](https://docs.astral.sh/uv/), uv takes care of Python even when it is not installed.
 
 ```
 uv tool install git+https://github.com/GarlicChicken/habitree
-# or
-pipx install git+https://github.com/GarlicChicken/habitree
-```
-
-This installs the `habitree` command and a short alias, `ht`.
-
-### Quick start
-
-```
 cd your-project
-habitree init                 # install the skeleton
-habitree check                # check map, docs and rules
-habitree rules brief global   # rules to read before working
+habitree init       # install the map, default rules and agent instruction files
+habitree check      # check that map, docs and rules match reality
 ```
 
-If you use Claude Code, install the plugin too. It adds the hooks that warn you during work, plus a few skills.
+If you use Claude Code, add the plugin for in-flight warnings and skills:
 
 ```
 claude plugin marketplace add GarlicChicken/habitree
 claude plugin install habitree@habitree
 ```
 
-To wire only the hooks into a project without the plugin, use `habitree init --hooks`.
-
-`init` creates the files below. It never deletes what you wrote in existing files, and running it again later only adds new default rules.
-
-| File | Purpose |
-|---|---|
-| `.habitree/config.json` | Settings: language, verify commands, and so on |
-| `.habitree/rules.json`, `.habitree/RULES.md` | The rule DB and a readable rule document |
-| `AGENTS.md`, `CLAUDE.md` | Instructions for AI tools; only the marked managed block is touched |
-| Map in `README.md` | A draft map of top-level folders |
-| `LOG.md` | Change log and a "to fix" list |
+`init` never deletes what you wrote in existing files. AGENTS.md and CLAUDE.md get a single marked managed block, and running `init` again later only adds new default rules.
 
 ### Turning feedback into rules
 
-When you find yourself correcting the AI, record the correction as a rule while fixing it. AGENTS.md explains how, so the agent usually records it on its own.
-
-```
-habitree rules add --scope work --aspect process \
-  --rule "Write commit messages in Korean" --why "team rule" --feedback "wrote in English"
-habitree rules hit <id> --feedback "English again"      # same feedback: should → must
-habitree rules miss <id> --feedback "wrong warning"     # the rule or warning was wrong
-habitree rules similar "commit message language"        # find rules with the same meaning
-```
-
-Rules sit on a scope tree (`work` → `work/cycle`), and child scopes inherit their parents' rules. Human feedback promotes quickly; demoting a rule needs a reason from a person (`demote`). Duplicate rules would split the feedback count, so `add` stops and tells you when it sees a similar rule.
-
-### Checks
-
-`habitree check` is deterministic. It exits with 1 on errors and can print machine-readable results with `--json`. The table above lists the check families; the full list is in [docs/spec/check.md](docs/spec/check.md).
-
-Add `check.run` to a rule and the "automatic check" rung of the ladder actually runs: a command (exit 0 passes), a forbidden pattern, a required pattern or a line limit. It works the same whatever language your project is written in.
-
-### Look before you build
-
-The first step of the work cycle is to look for what already exists. A hand-written README map cannot list every function, though, so the agent ends up opening whole files.
-
-`habitree map` builds an index of a project's functions, classes, modules and doc sections, keeping only names, signatures and first-line descriptions, and shows the most used ones first within a character budget. The agent looks at the list before opening files and opens only what it needs. Language detection, line counts, duplicates and change history work the same for any language. Python is read exactly through its parser and about twenty other languages approximately through patterns, and every result says which. Korean search works even with particles attached.
-
-Connect `habitree mcp` to your AI tool and the agent can call search, rules and checks directly. Token savings have not been measured yet; when they are, they will be published with their conditions. See [docs/spec/map.md](docs/spec/map.md).
-
-### Warnings while you work
-
-Waste usually shows up only afterwards. You learn from the session log that the same command ran five times, the same fix was retried on the same error, or one file doubled in size by appending alone.
-
-Habitree points these out while the work is happening. When the same command runs a third time, the same fix is retried on the same error, or a file keeps growing by appending alone, it hands the AI one line so it can change course. If that does not help, it stops and asks you. Detection looks only at behavior such as tool calls and file changes, so it works the same for a project in any language.
-
-Warnings are rules in the rule DB too. Reactions such as "that was right" or "that was noise" (`rules hit`, `rules miss`) adjust the thresholds, repeated warnings are capped, and you can mute one for the session (`habitree guard off <id>`).
-
-When you hand over a task with "just do it", the agent goes with the recommended options without asking, for that task only. It still asks before anything hard to undo, such as deleting, deploying, sending data outside, payments or personal data, and at the end it reports the decisions it made and the warnings it held back. See [docs/spec/guard.md](docs/spec/guard.md).
-
-### The right model for each job
-
-Using the most expensive model for everything wastes money; using the cheapest for everything wastes time fixing wrong results. Picking the right model is a habit too.
-
-Habitree sets a starting place (tier and reasoning effort) for each kind of work, such as exploring, summarizing, writing code, reviewing or risky changes, and translates it into real model names and effort values for Anthropic, OpenAI and Google (`habitree models`). Work that starts in a cheap place moves up one step only when machine verification such as tests or builds fails (`habitree verify`), and outages switch to another model of the same tier instead of raising it. Risky work such as auth, payments and deploys has a floor that is never lowered automatically.
-
-There is no router to run. One policy generates settings for Claude Code subagents, Codex, Aider, LiteLLM and opencode. Model prices and retirement dates live in a vendor table with their sources and checked dates, and `habitree check` tells you when they get old. See [docs/spec/models.md](docs/spec/models.md).
-
-### Direction
-
-- **Any language, any environment.** Rules and settings are a JSON and Markdown specification, and this engine is its reference implementation. The same commands run on Windows, macOS and Linux, including Korean file names and paths with spaces. An engine written in another language can share the same rule DB once it passes the [conformance suite](docs/spec/conformance.md).
-- **Keep what the AI reads small.** Instruction files hold only what is essential; everything else is pulled per scope when needed.
-- **Respect human edits.** The tool only rewrites the blocks it generated and never overwrites a generated block someone changed by hand.
-- **No numbers we have not measured.** Claims such as "saves N% of tokens" wait until we have measured them and published how.
+When you correct the AI, record the correction as a rule while fixing it; AGENTS.md explains how, so the agent usually records it itself. Use `rules add` for a new rule, `rules hit` when the same feedback comes back (should becomes must), and `rules miss` when a rule or warning was wrong. Before adding a rule, Habitree looks for one that already means the same thing, because duplicates split the feedback count and never harden.
 
 ### Roadmap
 
 | Version | Contents | Status |
 |---|---|---|
-| v0.1 | Rule DB, `init`/`rules`/`check`/`export`, conformance suite, CI on three OSes | Done |
-| v0.2 | In-flight warnings (`guard`), hooks, delegation, Claude Code plugin | Done |
-| v0.3 | Model allocation (`models`), verify commands (`verify`) | Done |
-| v0.4 | Code index (`map`), MCP server | Done |
-| v0.5 | Session audit (`audit`), before/after benchmark (`bench`) | Planned |
+| v0.1 | Rule DB, checks, instruction file generation, conformance suite, CI on three OSes | Done |
+| v0.2 | In-flight warnings, hooks, delegation, Claude Code plugin | Done |
+| v0.3 | Model allocation, verify commands | Done |
+| v0.4 | Code index, MCP server | Done |
+| v0.5 | Session audit, before/after benchmark | In progress |
+| v0.6 | Refactoring suggestions (merging and removing first) | In progress |
+| v0.7 | Lighter: smaller hook cost and default install, and showing the weight of the project that uses it | Planned |
 
 ### Made by
 
-The first open-source project from [Open Prompt](https://github.com/GarlicChicken), which helps anyone learn AI easily and get more out of it in daily life and work. What we make is published without conditions.
+Habitree is the first open-source project from [Open Prompt](https://github.com/GarlicChicken), which works so that AI becomes everyone's tool rather than a skill for a few: helping anyone learn AI easily and get more out of it in daily life and work. What we make is published without conditions, and we gladly borrow good ideas while saying where they came from.
