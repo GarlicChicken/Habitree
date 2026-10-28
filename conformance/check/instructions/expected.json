@@ -1,0 +1,13 @@
+{
+  "exit": 1,
+  "findings": [
+    {
+      "id": "docs.hidden-unicode",
+      "path": "AGENTS.md"
+    },
+    {
+      "id": "docs.import",
+      "path": "CLAUDE.md"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "lang": "en",
+  "rules": {
+    "doc": ""
+  },
+  "docs": {
+    "folder_readme": "error"
+  }
+}

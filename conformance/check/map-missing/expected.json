@@ -1,0 +1,17 @@
+{
+  "exit": 1,
+  "findings": [
+    {
+      "id": "map.folder-readme",
+      "path": "tools/"
+    },
+    {
+      "id": "map.folder-readme",
+      "path": "한글 폴더/"
+    },
+    {
+      "id": "map.missing-folder",
+      "path": "README.md"
+    }
+  ]
+}

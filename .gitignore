@@ -218,3 +218,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Habitree 세션 상태(커밋하지 않음) / Habitree session state (not committed)
+.habitree/state/

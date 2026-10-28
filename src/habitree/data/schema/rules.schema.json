@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/GarlicChicken/habitree/schema/rules.schema.json",
+  "title": "Habitree rule DB",
+  "description": "규칙 DB 형식. 범위(트리)·관점·상황 세 축으로 규칙을 찾고, 피드백·이력·반응이 규칙마다 쌓인다. / Rule DB: rules found by scope (tree), aspect and context, each carrying its own feedback, history and votes.",
+  "type": "object",
+  "required": ["scopes", "aspects", "rules"],
+  "properties": {
+    "version": {"type": "integer"},
+    "about": {"$ref": "#/$defs/text"},
+    "scopes": {"type": "object", "additionalProperties": {"$ref": "#/$defs/text"}},
+    "parents": {"type": "object", "additionalProperties": {"type": "string"}},
+    "aspects": {"type": "object", "additionalProperties": {"$ref": "#/$defs/text"}},
+    "contexts": {"type": "object", "additionalProperties": {"$ref": "#/$defs/text"}},
+    "packs": {"type": "object", "additionalProperties": {"type": "string"}},
+    "rules": {"type": "array", "items": {"$ref": "#/$defs/rule"}}
+  },
+  "$defs": {
+    "text": {
+      "description": "글 한 벌 또는 언어별 글. / One text or per-language texts.",
+      "anyOf": [
+        {"type": "string"},
+        {"type": "object", "properties": {"ko": {"type": "string"}, "en": {"type": "string"}}, "additionalProperties": {"type": "string"}}
+      ]
+    },
+    "cell": {
+      "description": "모델 칸: 등급과 추론 강도. / Model cell: tier and reasoning effort.",
+      "type": "object",
+      "required": ["tier"],
+      "properties": {
+        "tier": {"enum": ["low", "mid", "high", "top"]},
+        "effort": {"enum": ["low", "medium", "high", "max"]}
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "type": "object",
+      "required": ["id", "scope", "aspect", "level", "rule", "why", "check"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[^\\s]+$"},
+        "scope": {"type": "string"},
+        "aspect": {"type": "string"},
+        "when": {"type": "array", "items": {"type": "string"}},
+        "level": {"enum": ["must", "should"]},
+        "rule": {"$ref": "#/$defs/text"},
+        "why": {"$ref": "#/$defs/text"},
+        "check": {
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": {"enum": ["review", "auto"]},
+            "how": {"$ref": "#/$defs/text"},
+            "run": {
+              "description": "자동 검사 정의. / Automatic check definition.",
+              "type": "object",
+              "properties": {
+                "cmd": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+                "forbid": {"type": "string"},
+                "require": {"type": "string"},
+                "max_lines": {"type": "integer", "minimum": 1},
+                "in": {"type": "array", "items": {"type": "string"}},
+                "timeout": {"type": "integer", "minimum": 1}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "feedback": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["date", "note"],
+            "properties": {"date": {"type": "string"}, "note": {"$ref": "#/$defs/text"}, "ref": {"type": "string"}}
+          }
+        },
+        "history": {
+          "type": "array",
+          "items": {"type": "object", "required": ["date", "change"], "properties": {"date": {"type": "string"}, "change": {"type": "string"}}}
+        },
+        "status": {"enum": ["active", "paused", "retired"]},
+        "origin": {"type": "string"},
+        "origin_hash": {"type": "string"},
+        "retire_when": {"$ref": "#/$defs/text"},
+        "detect": {
+          "description": "작업 중 감지(guard). / In-flight detection.",
+          "type": "object",
+          "required": ["signal"],
+          "properties": {
+            "signal": {"type": "string"},
+            "event": {"type": "string"},
+            "threshold": {"type": "integer", "minimum": 1},
+            "stop_at": {"type": "integer", "minimum": 1},
+            "window": {"type": "integer", "minimum": 1},
+            "severity": {"enum": ["info", "warn", "stop"]},
+            "repeat": {"enum": ["once_per_session", "once_per_streak", "always"]},
+            "max_per_session": {"type": "integer", "minimum": 1},
+            "params": {"type": "object"}
+          }
+        },
+        "message": {
+          "type": "object",
+          "properties": {
+            "user": {"$ref": "#/$defs/text"},
+            "ai": {"$ref": "#/$defs/text"},
+            "suggest": {"type": "array", "items": {"$ref": "#/$defs/text"}}
+          }
+        },
+        "votes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["at", "kind"],
+            "properties": {"at": {"type": "string"}, "kind": {"enum": ["useful", "miss", "off"]}, "note": {"type": "string"}}
+          }
+        },
+        "on_delegate": {"enum": ["skip", "ask", "nudge"]},
+        "cell": {"$ref": "#/$defs/cell"},
+        "max_cell": {"$ref": "#/$defs/cell"},
+        "verify": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

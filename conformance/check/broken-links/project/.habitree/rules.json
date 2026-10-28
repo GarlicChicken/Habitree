@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "scopes": {
+    "global": "all"
+  },
+  "aspects": {
+    "process": "process"
+  },
+  "contexts": {},
+  "rules": [
+    {
+      "id": "global.one",
+      "scope": "global",
+      "aspect": "process",
+      "level": "should",
+      "rule": "one rule",
+      "why": "test",
+      "check": {
+        "type": "review",
+        "how": "look"
+      },
+      "feedback": [],
+      "history": [],
+      "status": "active"
+    }
+  ]
+}

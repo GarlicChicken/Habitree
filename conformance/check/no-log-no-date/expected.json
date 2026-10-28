@@ -1,0 +1,13 @@
+{
+  "exit": 0,
+  "findings": [
+    {
+      "id": "docs.log",
+      "path": "LOG.md"
+    },
+    {
+      "id": "docs.updated",
+      "path": "README.md"
+    }
+  ]
+}

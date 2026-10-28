@@ -1,0 +1,86 @@
+"""프로젝트 설정(.habitree/config.json)과 실행 맥락. / Project config and run context."""
+import copy
+from pathlib import Path
+
+from . import io as hio
+from .i18n import LANGS, default_lang
+from .paths import DEFAULT_EXCLUDES, find_root
+
+CONFIG_REL = ".habitree/config.json"
+STATE_REL = ".habitree/state"
+
+DEFAULTS = {
+    "version": 1,
+    "lang": None,  # None이면 이 컴퓨터 언어 설정에서 고른다
+    "exclude": list(DEFAULT_EXCLUDES),
+    "rules": {
+        "db": ".habitree/rules.json",
+        "doc": ".habitree/RULES.md",
+        "brief_budget": 6000,  # rules brief 기본 글자 예산(넘치면 필수 → 권장 순으로 자른다)
+    },
+    "docs": {
+        "map": "README.md",
+        "log": "LOG.md",
+        "folder_readme": "warn",  # "error" | "warn" | false
+        "updated_labels": ["마지막 갱신", "Last updated"],
+        "stale_days": 60,
+        "instructions": ["AGENTS.md", "CLAUDE.md"],
+        "agents_md_max_bytes": 32768,
+        "claude_md_max_lines": 200,
+    },
+    "export": {
+        "targets": ["agents", "claude"],
+        "brief_budget": 3000,  # AGENTS.md 안에 넣는 필수 규칙 요약의 글자 예산
+    },
+    "verify": {},  # 이름 → 명령 배열. 예: {"test": ["pytest", "-q"]}. 종료 코드 0이 합격
+    "checks": {"disable": [], "custom": []},
+    "guard": {"enabled": True},
+}
+
+
+def deep_merge(base, over):
+    out = copy.deepcopy(base)
+    for k, v in (over or {}).items():
+        if isinstance(v, dict) and isinstance(out.get(k), dict):
+            out[k] = deep_merge(out[k], v)
+        else:
+            out[k] = copy.deepcopy(v)
+    return out
+
+
+class Context:
+    """명령이 받는 실행 맥락: 루트, 설정, 언어. / What every command receives."""
+
+    def __init__(self, root, cfg, lang):
+        self.root = Path(root)
+        self.cfg = cfg
+        self.lang = lang
+
+    @classmethod
+    def load(cls, path=None, lang=None):
+        root = find_root(path)
+        raw = hio.load_json(root / CONFIG_REL, {}) or {}
+        cfg = deep_merge(DEFAULTS, raw)
+        chosen = lang or cfg.get("lang")
+        if chosen not in LANGS:
+            chosen = default_lang()
+        return cls(root, cfg, chosen)
+
+    @property
+    def configured(self):
+        return (self.root / CONFIG_REL).is_file()
+
+    def p(self, relpath):
+        return self.root / relpath
+
+    @property
+    def state_dir(self):
+        return self.root / STATE_REL
+
+    def get(self, dotted, default=None):
+        cur = self.cfg
+        for part in dotted.split("."):
+            if not isinstance(cur, dict) or part not in cur:
+                return default
+            cur = cur[part]
+        return cur

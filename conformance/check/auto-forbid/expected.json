@@ -1,0 +1,9 @@
+{
+  "exit": 1,
+  "findings": [
+    {
+      "id": "rules.auto.global.no-todo",
+      "path": "src/app.py"
+    }
+  ]
+}

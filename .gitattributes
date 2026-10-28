@@ -1,0 +1,3 @@
+# 줄바꿈은 세 OS 모두 LF로 / LF line endings on every OS
+* text=auto eol=lf
+*.png binary

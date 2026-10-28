@@ -1,0 +1,25 @@
+# docs
+
+Habitree가 어떻게 일하는지를 정한 문서입니다. 코드는 이 문서를 따라가고, 다른 언어로 엔진을 새로 만들 때도 이 문서가 기준이 됩니다.
+
+- 마지막 갱신: 2026-10-28
+
+| 문서 | 내용 |
+|---|---|
+| [spec/method.md](spec/method.md) | 작업 순환, 지도, 원본은 하나, 규칙 사다리 |
+| [spec/rules-format.md](spec/rules-format.md) | 규칙 DB 형식과 자동 검사 |
+| [spec/check.md](spec/check.md) | 점검 항목과 설정 |
+| [spec/conformance.md](spec/conformance.md) | 적합성 시험 |
+
+---
+
+## English
+
+The documents that define how Habitree works. The code follows them, and they are the reference for anyone writing an engine in another language.
+
+| Document | Contents |
+|---|---|
+| [spec/method.md](spec/method.md) | Work cycle, map, single source of truth, rule ladder |
+| [spec/rules-format.md](spec/rules-format.md) | Rule DB format and automatic checks |
+| [spec/check.md](spec/check.md) | Check items and settings |
+| [spec/conformance.md](spec/conformance.md) | Conformance suite |

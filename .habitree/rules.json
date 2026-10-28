@@ -1,0 +1,417 @@
+{
+  "version": 2,
+  "about": {
+    "ko": "이 프로젝트의 규칙",
+    "en": "Rules of this project"
+  },
+  "scopes": {
+    "global": {
+      "ko": "모든 작업",
+      "en": "All work"
+    },
+    "work": {
+      "ko": "AI가 일하는 방식",
+      "en": "How the AI works"
+    },
+    "work/cycle": {
+      "ko": "작업 순환: 찾기·쓰기·만들기·기록·고치기·점검",
+      "en": "Work cycle: find, reuse, build, record, fix, check"
+    },
+    "docs": {
+      "ko": "문서와 지도",
+      "en": "Docs and map"
+    },
+    "code": {
+      "ko": "코드",
+      "en": "Code"
+    },
+    "code/structure": {
+      "ko": "코드 구조(모듈, 파일 크기, 중복)",
+      "en": "Code structure (modules, file size, duplication)"
+    },
+    "security": {
+      "ko": "보안과 개인정보",
+      "en": "Security and privacy"
+    }
+  },
+  "aspects": {
+    "process": {
+      "ko": "절차와 작업 순서",
+      "en": "Process and order of work"
+    },
+    "structure": {
+      "ko": "구조와 나누기",
+      "en": "Structure and modularity"
+    },
+    "quality": {
+      "ko": "품질과 검증",
+      "en": "Quality and verification"
+    },
+    "docs": {
+      "ko": "문서와 기록",
+      "en": "Docs and records"
+    },
+    "security": {
+      "ko": "보안과 개인정보",
+      "en": "Security and privacy"
+    },
+    "style": {
+      "ko": "문체와 표기",
+      "en": "Style and wording"
+    },
+    "content": {
+      "ko": "내용",
+      "en": "Content"
+    }
+  },
+  "contexts": {
+    "task:implement": {
+      "ko": "기능을 만들거나 고칠 때",
+      "en": "When building or changing features"
+    },
+    "task:research": {
+      "ko": "조사하거나 읽기만 할 때",
+      "en": "When researching or only reading"
+    },
+    "task:review": {
+      "ko": "검토할 때",
+      "en": "When reviewing"
+    }
+  },
+  "rules": [
+    {
+      "id": "work.cycle.find-first",
+      "scope": "work/cycle",
+      "aspect": "process",
+      "level": "must",
+      "rule": {
+        "ko": "새로 만들기 전에 지도(README 색인)와 규칙에서 같은 일을 하는 문서·도구·코드가 있는지 먼저 찾는다. 있으면 쓰고, 낡았으면 그 자리에서 고친다.",
+        "en": "Before building anything, search the map (README index) and rules for docs, tools or code that already do the job. Reuse what exists and fix it on the spot if it is stale."
+      },
+      "why": {
+        "ko": "같은 것을 두 번 만들면 토큰과 유지 비용이 두 배가 되고, 원본이 둘이 된다.",
+        "en": "Building the same thing twice doubles tokens and upkeep, and creates two sources of truth."
+      },
+      "check": {
+        "type": "review",
+        "how": {
+          "ko": "새 파일·함수를 만들기 전에 찾은 근거(지도 항목, 검색 결과)를 말할 수 있는지 본다.",
+          "en": "Before adding a file or function, can you name what you searched (map entry, search result)?"
+        }
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.1.0",
+      "origin_hash": "06130fe16f0a46c5"
+    },
+    {
+      "id": "work.cycle.repeat-to-module",
+      "scope": "work/cycle",
+      "aspect": "structure",
+      "level": "should",
+      "rule": {
+        "ko": "같은 작업이 두 번 되풀이되면 세 번째 전에 도구·함수·양식으로 만든다.",
+        "en": "When the same task repeats twice, turn it into a tool, function or template before the third time."
+      },
+      "why": {
+        "ko": "되풀이할 때마다 같은 코드를 다시 쓰면 토큰을 매번 다시 쓰고 결과도 조금씩 달라진다.",
+        "en": "Rewriting the same code each time spends tokens again and drifts slightly every time."
+      },
+      "check": {
+        "type": "review",
+        "how": {
+          "ko": "이번 작업에서 전에 쓴 것과 비슷한 스크립트를 새로 썼는지 본다.",
+          "en": "Did this task rewrite a script similar to an earlier one?"
+        }
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.1.0",
+      "origin_hash": "af063fbd5eddc6d6"
+    },
+    {
+      "id": "work.cycle.batch-edits",
+      "scope": "work/cycle",
+      "aspect": "process",
+      "level": "should",
+      "rule": {
+        "ko": "같은 파일을 조금씩 여러 번 고치지 않는다. 바꿀 것을 먼저 목록으로 모으고 한 번에 고친 뒤 한 번 확인한다.",
+        "en": "Do not edit the same file in many small passes. Collect the changes first, apply them together, then verify once."
+      },
+      "why": {
+        "ko": "고칠 때마다 파일을 다시 읽어 토큰이 들고, 고친 곳끼리 어긋나기 쉽다.",
+        "en": "Each pass re-reads the file, costing tokens, and separate edits drift apart."
+      },
+      "check": {
+        "type": "review",
+        "how": {
+          "ko": "한 파일에 작은 수정이 여러 번 이어졌는지 본다.",
+          "en": "Were there many small consecutive edits to one file?"
+        }
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.1.0",
+      "origin_hash": "b37d25745e1c2981"
+    },
+    {
+      "id": "work.cycle.record",
+      "scope": "work/cycle",
+      "aspect": "docs",
+      "level": "must",
+      "rule": {
+        "ko": "바꾼 것은 이어진 문서(폴더 README, 지도, 변경 기록)에 함께 반영한다.",
+        "en": "Reflect every change in the linked docs (folder README, map, change log)."
+      },
+      "why": {
+        "ko": "문서가 실제와 어긋나면 다음 작업이 틀린 지도를 읽는다.",
+        "en": "When docs drift from reality, the next task reads a wrong map."
+      },
+      "check": {
+        "type": "review",
+        "how": {
+          "ko": "`habitree check`가 지도·링크·갱신일 문제를 보고하지 않는지 본다.",
+          "en": "`habitree check` reports no map, link or date problems."
+        }
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.1.0",
+      "origin_hash": "ea4a3745317cccee"
+    },
+    {
+      "id": "work.cycle.todo",
+      "scope": "work/cycle",
+      "aspect": "docs",
+      "level": "should",
+      "rule": {
+        "ko": "발견했지만 지금 고치지 못한 문제와 아이디어는 변경 기록의 '손볼 것'에 적는다. 처리하면 지우고 기록으로 옮긴다.",
+        "en": "Write problems or ideas you found but could not fix now under 'To fix' in the change log. Move them to the log once done."
+      },
+      "why": {
+        "ko": "적지 않으면 다음 세션이 같은 문제를 처음부터 다시 찾는다.",
+        "en": "Unrecorded findings get rediscovered from scratch in the next session."
+      },
+      "check": {
+        "type": "review",
+        "how": {
+          "ko": "작업 중 미룬 문제가 '손볼 것'에 있는지 본다.",
+          "en": "Deferred problems appear under 'To fix'."
+        }
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.1.0",
+      "origin_hash": "037cc41590f01adb"
+    },
+    {
+      "id": "work.cycle.check-before-done",
+      "scope": "work/cycle",
+      "aspect": "quality",
+      "level": "must",
+      "rule": {
+        "ko": "끝내기 전에 `habitree check`와 등록한 검증 명령(테스트·빌드)을 실행하고, 나온 문제를 고친 뒤 끝낸다.",
+        "en": "Before finishing, run `habitree check` and the registered verify commands (tests, build), and fix what they report."
+      },
+      "why": {
+        "ko": "사람이 검사기 역할을 하면 '됐어?'를 되풀이하며 시간과 토큰이 샌다.",
+        "en": "When the human acts as the test runner, 'is it done?' loops waste time and tokens."
+      },
+      "check": {
+        "type": "review",
+        "how": {
+          "ko": "끝 보고에 점검·검증 결과가 들어 있는지 본다.",
+          "en": "The final report includes check and verify results."
+        }
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.1.0",
+      "origin_hash": "b4c70bccd2733098"
+    },
+    {
+      "id": "work.cycle.feedback-to-rule",
+      "scope": "work/cycle",
+      "aspect": "process",
+      "level": "must",
+      "rule": {
+        "ko": "사용자 피드백은 고치는 것과 동시에 규칙으로 남긴다. 같은 뜻 규칙이 있으면 `habitree rules hit`, 없으면 `habitree rules add`(가장 넓게 맞는 범위에).",
+        "en": "Record user feedback as a rule while fixing it: `habitree rules hit` when a rule with the same meaning exists, otherwise `habitree rules add` (at the widest scope that fits)."
+      },
+      "why": {
+        "ko": "사용자가 같은 피드백을 두 번 하지 않게 한다.",
+        "en": "So the user never has to give the same feedback twice."
+      },
+      "check": {
+        "type": "review",
+        "how": {
+          "ko": "이번 피드백이 규칙 DB에 기록됐는지 본다.",
+          "en": "This feedback is recorded in the rule DB."
+        }
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.1.0",
+      "origin_hash": "dfa286cbd035a2ce"
+    },
+    {
+      "id": "docs.single-source",
+      "scope": "docs",
+      "aspect": "docs",
+      "level": "must",
+      "rule": {
+        "ko": "같은 내용을 여러 곳에 복사하지 않고 원본 한 곳에 두고 링크한다.",
+        "en": "Keep one source for each piece of content and link to it instead of copying."
+      },
+      "why": {
+        "ko": "복사본은 따로 낡아 서로 어긋난다.",
+        "en": "Copies go stale separately and contradict each other."
+      },
+      "check": {
+        "type": "review",
+        "how": {
+          "ko": "같은 설명이 두 문서에 따로 있지 않은지 본다.",
+          "en": "The same explanation does not live in two documents."
+        }
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.1.0",
+      "origin_hash": "1348c08a2cb00c64"
+    },
+    {
+      "id": "docs.generated-no-edit",
+      "scope": "docs",
+      "aspect": "docs",
+      "level": "must",
+      "rule": {
+        "ko": "도구가 만든 파일과 구역(habitree:begin/end 사이)은 직접 고치지 않는다. 원본을 고친 뒤 도구로 다시 만든다.",
+        "en": "Do not hand-edit generated files or blocks (between habitree:begin/end). Change the source and regenerate."
+      },
+      "why": {
+        "ko": "직접 고친 내용은 다음 생성 때 사라지거나 원본과 어긋난다.",
+        "en": "Hand edits are lost on the next generation or drift from the source."
+      },
+      "check": {
+        "type": "review",
+        "how": {
+          "ko": "`habitree check`의 generated.edited 알림이 없는지 본다.",
+          "en": "`habitree check` shows no generated.edited notice."
+        }
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.1.0",
+      "origin_hash": "e9a2c9bd1307ead5"
+    },
+    {
+      "id": "code.structure.module-over-patch",
+      "scope": "code/structure",
+      "aspect": "structure",
+      "level": "should",
+      "rule": {
+        "ko": "기능을 더할 때 기존 함수·파일에 덧대지 말고 역할별 모듈·함수로 나눈다. 한 파일이 계속 커지면 나눌 때다.",
+        "en": "When adding features, split by responsibility into modules and functions instead of patching onto existing ones. A file that keeps growing is due for a split."
+      },
+      "why": {
+        "ko": "덧대기로 커진 코드는 읽을 때마다 토큰이 많이 들고, 고칠 때 엉뚱한 곳이 깨진다.",
+        "en": "Patched-up code costs more tokens to read and breaks in unexpected places when changed."
+      },
+      "check": {
+        "type": "review",
+        "how": {
+          "ko": "이번에 크게 늘어난 파일이 있는지, 비슷한 코드가 복사됐는지 본다.",
+          "en": "Did any file grow a lot, or was similar code copied?"
+        }
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.1.0",
+      "origin_hash": "ef22270092c82ea3"
+    },
+    {
+      "id": "work.verify.define-check",
+      "scope": "work",
+      "aspect": "quality",
+      "level": "should",
+      "rule": {
+        "ko": "결과를 확인할 기계 검증(테스트·빌드·린트 명령)을 정해 설정 `verify`에 등록하고, 고칠 때마다 돌린다.",
+        "en": "Register machine checks (test, build, lint commands) under `verify` in the config and run them after each change."
+      },
+      "why": {
+        "ko": "통과·실패가 분명해야 AI가 스스로 고치고, 낮은 등급 모델의 실수도 잡힌다.",
+        "en": "A clear pass/fail lets the AI fix its own mistakes and catches errors from lower-tier models."
+      },
+      "check": {
+        "type": "review",
+        "how": {
+          "ko": "설정의 verify에 명령이 하나 이상 있는지 본다.",
+          "en": "The config lists at least one verify command."
+        }
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.1.0",
+      "origin_hash": "964abb8a566f989c"
+    },
+    {
+      "id": "security.no-secrets",
+      "scope": "security",
+      "aspect": "security",
+      "level": "must",
+      "rule": {
+        "ko": "API 키·토큰·비밀번호·개인정보를 코드, 문서, 커밋에 넣지 않는다. 환경 변수나 .env(커밋 제외)로 받는다.",
+        "en": "Never put API keys, tokens, passwords or personal data in code, docs or commits. Read them from environment variables or an uncommitted .env."
+      },
+      "why": {
+        "ko": "한 번 공개된 비밀은 지워도 이미 퍼졌을 수 있다.",
+        "en": "A secret once published may already have spread, even after deletion."
+      },
+      "check": {
+        "type": "auto",
+        "how": {
+          "ko": "잘 알려진 키 형식(sk-, ghp_, AKIA, 개인 키 머리말)이 파일에 없는지 자동으로 찾는다.",
+          "en": "Automatically scans files for well-known key formats (sk-, ghp_, AKIA, private key headers)."
+        },
+        "run": {
+          "forbid": "(sk-(?:ant-|proj-)?[A-Za-z0-9_-]{24,}|ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{40,}|AKIA[0-9A-Z]{16}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----)",
+          "in": [
+            "**/*"
+          ]
+        }
+      },
+      "when": [],
+      "feedback": [],
+      "history": [],
+      "status": "active",
+      "origin": "pack:base@0.1.0",
+      "origin_hash": "6c0b5b9c1169ad49"
+    }
+  ],
+  "parents": {},
+  "packs": {
+    "base": "0.1.0"
+  }
+}

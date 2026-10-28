@@ -1,0 +1,9 @@
+{
+  "exit": 1,
+  "findings": [
+    {
+      "id": "docs.link",
+      "path": "README.md"
+    }
+  ]
+}
