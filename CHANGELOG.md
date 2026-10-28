@@ -2,6 +2,16 @@
 
 새 버전을 위에 씁니다.
 
+## 0.3.0 (2026-10-28)
+
+일의 종류마다 알맞은 모델에서 시작하고, 기계 검증이 실패할 때만 올라가게 하는 버전입니다.
+
+- `habitree models`: 작업 유형별 (등급, 강도) 칸 보기와 고르기(`show`, `pick`), 실패 신호별 승격(`escalate`), 결과 기록(`record`), 기록으로 기본 칸 조정(`tune`, 올림은 바로 하고 내림은 제안만), 사람이 이유와 함께 칸 정하기(`set`), Claude Code·Codex·Aider·LiteLLM·opencode 설정 내보내기(`export`), 점검(`check`).
+- `habitree verify`: 설정의 검증 명령을 셸 없이 실행합니다. 종료 코드 0이 합격이고, `--task`를 주면 결과를 기록합니다.
+- 모델 대응표 `vendors.json`과 스키마(Anthropic, OpenAI, Google, 확인일 2026-10-28). 프로젝트의 `.habitree/vendors.json`으로 덮어쓸 수 있습니다.
+- 규칙 꾸러미 `task`: 작업 유형별 기본 칸과, 위험한 작업과 보안 리뷰의 하한.
+- 점검 항목 `models.deprecated`, `models.floor`, `models.price-stale`과 적합성 사례 `check/models-floor`. 명세 `docs/spec/models.md`.
+
 ## 0.2.0 (2026-10-28)
 
 끝난 뒤가 아니라 일하는 도중에 알려 주는 버전입니다.
@@ -29,6 +39,16 @@
 ## English
 
 Newest first.
+
+### 0.3.0 (2026-10-28)
+
+Start each kind of work on a suitable model, and move up only when machine verification fails.
+
+- `habitree models`: show and pick the (tier, effort) cell per task type (`show`, `pick`), escalate by failure signal (`escalate`), record outcomes (`record`), tune default cells from the records (`tune`: raises apply at once, lowering is only suggested), set a cell by hand with a reason (`set`), export settings for Claude Code, Codex, Aider, LiteLLM and opencode (`export`), and check (`check`).
+- `habitree verify` runs the configured verify commands without a shell. Exit 0 passes, and `--task` records the result.
+- The vendor table `vendors.json` with its schema (Anthropic, OpenAI, Google; checked 2026-10-28), overridable per project with `.habitree/vendors.json`.
+- The `task` rule pack: default cells per task type, with floors for risky work and security review.
+- Check items `models.deprecated`, `models.floor` and `models.price-stale`, the conformance case `check/models-floor`, and the spec `docs/spec/models.md`.
 
 ### 0.2.0 (2026-10-28)
 

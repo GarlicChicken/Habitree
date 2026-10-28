@@ -1,0 +1,55 @@
+{
+  "version": 2,
+  "scopes": {
+    "global": "all",
+    "task": "task types",
+    "task/explore": "exploration",
+    "task/risky": "risky work",
+    "task/risky/deploy": "deploys"
+  },
+  "aspects": {
+    "model": "model allocation"
+  },
+  "contexts": {},
+  "rules": [
+    {
+      "id": "task.cell",
+      "scope": "task",
+      "aspect": "model",
+      "level": "should",
+      "cell": {"tier": "mid", "effort": "medium"},
+      "rule": "default cell `mid:medium`",
+      "why": "test",
+      "check": {"type": "auto", "how": "models pick"},
+      "feedback": [],
+      "history": [],
+      "status": "active"
+    },
+    {
+      "id": "task.explore.cell",
+      "scope": "task/explore",
+      "aspect": "model",
+      "level": "should",
+      "cell": {"tier": "low", "effort": "medium"},
+      "rule": "explore at `low:medium`",
+      "why": "test",
+      "check": {"type": "auto", "how": "models pick"},
+      "feedback": [],
+      "history": [],
+      "status": "active"
+    },
+    {
+      "id": "task.risky.floor",
+      "scope": "task/risky",
+      "aspect": "model",
+      "level": "must",
+      "cell": {"tier": "high", "effort": "high"},
+      "rule": "risky work has a floor of `high:high`",
+      "why": "test",
+      "check": {"type": "auto", "how": "models.floor"},
+      "feedback": [],
+      "history": [],
+      "status": "active"
+    }
+  ]
+}

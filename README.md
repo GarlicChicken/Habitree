@@ -3,7 +3,7 @@
 AI와 코딩할 때 토큰은 줄이고 재사용은 늘리도록 돕는 도구입니다. 피드백은 규칙으로, 반복은 모듈로 자라게 합니다.
 
 - 마지막 갱신: 2026-10-28
-- 상태: v0.2 알파
+- 상태: v0.3 알파
 - 라이선스: [MIT](LICENSE)
 - [English](#english)
 
@@ -108,6 +108,14 @@ Habitree는 이것을 일하는 도중에 알려 줍니다. 같은 명령을 세
 
 "알아서 해 줘"라고 맡기면 그 작업에 한해서는 되묻지 않고 추천안대로 진행합니다. 다만 지우기, 배포, 외부로 보내기, 결제, 개인정보처럼 되돌리기 어려운 일은 그때도 묻고, 끝에 대신 정한 것과 미뤄 둔 경고를 모아 보고합니다. 자세한 것은 [docs/spec/guard.md](docs/spec/guard.md)에 있습니다.
 
+## 일마다 알맞은 모델
+
+AI에게 일을 맡길 때 가장 비싼 모델을 늘 쓰면 돈이 새고, 가장 싼 모델을 늘 쓰면 틀린 결과를 고치느라 시간이 샙니다. 알맞은 모델을 고르는 것도 습관입니다.
+
+Habitree는 탐색, 요약, 코드 작성, 리뷰, 위험한 작업 같은 작업 유형마다 시작할 자리(등급과 추론 강도)를 정해 두고, 그 자리를 Anthropic, OpenAI, Google의 실제 모델 이름과 강도 값으로 옮겨 줍니다(`habitree models`). 싼 자리에서 시작한 일은 테스트나 빌드 같은 기계 검증(`habitree verify`)이 실패했을 때만 한 칸씩 올리고, 서버 장애 때는 등급을 올리지 않고 같은 등급의 다른 모델로 돌립니다. 인증, 결제, 배포 같은 위험한 작업에는 하한을 두어 자동으로 내려가지 않게 합니다.
+
+라우터를 따로 띄우지 않습니다. 정책 하나에서 Claude Code 서브에이전트, Codex, Aider, LiteLLM, opencode 설정을 만들어 냅니다. 모델 가격과 단종일은 출처, 확인한 날짜와 함께 대응표에 두고, 오래되면 `habitree check`가 알려 줍니다. 자세한 것은 [docs/spec/models.md](docs/spec/models.md)에 있습니다.
+
 ## 방향
 
 - **어떤 언어, 어떤 환경에서도.** 규칙과 설정은 JSON과 Markdown으로 된 명세이고, 이 엔진은 그 명세의 참조 구현입니다. Windows, macOS, Linux에서 같은 명령으로 돌고, 한글 파일 이름과 공백이 든 경로도 처리합니다. 다른 언어로 엔진을 새로 만들어도 [적합성 시험](docs/spec/conformance.md)을 통과하면 같은 규칙 DB를 쓸 수 있습니다.
@@ -121,7 +129,7 @@ Habitree는 이것을 일하는 도중에 알려 줍니다. 같은 명령을 세
 |---|---|---|
 | v0.1 | 규칙 DB, `init`·`rules`·`check`·`export`, 적합성 시험, 세 OS CI | 완료 |
 | v0.2 | 작업 중 비효율 경고(`guard`), 훅, 위임 예외, Claude Code 플러그인 | 완료 |
-| v0.3 | 모델 배분(`models`), 검증 명령(`verify`) | 진행 중 |
+| v0.3 | 모델 배분(`models`), 검증 명령(`verify`) | 완료 |
 | v0.4 | 코드 색인(`map`), MCP 서버 | 진행 중 |
 | v0.5 | 세션 기록 분석(`audit`), 전후 비교 측정(`bench`) | 예정 |
 
@@ -133,6 +141,7 @@ Habitree는 이것을 일하는 도중에 알려 줍니다. 같은 명령을 세
 | 규칙 DB 형식 | [docs/spec/rules-format.md](docs/spec/rules-format.md) |
 | 점검 항목 | [docs/spec/check.md](docs/spec/check.md) |
 | 작업 중 경고와 위임 | [docs/spec/guard.md](docs/spec/guard.md) |
+| 모델 배분과 검증 | [docs/spec/models.md](docs/spec/models.md) |
 | 적합성 시험 | [docs/spec/conformance.md](docs/spec/conformance.md) |
 | 구조와 기여 방법 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 바뀐 것 | [CHANGELOG.md](CHANGELOG.md) |
@@ -250,6 +259,14 @@ Warnings are rules in the rule DB too. Reactions such as "that was right" or "th
 
 When you hand over a task with "just do it", the agent goes with the recommended options without asking, for that task only. It still asks before anything hard to undo, such as deleting, deploying, sending data outside, payments or personal data, and at the end it reports the decisions it made and the warnings it held back. See [docs/spec/guard.md](docs/spec/guard.md).
 
+### The right model for each job
+
+Using the most expensive model for everything wastes money; using the cheapest for everything wastes time fixing wrong results. Picking the right model is a habit too.
+
+Habitree sets a starting place (tier and reasoning effort) for each kind of work, such as exploring, summarizing, writing code, reviewing or risky changes, and translates it into real model names and effort values for Anthropic, OpenAI and Google (`habitree models`). Work that starts in a cheap place moves up one step only when machine verification such as tests or builds fails (`habitree verify`), and outages switch to another model of the same tier instead of raising it. Risky work such as auth, payments and deploys has a floor that is never lowered automatically.
+
+There is no router to run. One policy generates settings for Claude Code subagents, Codex, Aider, LiteLLM and opencode. Model prices and retirement dates live in a vendor table with their sources and checked dates, and `habitree check` tells you when they get old. See [docs/spec/models.md](docs/spec/models.md).
+
 ### Direction
 
 - **Any language, any environment.** Rules and settings are a JSON and Markdown specification, and this engine is its reference implementation. The same commands run on Windows, macOS and Linux, including Korean file names and paths with spaces. An engine written in another language can share the same rule DB once it passes the [conformance suite](docs/spec/conformance.md).
@@ -263,7 +280,7 @@ When you hand over a task with "just do it", the agent goes with the recommended
 |---|---|---|
 | v0.1 | Rule DB, `init`/`rules`/`check`/`export`, conformance suite, CI on three OSes | Done |
 | v0.2 | In-flight warnings (`guard`), hooks, delegation, Claude Code plugin | Done |
-| v0.3 | Model allocation (`models`), verify commands (`verify`) | In progress |
+| v0.3 | Model allocation (`models`), verify commands (`verify`) | Done |
 | v0.4 | Code index (`map`), MCP server | In progress |
 | v0.5 | Session audit (`audit`), before/after benchmark (`bench`) | Planned |
 

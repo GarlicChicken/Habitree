@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/GarlicChicken/habitree/schema/vendors.schema.json",
+  "title": "Habitree vendor table",
+  "description": "회사별 모델 대응표. 정책은 (등급, 강도) 칸으로 쓰고, 이 표가 칸을 회사의 실제 모델 ID와 강도 값으로 옮긴다. 가격은 100만 토큰당 USD. 확인하지 못한 값은 null로 두고 note에 적는다. / Vendor table: maps a (tier, effort) cell to each vendor's real model ID and effort value. Prices are USD per million tokens; unverified values are null with a note.",
+  "type": "object",
+  "required": ["version", "vendors"],
+  "properties": {
+    "version": {"type": "integer"},
+    "about": {"$ref": "#/$defs/text"},
+    "vendors": {"type": "object", "additionalProperties": {"$ref": "#/$defs/vendor"}}
+  },
+  "$defs": {
+    "text": {
+      "anyOf": [
+        {"type": "string"},
+        {"type": "object", "properties": {"ko": {"type": "string"}, "en": {"type": "string"}}, "additionalProperties": {"type": "string"}}
+      ]
+    },
+    "date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+    "tier": {"enum": ["low", "mid", "high", "top"]},
+    "effort": {"enum": ["low", "medium", "high", "max"]},
+    "usd": {"type": ["number", "null"], "minimum": 0},
+    "effort_map": {
+      "description": "중립 강도 이름 → 회사의 강도 값. / Neutral effort name → vendor effort value.",
+      "type": "object",
+      "properties": {
+        "low": {"type": "string"},
+        "medium": {"type": "string"},
+        "high": {"type": "string"},
+        "max": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "substitute": {
+      "description": "그 등급 모델이 없을 때 대신 쓰는 칸. / Cell used when the vendor has no model at this tier.",
+      "type": "object",
+      "required": ["tier"],
+      "properties": {
+        "tier": {"$ref": "#/$defs/tier"},
+        "effort": {"$ref": "#/$defs/effort"},
+        "note": {"$ref": "#/$defs/text"}
+      },
+      "additionalProperties": false
+    },
+    "tier_slot": {
+      "anyOf": [{"type": "string"}, {"type": "null"}, {"$ref": "#/$defs/substitute"}]
+    },
+    "price_band": {
+      "description": "프롬프트가 prompt_tokens를 넘을 때의 단가. / Rates when the prompt is over prompt_tokens.",
+      "type": "object",
+      "required": ["prompt_tokens"],
+      "properties": {
+        "prompt_tokens": {"type": "integer", "minimum": 1},
+        "input": {"$ref": "#/$defs/usd"},
+        "output": {"$ref": "#/$defs/usd"},
+        "cache_read": {"$ref": "#/$defs/usd"},
+        "cache_write": {"$ref": "#/$defs/usd"},
+        "cache_write_long": {"$ref": "#/$defs/usd"}
+      },
+      "additionalProperties": false
+    },
+    "price_change": {
+      "description": "예고된 가격 변경(from 날짜부터). / Announced price change effective from a date.",
+      "type": "object",
+      "required": ["from"],
+      "properties": {
+        "from": {"$ref": "#/$defs/date"},
+        "input": {"$ref": "#/$defs/usd"},
+        "output": {"$ref": "#/$defs/usd"},
+        "cache_read": {"$ref": "#/$defs/usd"},
+        "cache_write": {"$ref": "#/$defs/usd"},
+        "cache_write_long": {"$ref": "#/$defs/usd"},
+        "cache_storage_hour": {"$ref": "#/$defs/usd"}
+      },
+      "additionalProperties": false
+    },
+    "price": {
+      "description": "100만 토큰당 USD(표준 등급). cache_write는 짧은 캐시 쓰기, cache_write_long은 긴 캐시 쓰기(회사마다 1시간·12시간 등). / USD per million tokens (standard tier).",
+      "type": "object",
+      "required": ["input", "output"],
+      "properties": {
+        "input": {"$ref": "#/$defs/usd"},
+        "output": {"$ref": "#/$defs/usd"},
+        "cache_read": {"$ref": "#/$defs/usd"},
+        "cache_write": {"$ref": "#/$defs/usd"},
+        "cache_write_long": {"$ref": "#/$defs/usd"},
+        "cache_storage_hour": {"$ref": "#/$defs/usd"},
+        "above": {"type": "array", "items": {"$ref": "#/$defs/price_band"}},
+        "changes": {"type": "array", "items": {"$ref": "#/$defs/price_change"}},
+        "note": {"$ref": "#/$defs/text"}
+      },
+      "additionalProperties": false
+    },
+    "model": {
+      "type": "object",
+      "required": ["tier", "price", "source"],
+      "properties": {
+        "name": {"type": "string"},
+        "tier": {"anyOf": [{"$ref": "#/$defs/tier"}, {"type": "null"}]},
+        "aliases": {"type": "array", "items": {"type": "string"}},
+        "pinned": {"type": ["boolean", "null"]},
+        "status": {"enum": ["active", "legacy", "deprecated", "retired", "preview"]},
+        "efforts": {"type": "array", "items": {"type": "string"}},
+        "default_effort": {"type": ["string", "null"]},
+        "effort_map": {"$ref": "#/$defs/effort_map"},
+        "context": {"type": ["integer", "null"], "minimum": 1},
+        "max_output": {"type": ["integer", "null"], "minimum": 1},
+        "price": {"$ref": "#/$defs/price"},
+        "retire": {"anyOf": [{"$ref": "#/$defs/date"}, {"type": "null"}]},
+        "retire_not_before": {"anyOf": [{"$ref": "#/$defs/date"}, {"type": "null"}]},
+        "replacement": {"type": ["string", "null"]},
+        "source": {"type": "string"},
+        "checked": {"$ref": "#/$defs/date"},
+        "note": {"$ref": "#/$defs/text"}
+      },
+      "additionalProperties": false
+    },
+    "vendor": {
+      "type": "object",
+      "required": ["name", "checked", "effort_map", "tiers", "models"],
+      "properties": {
+        "name": {"type": "string"},
+        "checked": {"$ref": "#/$defs/date"},
+        "effort_param": {"type": "string"},
+        "effort_map": {"$ref": "#/$defs/effort_map"},
+        "tiers": {
+          "type": "object",
+          "properties": {
+            "low": {"$ref": "#/$defs/tier_slot"},
+            "mid": {"$ref": "#/$defs/tier_slot"},
+            "high": {"$ref": "#/$defs/tier_slot"},
+            "top": {"$ref": "#/$defs/tier_slot"}
+          },
+          "additionalProperties": false
+        },
+        "prefix": {
+          "description": "도구별 모델 이름 앞에 붙이는 회사 이름(예: LiteLLM의 anthropic/). / Provider prefix per tool.",
+          "type": "object",
+          "additionalProperties": {"type": "string"}
+        },
+        "env_key": {"type": "string"},
+        "sources": {"type": "object", "additionalProperties": {"type": "string"}},
+        "note": {"$ref": "#/$defs/text"},
+        "models": {"type": "object", "additionalProperties": {"$ref": "#/$defs/model"}}
+      },
+      "additionalProperties": false
+    }
+  }
+}

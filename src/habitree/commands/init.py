@@ -21,7 +21,7 @@ from . import export
 SUMMARY = {"ko": "프로젝트에 Habitree 뼈대 깔기(다시 실행하면 업그레이드)",
            "en": "Install the Habitree skeleton (run again to upgrade)"}
 
-DEFAULT_PACKS = ["base", "work"]
+DEFAULT_PACKS = ["base", "work", "task"]
 
 README_NEW = """# {name}
 

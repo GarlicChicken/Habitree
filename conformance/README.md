@@ -12,6 +12,7 @@
 | `check/auto-forbid` | 규칙의 자동 검사(`forbid`와 `in` 글롭) |
 | `check/instructions` | 숨은 제어 문자, 대상이 없는 `@import` |
 | `check/no-log-no-date` | 변경 기록과 갱신일이 없을 때(경고만) |
+| `check/models-floor` | 에이전트가 쓰는 모델이 그 작업의 하한보다 낮음(상위 범위의 하한을 물려받음) |
 
 판정 방법은 [docs/spec/conformance.md](../docs/spec/conformance.md)에 있습니다.
 

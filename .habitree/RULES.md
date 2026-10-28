@@ -3,8 +3,8 @@
 > 이 문서는 [rules.json](rules.json)에서 자동으로 만든다. 직접 고치지 말고 `habitree rules`로 고친다.
 > Generated from [rules.json](rules.json). Do not edit by hand; use `habitree rules`.
 
-- 규칙 26개 · 피드백 0건 · 마지막 피드백 -
-- 26 rules · 0 feedback entries · last feedback -
+- 규칙 50개 · 피드백 0건 · 마지막 피드백 -
+- 50 rules · 0 feedback entries · last feedback -
 
 ## 범위 · Scopes
 
@@ -22,6 +22,25 @@
 | 　`code` | 코드 · Code | 0 |
 | 　　`code/structure` | 코드 구조(모듈, 파일 크기, 중복) · Code structure (modules, file size, duplication) | 3 |
 | 　`security` | 보안과 개인정보 · Security and privacy | 1 |
+| 　`task` | 작업 유형(모델 배분) · Task types (model allocation) | 6 |
+| 　　`task/explore` | 탐색·검색 · Exploration and search | 1 |
+| 　　`task/summarize` | 요약 · Summaries | 1 |
+| 　　`task/commit-message` | 커밋 메시지·제목·이름 · Commit messages, titles, names | 1 |
+| 　　`task/bulk` | 대량 분류·추출·변환 · Bulk classification, extraction, conversion | 1 |
+| 　　`task/plan` | 계획·설계 · Planning and design | 1 |
+| 　　`task/code` | 코드 작성 · Writing code | 1 |
+| 　　　`task/code/clear-spec` | 명세가 분명한 코드 · Code with a clear spec | 1 |
+| 　　　`task/code/ambiguous` | 모호하거나 여러 파일에 걸친 코드 · Ambiguous or multi-file code | 1 |
+| 　　`task/refactor` | 리팩터링 · Refactoring | 1 |
+| 　　　`task/refactor/mechanical` | 기계적 리팩터링 · Mechanical refactoring | 1 |
+| 　　　`task/refactor/structural` | 구조 리팩터링 · Structural refactoring | 1 |
+| 　　`task/debug` | 디버깅 · Debugging | 1 |
+| 　　`task/test` | 테스트 작성 · Writing tests | 1 |
+| 　　`task/review` | 리뷰·판정 · Review and judging | 1 |
+| 　　　`task/review/security` | 보안 리뷰 · Security review | 1 |
+| 　　`task/docs` | 문서 · Documentation | 1 |
+| 　　`task/risky` | 위험 작업(인증·돈·개인정보·비밀값·마이그레이션·삭제·배포) · Risky work (auth, money, personal data, secrets, migrations, deletion, deploys) | 1 |
+| 　　`task/long-autonomous` | 몇 시간 도는 자율 작업 · Long-running autonomous work | 1 |
 
 ## 관점 · Aspects
 
@@ -34,6 +53,7 @@
 | `security` | 보안과 개인정보 · Security and privacy | 2 |
 | `style` | 문체와 표기 · Style and wording | 0 |
 | `content` | 내용 · Content | 0 |
+| `model` | 모델 배분(등급·강도) · Model allocation (tier and effort) | 24 |
 
 ## 상황 태그 · Contexts
 
@@ -192,4 +212,157 @@
   - 이유 · Why: 한 번 공개된 비밀은 지워도 이미 퍼졌을 수 있다. / A secret once published may already have spread, even after deletion.
   - 점검 · Check (자동 · auto): 잘 알려진 키 형식(sk-, ghp_, AKIA, 개인 키 머리말)이 파일에 없는지 자동으로 찾는다. / Automatically scans files for well-known key formats (sk-, ghp_, AKIA, private key headers).
   - 피드백 · feedback 0 · `pack:base@0.1.0` · `security.no-secrets`
+
+### `task` · 작업 유형(모델 배분) · Task types (model allocation)
+
+- **[권장 · should · model] 작업 유형을 정하지 않은 일은 `mid:medium` 칸(등급:강도)에서 시작한다. 자동 승격은 `high:high`까지. / Work without a task type starts at the `mid:medium` cell (tier:effort). Automatic escalation stops at `high:high`.**
+  - 이유 · Why: [확인] Claude Code 비용 문서: Sonnet이 대부분의 코딩을 잘 하고 Opus보다 싸다. [추정] 유형을 모를 때의 기본값으로 중 등급을 둔다. / [verified] Claude Code costs doc: Sonnet handles most coding tasks well and costs less than Opus. [estimate] mid tier as the default when the type is unknown.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.cell`
+- **[권장 · should · model] 모델 비용은 토큰 단가가 아니라 끝낸 작업 하나당 비용으로 비교한다. 실패한 시도의 비용도 넣는다. / Compare model cost per completed task, not per token, including the cost of failed attempts.**
+  - 이유 · Why: [확인] Anthropic 비용·지능 최적화 문서: 끝낸 작업에 돈을 내므로 토큰당이 아니라 끝낸 작업당 비용으로 비교한다. / [verified] Anthropic cost and intelligence guide: compare cost per completed task, not per token, because you pay for completed tasks.
+  - 점검 · Check (눈으로 · review): 비교표에 실패한 시도의 비용이 들어 있는지 본다. / Comparisons include failed attempts.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.cost-per-task`
+- **[권장 · should · model] 싼 서브에이전트에게 나눠 맡기는 것은 서로 독립이고 양이 많고 결과를 검사할 수 있는 일일 때만 한다. 한 줄로 이어지는 일은 쪼개지 않고 주 에이전트가 강도를 낮춰 한다. / Split work across cheap subagents only when the pieces are independent, numerous and checkable. Do not split one dependent chain; let the main agent do it at lower effort.**
+  - 이유 · Why: [주장] Anthropic 비용·지능 최적화 문서의 내부 측정: 위임은 꼬리가 긴 반복 작업과 컨텍스트 하나를 넘는 일에서만 돈을 아꼈고, 한 줄로 이어지는 일은 지휘 모델 혼자 낮은 강도로 한 쪽이 측정한 모든 경우에 앞섰다. / [claim] Anthropic's internal measurements in the cost and intelligence guide: delegation saved money only for routine work with a long cost tail and for work larger than one context; for one dependent chain the orchestrator alone at lower effort came out ahead in every case measured.
+  - 점검 · Check (눈으로 · review): 나눠 맡긴 조각들이 서로 기다리지 않는지 본다. / Delegated pieces do not wait on each other.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.delegate-independent`
+- **[권장 · should · model] 칸을 올릴 때는 모델(등급)보다 강도를 먼저 본다. 둘 다 바꾸기 전에 지시문·맥락·도구·검증 명령이 빠지지 않았는지 먼저 확인한다. / When moving up a cell, look at effort before the model tier. Before changing either, check that instructions, context, tools and verify commands are not missing.**
+  - 이유 · Why: [확인] Anthropic 비용·지능 최적화 문서: 두 번째 모델을 더하기 전에 지금 모델의 강도부터 훑어 본다. Anthropic의 Claude Code 모델·강도 글: 고칠 곳은 대개 위쪽(맥락, CLAUDE.md, 작업 범위)에 있다. / [verified] Anthropic cost and intelligence guide: sweep effort on the current model before adding a second one. Anthropic's Claude Code model and effort article: the fix is often upstream (context, CLAUDE.md, task scope).
+  - 점검 · Check (눈으로 · review): 승격 전에 맥락·도구·검증 명령을 점검했는지 본다. / Context, tools and verify commands were checked before escalating.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.effort-first`
+- **[권장 · should · model] 승격한 칸은 새 서브에이전트(새 대화)에서 돌리고 실패 요약만 넘긴다. 대화 중간에 모델을 바꾸지 않는다. / Run an escalated cell in a fresh subagent (new conversation) and pass only a failure summary. Do not switch models mid-conversation.**
+  - 이유 · Why: [확인] Anthropic 강도 문서: 최상위 강도를 요청 사이에 바꾸면 캐시가 다시 시작된다. / [verified] Anthropic effort docs: changing top-level effort between requests restarts the prompt cache.
+  - 점검 · Check (눈으로 · review): 승격이 같은 대화 안에서 모델만 바꿔 일어나지 않았는지 본다. / Escalation did not just swap the model inside the same conversation.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.escalate-fresh`
+- **[권장 · should · model] 자동 승격은 기계 검증(설정 verify의 명령, 종료 코드 0이 합격)이 있는 작업만 한다. 건너뜀은 강도+1, 자신 있게 틀림·맴돌기는 등급+1, 형식 오류는 같은 칸 1번 더, 장애(429·5xx·과부하)는 등급을 올리지 않고 같은 등급의 다른 모델로. 작업당 자동 승격 2단계·시도 4번까지 하고 그다음은 사람에게 넘긴다(`habitree models escalate`). / Escalate automatically only for tasks with machine verification (verify commands in the config, exit 0 passes). Skipped steps: effort +1. Confidently wrong or looping: tier +1. Format errors: one more try in the same cell. Outages (429, 5xx, overload): keep the tier and switch to another model of the same tier. At most 2 automatic steps and 4 attempts per task, then hand over to a person (`habitree models escalate`).**
+  - 이유 · Why: [확인] Anthropic 비용·지능 최적화 문서: 낮은 강도로 돌리고 실패만 높은 강도로 다시 돌리면 싸지만, 나쁜 결과를 통과시키는 판정이면 실패가 그대로 지나간다. [주장] RouterBench(arXiv 2403.12031): 계단식 라우터는 판정 오류율이 0.2를 넘으면 급격히 나빠진다. [확인] LiteLLM은 장애 대체(fallbacks)를 품질과 다른 설정으로 둔다. [추정] 2단계·4번 상한. / [verified] Anthropic cost and intelligence guide: running low and re-running only failures higher saves money, but a checker that passes bad work lets failures through. [claim] RouterBench (arXiv 2403.12031): cascades degrade sharply once judge error exceeds 0.2. [verified] LiteLLM keeps outage fallbacks separate from quality. [estimate] the 2-step and 4-attempt caps.
+  - 점검 · Check (눈으로 · review): 승격 기록(models record)에 장애와 품질 실패가 섞이지 않았는지 본다. / Escalation records (models record) keep outages apart from quality failures.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.escalate-on-verify`
+
+### `task/explore` · 탐색·검색 · Exploration and search
+
+- **[권장 · should · model] 탐색·검색(파일·함수 위치 찾기, 문서 조회, 코드를 읽고 보고하기)은 `low:medium` 칸에서 시작한다. 자동 승격은 `mid:medium`까지. / Exploration and search (finding files and functions, looking up docs, reading code and reporting) starts at `low:medium`. Automatic escalation stops at `mid:medium`.**
+  - 이유 · Why: [확인] Claude Code 비용 문서: 단순한 서브에이전트 작업은 model: haiku. [확인] Anthropic 강도 문서: Haiku 5.5는 긴 에이전트 프롬프트에서 low일 때 검색을 건너뛰거나 일찍 멈추기 쉽다. 그래서 보통 강도. / [verified] Claude Code costs doc: use model: haiku for simple subagent tasks. [verified] Anthropic effort docs: in long agent prompts Haiku 5.5 is more likely to skip a search or stop early at low, hence medium.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.explore.cell`
+
+### `task/summarize` · 요약 · Summaries
+
+- **[권장 · should · model] 로그·긴 문서·지난 대화 요약은 `low:low` 칸에서 시작하고, 입력이 크면 나눠서 넘긴다. 자동 승격은 `mid:medium`까지. / Summaries of logs, long documents and past sessions start at `low:low`; split large inputs. Automatic escalation stops at `mid:medium`.**
+  - 이유 · Why: [확인] Aider는 대화 요약에 약한 모델을 쓰고, Claude Code는 지난 대화 요약 같은 배경 일에 haiku 별칭 모델을 쓴다. [확인] Anthropic 가격표: Haiku 5.5는 프롬프트가 10만 토큰을 넘으면 입력 단가가 0.10달러에서 0.50달러가 된다. / [verified] Aider summarizes chats with its weak model, and Claude Code runs background summaries on the haiku alias model. [verified] Anthropic pricing: Haiku 5.5 input goes from $0.10 to $0.50 per million tokens for prompts over 100,000 tokens.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.summarize.cell`
+
+### `task/commit-message` · 커밋 메시지·제목·이름 · Commit messages, titles, names
+
+- **[권장 · should · model] 커밋 메시지·세션 제목·PR 제목·이름 짓기는 `low:low` 칸에서 시작한다. 자동 승격은 `mid:low`까지. / Commit messages, session titles, PR titles and naming start at `low:low`. Automatic escalation stops at `mid:low`.**
+  - 이유 · Why: [확인] Aider는 커밋 메시지를 약한 모델로 먼저 만들고 안 되면 주 모델로 만든다. opencode는 제목 생성 같은 가벼운 일에 small_model을 쓴다(설정 문서). / [verified] Aider writes commit messages with the weak model first and falls back to the main model. opencode uses small_model for light work such as title generation (config docs).
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.commit-message.cell`
+
+### `task/bulk` · 대량 분류·추출·변환 · Bulk classification, extraction, conversion
+
+- **[권장 · should · model] 대량 분류·추출·형식 변환은 `low:low` 칸에서 시작하고 결과를 스키마로 검사한다. 자동 승격은 `mid:medium`까지. / Bulk classification, extraction and format conversion start at `low:low`, with results checked against a schema. Automatic escalation stops at `mid:medium`.**
+  - 이유 · Why: [확인] Anthropic 모델 개요: Haiku 5.5는 분류·추출·라우팅 같은 대량·지연 민감 작업용이고 Batch API는 50% 할인. OpenAI 모델 문서: Luna는 대량 작업용. / [verified] Anthropic models overview: Haiku 5.5 is for high-volume, latency-sensitive classification, extraction and routing, and the Batch API is 50% off. OpenAI models page: Luna is for high-volume tasks.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.bulk.cell`
+
+### `task/plan` · 계획·설계 · Planning and design
+
+- **[권장 · should · model] 계획·설계(구조 설계, 작업 나누기, 기술 선택)는 `high:high` 칸에서 읽기만 하며 한다. 자동 승격은 `top:high`까지. / Planning and design (architecture, breaking down work, choosing technology) runs read-only at `high:high`. Automatic escalation stops at `top:high`.**
+  - 이유 · Why: [확인] Claude Code의 opusplan은 계획 모드에 opus, 실행에 sonnet을 쓴다. Anthropic의 모델·강도 글: 설계 결정은 큰 모델. [추정] 방향이 틀리면 뒤 작업이 모두 헛수고가 된다. / [verified] Claude Code's opusplan uses opus in plan mode and sonnet for execution. Anthropic's model and effort article: architecture decisions go to the larger model. [estimate] a wrong direction wastes all later work.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.plan.cell`
+
+### `task/code` · 코드 작성 · Writing code
+
+- **[권장 · should · model] 새 코드 작성과 기능 추가는 `mid:medium` 칸에서 시작하고, 명세가 분명한지 모호한지 알면 하위 유형(clear-spec, ambiguous)으로 고른다. 자동 승격은 `high:high`까지. / Writing new code and adding features starts at `mid:medium`; pick a subtype (clear-spec, ambiguous) once you know how clear the spec is. Automatic escalation stops at `high:high`.**
+  - 이유 · Why: [확인] Claude Code 비용 문서: Sonnet이 대부분의 코딩을 잘 하고 Opus보다 싸다. Anthropic 강도 문서: Sonnet 5.5로 에이전트 코딩을 할 때 명세가 분명하면 medium부터, 어렵거나 길면 high. / [verified] Claude Code costs doc: Sonnet handles most coding well and costs less than Opus. Anthropic effort docs: for agentic coding on Sonnet 5.5, start at medium for well-specified tasks and move to high for harder or longer ones.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.code.cell`
+
+### `task/code/clear-spec` · 명세가 분명한 코드 · Code with a clear spec
+
+- **[권장 · should · model] 정해진 함수·화면·API 하나처럼 명세가 분명한 구현은 `mid:medium` 칸에서 시작한다. 자동 승격은 `high:high`까지. / Well-specified implementation, such as one defined function, screen or API, starts at `mid:medium`. Automatic escalation stops at `high:high`.**
+  - 이유 · Why: [확인] Anthropic의 모델·강도 글: 정확히 설명할 수 있는 변경은 작은 모델. Anthropic 강도 문서: 명세가 분명한 에이전트 코딩은 medium부터. / [verified] Anthropic's model and effort article: edits you can describe precisely go to a smaller model. Anthropic effort docs: start well-specified agentic coding at medium.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.code.clear-spec.cell`
+
+### `task/code/ambiguous` · 모호하거나 여러 파일에 걸친 코드 · Ambiguous or multi-file code
+
+- **[권장 · should · model] 모호하거나 여러 모듈에 걸친 변경(새 기능, 여러 파일)은 `high:medium` 칸에서 시작한다. 자동 승격은 `top:high`까지. / Ambiguous or multi-module changes (new features, many files) start at `high:medium`. Automatic escalation stops at `top:high`.**
+  - 이유 · Why: [확인] Anthropic 모델 개요: 잘 모르면 Opus 5.5로 시작한다(기본 강도 medium). 모델·강도 글: 큰 모델이 모호함을 더 잘 다룬다. / [verified] Anthropic models overview: if unsure, start with Opus 5.5 (default effort medium). Model and effort article: larger models handle ambiguity better.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.code.ambiguous.cell`
+
+### `task/refactor` · 리팩터링 · Refactoring
+
+- **[권장 · should · model] 종류를 정하지 않은 리팩터링은 `mid:medium` 칸에서 시작한다. 자동 승격은 `high:high`까지. / Refactoring of unspecified kind starts at `mid:medium`. Automatic escalation stops at `high:high`.**
+  - 이유 · Why: [추정] 기계적인지 구조적인지 정하지 않았을 때의 중간값. / [estimate] a middle value when it is not yet clear whether the change is mechanical or structural.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.refactor.cell`
+
+### `task/refactor/mechanical` · 기계적 리팩터링 · Mechanical refactoring
+
+- **[권장 · should · model] 이름 바꾸기·함수 옮기기·형식 통일 같은 기계적 리팩터링은 `mid:low` 칸에서 시작한다. 자동 승격은 `high:medium`까지. / Mechanical refactoring such as renames, moving functions and unifying formats starts at `mid:low`. Automatic escalation stops at `high:medium`.**
+  - 이유 · Why: [확인] Anthropic의 모델·강도 글: 기계적 변경은 작은 모델. [추정] 테스트가 있으면 낮은 강도로 충분하다. / [verified] Anthropic's model and effort article: mechanical changes go to a smaller model. [estimate] low effort is enough when tests exist.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.refactor.mechanical.cell`
+
+### `task/refactor/structural` · 구조 리팩터링 · Structural refactoring
+
+- **[권장 · should · model] 큰 구조 변경·의존성 교체 같은 구조 리팩터링은 `high:high` 칸에서 시작한다. 자동 승격은 `top:high`까지. / Structural refactoring such as large restructures or dependency swaps starts at `high:high`. Automatic escalation stops at `top:high`.**
+  - 이유 · Why: [확인] Claude Code 비용 문서: Opus는 복잡한 설계 결정과 여러 단계 추론에 쓴다. [추정] 되돌리기 비용이 크고 여러 파일의 맞물림을 함께 봐야 한다. / [verified] Claude Code costs doc: reserve Opus for complex architectural decisions and multi-step reasoning. [estimate] high rollback cost and many interlocking files.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.refactor.structural.cell`
+
+### `task/debug` · 디버깅 · Debugging
+
+- **[권장 · should · model] 원인 모를 버그·간헐 실패는 `high:high` 칸에서 재현 테스트부터 만들며 고친다. 자동 승격은 `top:high`까지. / Unknown bugs and flaky failures are fixed at `high:high`, starting with a reproducing test. Automatic escalation stops at `top:high`.**
+  - 이유 · Why: [확인] Anthropic의 모델·강도 글: 미묘한 버그는 큰 모델. Claude Code 강도 안내: high는 기존 코드의 버그 수정처럼 검증이 중요한 일. / [verified] Anthropic's model and effort article: subtle bugs go to the larger model. Claude Code effort guidance: high suits work where verification matters, such as fixing bugs in existing code.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.debug.cell`
+
+### `task/test` · 테스트 작성 · Writing tests
+
+- **[권장 · should · model] 테스트 작성은 `mid:medium` 칸에서 시작하고, 통과해도 아무것도 검사하지 않는 테스트가 없는지 사람이 본다. 자동 승격은 `high:medium`까지. / Writing tests starts at `mid:medium`; a person checks for tests that pass without asserting anything. Automatic escalation stops at `high:medium`.**
+  - 이유 · Why: [추정] 테스트는 통과해도 의미가 없을 수 있어 기계 검증만으로는 품질을 다 알 수 없다. / [estimate] tests can pass while checking nothing, so machine verification alone cannot judge them.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.test.cell`
+
+### `task/review` · 리뷰·판정 · Review and judging
+
+- **[권장 · should · model] 리뷰·결과 판정은 `high:medium` 칸에서 하고, 되도록 작성한 모델과 다른 회사 모델로 한다. 하 등급으로 리뷰하지 않는다. 자동 승격은 `top:high`까지. / Review and judging run at `high:medium`, preferably on a different vendor than the author model. Never review with the low tier. Automatic escalation stops at `top:high`.**
+  - 이유 · Why: [주장] LLM 판정자는 자기 계열 답을 좋게 보는 편향이 있다(Zheng 외, arXiv 2306.05685). [확인] Codex는 /review 전용 review_model을 따로 둔다. [추정] 작성 칸보다 한 단계 위. / [claim] LLM judges favor answers from their own family (Zheng et al., arXiv 2306.05685). [verified] Codex has a separate review_model for /review. [estimate] one step above the author cell.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.review.cell`
+
+### `task/review/security` · 보안 리뷰 · Security review
+
+- **[필수 · must · model] 보안 리뷰는 `high:high` 칸이 하한이다. 자동으로 내리지 않고, 결과가 미덥지 않으면 사람에게 넘긴다. 실제 모델은 `habitree models pick task/review/security`로 본다. / Security review has a floor of `high:high`. It is never lowered automatically, and doubtful results go to a person. Look up the real model with `habitree models pick task/review/security`.**
+  - 이유 · Why: [추정] 놓친 문제를 되돌리는 비용이 매우 크다. / [estimate] a missed issue is very expensive to undo.
+  - 점검 · Check (자동 · auto): `habitree check`의 models.floor가 에이전트 파일의 model을 하한과 비교하고, `habitree models export`는 하한보다 낮은 값을 쓰지 않는다. / `habitree check` (models.floor) compares agent files with the floor, and `habitree models export` never writes a lower value.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.review.security.floor`
+
+### `task/docs` · 문서 · Documentation
+
+- **[권장 · should · model] README·안내문·주석 같은 문서는 `mid:medium` 칸에서 쓰고, 쉬운 말과 정확성은 사람이 본다. 자동 승격은 `high:medium`까지. / Docs such as READMEs, guides and comments are written at `mid:medium`; a person checks plain wording and accuracy. Automatic escalation stops at `high:medium`.**
+  - 이유 · Why: [추정] 링크·형식은 기계로 볼 수 있지만 읽기 쉬움은 사람이 본다. / [estimate] links and format can be machine-checked, readability cannot.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.docs.cell`
+
+### `task/risky` · 위험 작업(인증·돈·개인정보·비밀값·마이그레이션·삭제·배포) · Risky work (auth, money, personal data, secrets, migrations, deletion, deploys)
+
+- **[필수 · must · model] 인증·권한, 돈·결제, 개인정보, 비밀값, DB 마이그레이션, 삭제, 배포는 `high:high` 칸이 하한이다. 자동으로 내리지 않고, 실패하면 사람에게 넘긴다. 실제 모델은 `habitree models pick task/risky`로 본다. / Auth and permissions, money and payments, personal data, secrets, DB migrations, deletion and deploys have a floor of `high:high`. It is never lowered automatically, and failures go to a person. Look up the real model with `habitree models pick task/risky`.**
+  - 이유 · Why: [추정] 되돌리기 비용이 매우 크다. 근거: Anthropic 'Building effective agents'는 자율 에이전트가 비용이 크고 오류가 쌓일 수 있어 격리 환경에서 충분히 시험하라고 한다. / [estimate] the cost of undoing is very high. Basis: Anthropic's 'Building effective agents' warns that autonomous agents cost more and compound errors, so test them extensively in sandboxes.
+  - 점검 · Check (자동 · auto): `habitree check`의 models.floor가 에이전트 파일의 model을 하한과 비교하고, `habitree models export`는 하한보다 낮은 값을 쓰지 않는다. / `habitree check` (models.floor) compares agent files with the floor, and `habitree models export` never writes a lower value.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.risky.floor`
+
+### `task/long-autonomous` · 몇 시간 도는 자율 작업 · Long-running autonomous work
+
+- **[권장 · should · model] 몇 시간 도는 자율 조사·구현은 `top:high` 칸에서 하고, 끝나면 사람이 결과를 본다. / Autonomous research or implementation that runs for hours uses `top:high`, and a person reviews the result.**
+  - 이유 · Why: [확인] Anthropic 모델 개요: Fable 5.1은 어려운 추론과 오래 도는 에이전트 작업용. [추정] 최상 등급은 승격이나 이런 명시적 지정으로만 쓴다. / [verified] Anthropic models overview: Fable 5.1 is for demanding reasoning and long-horizon agentic work. [estimate] the top tier is used only by escalation or explicit choice like this.
+  - 점검 · Check (자동 · auto): `habitree models pick`·`export`가 이 칸을 쓴다. / `habitree models pick` and `export` use this cell.
+  - 피드백 · feedback 0 · `pack:task@0.3.0` · `task.long-autonomous.cell`
 

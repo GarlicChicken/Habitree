@@ -23,4 +23,10 @@
 
 [security] 보안과 개인정보
 - [필수·security] API 키·토큰·비밀번호·개인정보를 코드, 문서, 커밋에 넣지 않는다. 환경 변수나 .env(커밋 제외)로 받는다.
+
+[task/review/security] 보안 리뷰
+- [필수·model] 보안 리뷰는 `high:high` 칸이 하한이다. 자동으로 내리지 않고, 결과가 미덥지 않으면 사람에게 넘긴다. 실제 모델은 `habitree models pick task/review/security`로 본다.
+
+[task/risky] 위험 작업(인증·돈·개인정보·비밀값·마이그레이션·삭제·배포)
+- [필수·model] 인증·권한, 돈·결제, 개인정보, 비밀값, DB 마이그레이션, 삭제, 배포는 `high:high` 칸이 하한이다. 자동으로 내리지 않고, 실패하면 사람에게 넘긴다. 실제 모델은 `habitree models pick task/risky`로 본다.
 <!-- habitree:end habitree -->

@@ -389,6 +389,13 @@ def check_custom(ctx, out):
             out.append(Finding(cid, c.get("level", "error"), msg))
 
 
+def check_models(ctx, out):
+    """모델 배분(v0.3): models.deprecated·models.floor·models.price-stale. 설정에 models 절이 없으면 넘어간다."""
+    from ..core.modelpolicy import findings
+    for f in findings(ctx):
+        out.append(Finding(f["id"], f["level"], f["msg"], f.get("path", "")))
+
+
 def collect(ctx, no_auto=False):
     files = iter_files(ctx.root, ctx.get("exclude"))
     out = []
@@ -401,6 +408,7 @@ def collect(ctx, no_auto=False):
     check_generated(ctx, out)
     check_paths(ctx, files, out)
     check_custom(ctx, out)
+    check_models(ctx, out)
     disabled = ctx.get("checks.disable") or []
     out = [f for f in out if not any(f.id == d or f.id.startswith(d + ".") for d in disabled)]
     return out, files

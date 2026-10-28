@@ -10,7 +10,8 @@ habitree/
 ├── commands/         # 명령 하나에 모듈 하나
 │   ├── __init__.py   # 등록부 COMMANDS
 │   ├── init.py  rules.py  check.py  export.py
-│   └── hook.py  guard.py   # 작업 중 경고(v0.2)
+│   ├── hook.py  guard.py   # 작업 중 경고(v0.2)
+│   └── models.py  verify.py  # 모델 배분과 검증(v0.3)
 ├── core/             # 여러 명령이 함께 쓰는 코드
 │   ├── io.py         # UTF-8·LF 원자적 쓰기, 표준 입출력
 │   ├── paths.py      # NFC 경로 키, 글롭, git 파일 목록
@@ -21,11 +22,14 @@ habitree/
 │   ├── textsim.py    # 같은 뜻 규칙 찾기
 │   ├── markdown.py   # 링크, 앵커, 생성 구역
 │   ├── timeutil.py   # UTC 저장, 지역 시각 표시
-│   └── state.py      # 세션 상태 파일(훅이 씀)
+│   ├── state.py      # 세션 상태 파일(훅이 씀)
+│   ├── vendors.py    # 회사별 모델 대응표와 가격
+│   └── modelpolicy.py  # 작업별 칸, 승격, 조정
 ├── guard/            # 감지기, 위임, Claude Code 훅 어댑터
 └── data/
     ├── schema/       # JSON Schema (명세의 일부)
-    └── packs/        # 기본 규칙 꾸러미
+    ├── packs/        # 기본 규칙 꾸러미(base, work, task)
+    └── vendors.json  # 모델 대응표(출처와 확인일 포함)
 ```
 
 새 명령을 더하는 방법은 [CONTRIBUTING.md](../CONTRIBUTING.md)에 있습니다.

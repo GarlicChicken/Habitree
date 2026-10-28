@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "lang": "en",
+  "rules": {
+    "doc": ""
+  },
+  "docs": {
+    "folder_readme": "error"
+  },
+  "models": {
+    "vendor": "anthropic",
+    "agents": {
+      "scout": "task/risky/deploy",
+      "reader": "task/explore"
+    },
+    "price_stale_days": 36500
+  }
+}

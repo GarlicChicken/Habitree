@@ -21,6 +21,9 @@
 | `generated.edited` | 알림 | 생성 구역을 사람이 직접 고침(`.habitree/manifest.json`과 다름) |
 | `paths.collision` | 오류, 경고 | 대소문자나 NFC·NFD만 다른 파일 이름(오류), git에 NFD로 등록된 이름(경고) |
 | `git.precompose` | 경고 | macOS에서 git `core.precomposeUnicode`가 꺼져 있음 |
+| `models.deprecated` | 경고 | 쓰는 모델(기본 회사의 등급 모델, `models.agents`에 묶인 에이전트 파일의 model)이 `models.deprecation_days`(90) 안에 단종되거나 이미 단종됨. 설정에 `models` 절이 없으면 보지 않음 |
+| `models.floor` | 오류 | 에이전트 파일의 model(같은 등급이면 강도까지)이 그 작업의 하한(필수 규칙의 `cell`)보다 낮거나, 대응표를 읽지 못함 |
+| `models.price-stale` | 알림 | 쓰는 회사의 가격·모델 확인일이 `models.price_stale_days`(90)보다 오래됨 |
 | `custom.<id>` | 설정대로 | 설정 `checks.custom`의 명령이 0이 아닌 코드로 끝남 |
 
 ## 설정
@@ -63,6 +66,9 @@ The items reported by `habitree check`. Checks that ask an AI to judge cost mone
 | `generated.edited` | info | A managed block was edited by hand (differs from `.habitree/manifest.json`) |
 | `paths.collision` | error, warn | File names that differ only by case or NFC/NFD (error); names stored in git as NFD (warn) |
 | `git.precompose` | warn | On macOS, git `core.precomposeUnicode` is off |
+| `models.deprecated` | warn | A model in use (the default vendor's tier models, or the model in an agent file bound by `models.agents`) retires within `models.deprecation_days` (90) or already has; skipped without a `models` section |
+| `models.floor` | error | An agent file's model (and effort, within the same tier) is below the task's floor (the `cell` of a must rule), or the vendor table cannot be read |
+| `models.price-stale` | info | The vendor's prices and models were checked longer ago than `models.price_stale_days` (90) |
 | `custom.<id>` | as configured | A command in `checks.custom` exited with a non-zero code |
 
 ### Configuration

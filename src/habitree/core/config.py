@@ -33,6 +33,15 @@ DEFAULTS = {
         "brief_budget": 3000,  # AGENTS.md 안에 넣는 필수 규칙 요약의 글자 예산
     },
     "verify": {},  # 이름 → 명령 배열. 예: {"test": ["pytest", "-q"]}. 종료 코드 0이 합격
+    "models": {  # 모델 배분(habitree models). 설정 파일에 이 절이 없으면 check가 모델 점검을 건너뛴다
+        "vendor": "anthropic",       # pick·export가 쓸 회사(대응표 vendors.json의 이름)
+        "agents": {},                # 에이전트 이름 → 작업. 예: {"explorer": "task/explore"} (.claude/agents/<이름>.md)
+        "claude_model": "id",        # 에이전트 파일에 쓸 값: "id"(고정 ID) | "alias"(opus·sonnet·haiku)
+        "deprecation_days": 90,      # 단종일이 이 날 수 안이면 경고
+        "price_stale_days": 90,      # 가격·모델 확인일이 이보다 오래되면 알림
+        "tune": {"window": 20, "min_runs": 10, "up_ratio": 0.2, "down_ratio": 0.05},
+        "escalate": {"max_steps": 2, "max_attempts": 4},
+    },
     "checks": {"disable": [], "custom": []},
     "guard": {
         "enabled": True,

@@ -1,0 +1,426 @@
+{
+  "version": 1,
+  "about": {
+    "ko": "회사별 모델 대응표. 등급(low·mid·high·top)과 회사 모델의 대응은 각 회사가 모델에 붙인 설명으로 맞춘 추정이고, 회사 사이 성능이 같은지는 재지 않았다. 가격은 표준 등급, 100만 토큰당 USD. 확인일의 공식 페이지 값이며, 확인하지 못한 값은 null이다. 프로젝트의 .habitree/vendors.json으로 항목 단위로 덮어쓸 수 있다.",
+    "en": "Vendor table. The mapping of tiers (low, mid, high, top) to vendor models is an estimate based on each vendor's own model descriptions; cross-vendor performance parity was not measured. Prices are standard tier, USD per million tokens, as shown on official pages on the checked date; unverified values are null. A project can override entries in .habitree/vendors.json."
+  },
+  "vendors": {
+    "anthropic": {
+      "name": "Anthropic",
+      "checked": "2026-10-28",
+      "effort_param": "output_config.effort",
+      "effort_map": {"low": "low", "medium": "medium", "high": "high", "max": "xhigh"},
+      "tiers": {
+        "top": "claude-fable-5-1",
+        "high": "claude-opus-5-5",
+        "mid": "claude-sonnet-5-5",
+        "low": "claude-haiku-5-5"
+      },
+      "prefix": {"litellm": "anthropic", "opencode": "anthropic", "aider": "anthropic"},
+      "env_key": "ANTHROPIC_API_KEY",
+      "sources": {
+        "models": "https://platform.claude.com/docs/en/about-claude/models/overview",
+        "pricing": "https://platform.claude.com/docs/en/about-claude/pricing",
+        "effort": "https://platform.claude.com/docs/en/build-with-claude/effort",
+        "deprecations": "https://platform.claude.com/docs/en/about-claude/model-deprecations",
+        "claude_code_aliases": "https://code.claude.com/docs/en/model-config"
+      },
+      "note": {
+        "ko": "모든 Claude 모델 ID는 고정 스냅숏이다(모델 개요). 별칭 opus·sonnet·haiku·fable은 Claude Code의 별칭이고 버전에 따라 가리키는 모델이 바뀐다. 중립 강도 max는 xhigh로 옮긴다. Anthropic의 max는 토큰 사용에 제한이 없는 단계라 기본 번역에 쓰지 않는다. 단종 예고는 공개 모델 기준 60일 이상(단종 문서).",
+        "en": "Every Claude model ID is a pinned snapshot (models overview). The aliases opus, sonnet, haiku and fable are Claude Code aliases whose targets change between versions. Neutral max maps to xhigh; Anthropic's max has no limit on token spending, so the default mapping does not use it. Retirement notice is at least 60 days for publicly released models (deprecations page)."
+      },
+      "models": {
+        "claude-fable-5-1": {
+          "name": "Claude Fable 5.1",
+          "tier": "top",
+          "aliases": ["fable"],
+          "pinned": true,
+          "status": "active",
+          "efforts": ["low", "medium", "high", "xhigh", "max"],
+          "default_effort": "high",
+          "context": 1000000,
+          "max_output": 128000,
+          "price": {"input": 10, "output": 50, "cache_read": 0.25, "cache_write": 12.5, "cache_write_long": 20,
+                    "note": "cache_write: 5분 캐시 쓰기, cache_write_long: 1시간 캐시 쓰기 / 5-minute and 1-hour cache writes"},
+          "retire": null,
+          "retire_not_before": "2027-09-01",
+          "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+          "checked": "2026-10-28"
+        },
+        "claude-opus-5-5": {
+          "name": "Claude Opus 5.5",
+          "tier": "high",
+          "aliases": ["opus"],
+          "pinned": true,
+          "status": "active",
+          "efforts": ["low", "medium", "high", "xhigh", "max"],
+          "default_effort": "medium",
+          "context": 1000000,
+          "max_output": 128000,
+          "price": {"input": 4, "output": 20, "cache_read": 0.2, "cache_write": 5, "cache_write_long": 8},
+          "retire": null,
+          "retire_not_before": "2027-09-22",
+          "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+          "checked": "2026-10-28"
+        },
+        "claude-sonnet-5-5": {
+          "name": "Claude Sonnet 5.5",
+          "tier": "mid",
+          "aliases": ["sonnet"],
+          "pinned": true,
+          "status": "active",
+          "efforts": ["low", "medium", "high", "xhigh", "max"],
+          "default_effort": "high",
+          "context": 1000000,
+          "max_output": 128000,
+          "price": {"input": 2, "output": 10, "cache_read": 0.1, "cache_write": 2.5, "cache_write_long": 4},
+          "retire": null,
+          "retire_not_before": "2027-09-28",
+          "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+          "checked": "2026-10-28",
+          "note": {"ko": "API 기본 강도는 high, Claude Code 기본 강도는 medium(Claude Code 모델 설정 문서).",
+                   "en": "Default effort is high on the API and medium in Claude Code (Claude Code model config)."}
+        },
+        "claude-haiku-5-5": {
+          "name": "Claude Haiku 5.5",
+          "tier": "low",
+          "aliases": ["haiku"],
+          "pinned": true,
+          "status": "active",
+          "efforts": ["low", "medium", "high", "xhigh", "max"],
+          "default_effort": "medium",
+          "context": 1000000,
+          "max_output": 128000,
+          "price": {
+            "input": 0.1, "output": 0.5, "cache_read": 0.01, "cache_write": 0.125, "cache_write_long": 0.2,
+            "above": [{"prompt_tokens": 100000, "input": 0.5, "output": 2.5, "cache_read": 0.05, "cache_write": 0.625,
+                       "cache_write_long": 1}],
+            "note": "프롬프트가 10만 토큰을 넘으면 above 단가 / above rates apply to prompts over 100,000 tokens"
+          },
+          "retire": null,
+          "retire_not_before": "2027-10-07",
+          "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+          "checked": "2026-10-28"
+        },
+        "claude-fable-5": {
+          "name": "Claude Fable 5", "tier": null, "pinned": true, "status": "legacy",
+          "efforts": ["low", "medium", "high", "xhigh", "max"], "default_effort": "high",
+          "price": {"input": 10, "output": 50, "cache_read": 1, "cache_write": 12.5, "cache_write_long": 20},
+          "retire": null, "retire_not_before": "2027-06-09",
+          "source": "https://platform.claude.com/docs/en/about-claude/pricing", "checked": "2026-10-28"
+        },
+        "claude-opus-5": {
+          "name": "Claude Opus 5", "tier": null, "pinned": true, "status": "legacy",
+          "efforts": ["low", "medium", "high", "xhigh", "max"], "default_effort": "high",
+          "price": {"input": 5, "output": 25, "cache_read": 0.5, "cache_write": 6.25, "cache_write_long": 10},
+          "retire": null, "retire_not_before": "2027-07-24",
+          "source": "https://platform.claude.com/docs/en/about-claude/pricing", "checked": "2026-10-28"
+        },
+        "claude-opus-4-8": {
+          "name": "Claude Opus 4.8", "tier": null, "pinned": true, "status": "legacy",
+          "efforts": ["low", "medium", "high", "xhigh", "max"], "default_effort": "high",
+          "price": {"input": 5, "output": 25, "cache_read": 0.5, "cache_write": 6.25, "cache_write_long": 10},
+          "retire": null, "retire_not_before": "2027-05-28",
+          "source": "https://platform.claude.com/docs/en/about-claude/pricing", "checked": "2026-10-28"
+        },
+        "claude-opus-4-7": {
+          "name": "Claude Opus 4.7", "tier": null, "pinned": true, "status": "legacy",
+          "efforts": ["low", "medium", "high", "xhigh", "max"], "default_effort": "high",
+          "price": {"input": 5, "output": 25, "cache_read": 0.5, "cache_write": 6.25, "cache_write_long": 10},
+          "retire": null, "retire_not_before": "2027-04-16",
+          "source": "https://platform.claude.com/docs/en/about-claude/pricing", "checked": "2026-10-28"
+        },
+        "claude-opus-4-6": {
+          "name": "Claude Opus 4.6", "tier": null, "pinned": true, "status": "legacy",
+          "efforts": ["low", "medium", "high", "max"], "default_effort": "high",
+          "price": {"input": 5, "output": 25, "cache_read": 0.5, "cache_write": 6.25, "cache_write_long": 10},
+          "retire": null, "retire_not_before": "2027-02-05",
+          "source": "https://platform.claude.com/docs/en/about-claude/pricing", "checked": "2026-10-28"
+        },
+        "claude-opus-4-5-20251101": {
+          "name": "Claude Opus 4.5", "tier": null, "pinned": true, "status": "legacy",
+          "price": {"input": 5, "output": 25, "cache_read": 0.5, "cache_write": 6.25, "cache_write_long": 10},
+          "retire": null, "retire_not_before": "2026-11-24",
+          "source": "https://platform.claude.com/docs/en/about-claude/model-deprecations", "checked": "2026-10-28"
+        },
+        "claude-sonnet-5": {
+          "name": "Claude Sonnet 5", "tier": null, "pinned": true, "status": "legacy",
+          "efforts": ["low", "medium", "high", "xhigh", "max"], "default_effort": "high",
+          "price": {"input": 2, "output": 10, "cache_read": 0.2, "cache_write": 2.5, "cache_write_long": 4},
+          "retire": null, "retire_not_before": "2027-06-30",
+          "source": "https://platform.claude.com/docs/en/about-claude/pricing", "checked": "2026-10-28"
+        },
+        "claude-sonnet-4-6": {
+          "name": "Claude Sonnet 4.6", "tier": null, "pinned": true, "status": "legacy",
+          "efforts": ["low", "medium", "high", "max"], "default_effort": "high",
+          "price": {"input": 3, "output": 15, "cache_read": 0.3, "cache_write": 3.75, "cache_write_long": 6},
+          "retire": null, "retire_not_before": "2027-02-17",
+          "source": "https://platform.claude.com/docs/en/about-claude/pricing", "checked": "2026-10-28"
+        },
+        "claude-sonnet-4-5-20250929": {
+          "name": "Claude Sonnet 4.5", "tier": null, "pinned": true, "status": "deprecated",
+          "price": {"input": 3, "output": 15, "cache_read": 0.3, "cache_write": 3.75, "cache_write_long": 6},
+          "retire": "2026-11-30", "replacement": "claude-sonnet-5-5",
+          "source": "https://platform.claude.com/docs/en/about-claude/model-deprecations", "checked": "2026-10-28"
+        },
+        "claude-haiku-4-5-20251001": {
+          "name": "Claude Haiku 4.5", "tier": null, "pinned": true, "status": "legacy",
+          "price": {"input": 1, "output": 5, "cache_read": 0.1, "cache_write": 1.25, "cache_write_long": 2},
+          "retire": null, "retire_not_before": "2026-10-15",
+          "source": "https://platform.claude.com/docs/en/about-claude/model-deprecations", "checked": "2026-10-28",
+          "note": {"ko": "단종 문서의 '빨라도 2026-10-15 이후'는 지났지만 2026-10-28 기준 상태는 Active다.",
+                   "en": "The 'not sooner than 2026-10-15' date has passed, but the state was still Active on 2026-10-28."}
+        }
+      }
+    },
+    "openai": {
+      "name": "OpenAI",
+      "checked": "2026-10-28",
+      "effort_param": "reasoning.effort (Responses API) / reasoning_effort (Chat Completions)",
+      "effort_map": {"low": "low", "medium": "medium", "high": "high", "max": "xhigh"},
+      "tiers": {
+        "top": "gpt-6-astra",
+        "high": "gpt-6.1-sol",
+        "mid": "gpt-6.1-terra",
+        "low": "gpt-6-luna"
+      },
+      "prefix": {"litellm": "openai", "opencode": "openai", "aider": "openai"},
+      "env_key": "OPENAI_API_KEY",
+      "sources": {
+        "models": "https://developers.openai.com/api/docs/models",
+        "pricing": "https://developers.openai.com/api/docs/pricing",
+        "reasoning": "https://developers.openai.com/api/docs/guides/reasoning",
+        "deprecations": "https://developers.openai.com/api/docs/deprecations"
+      },
+      "note": {
+        "ko": "가격은 짧은 컨텍스트(입력 272K 이하) 기준이고, 넘으면 above 단가. 캐시 쓰기는 30분(cache_write)과 12시간(cache_write_long) 두 가지. 모델 페이지에 날짜 스냅숏 ID가 보이지 않아 이 ID들이 고정인지는 확인하지 못했다(pinned: null). 정식 모델 단종 예고는 6개월 이상, 특수 변형 3개월 이상, preview는 2주 정도(단종 문서).",
+        "en": "Prices are for short context (input up to 272K); above rates apply beyond. Cache writes come as 30-minute (cache_write) and 12-hour (cache_write_long). The models page shows no dated snapshot IDs, so whether these IDs are pinned is unverified (pinned: null). Notice is at least 6 months for GA models, 3 months for specialized variants, about 2 weeks for previews (deprecations page)."
+      },
+      "models": {
+        "gpt-6-astra": {
+          "name": "GPT-6 Astra",
+          "tier": "top",
+          "pinned": null,
+          "status": "active",
+          "efforts": ["low", "medium", "high", "xhigh", "max"],
+          "default_effort": null,
+          "context": 1050000,
+          "max_output": 128000,
+          "price": {"input": 10, "output": 50, "cache_read": 1, "cache_write": 12.5, "cache_write_long": 25,
+                    "above": [{"prompt_tokens": 272000, "input": 20, "output": 75, "cache_read": 2, "cache_write": 25,
+                               "cache_write_long": 50}]},
+          "retire": null,
+          "source": "https://developers.openai.com/api/docs/pricing",
+          "checked": "2026-10-28",
+          "note": {"ko": "기본 강도가 문서에 없다. none은 지원하지 않는다(추론 가이드).",
+                   "en": "Default effort is not documented; none is not supported (reasoning guide)."}
+        },
+        "gpt-6.1-sol": {
+          "name": "GPT-6.1 Sol",
+          "tier": "high",
+          "pinned": null,
+          "status": "active",
+          "efforts": ["low", "medium", "high", "xhigh", "max"],
+          "default_effort": "medium",
+          "context": 1050000,
+          "max_output": 128000,
+          "price": {"input": 2, "output": 10, "cache_read": 0.1, "cache_write": 2.5, "cache_write_long": 5,
+                    "above": [{"prompt_tokens": 272000, "input": 4, "output": 15, "cache_read": 0.2, "cache_write": 5,
+                               "cache_write_long": 10}]},
+          "retire": null,
+          "source": "https://developers.openai.com/api/docs/pricing",
+          "checked": "2026-10-28"
+        },
+        "gpt-6.1-terra": {
+          "name": "GPT-6.1 Terra",
+          "tier": "mid",
+          "pinned": null,
+          "status": "active",
+          "efforts": ["none", "low", "medium", "high", "xhigh", "max"],
+          "default_effort": null,
+          "context": 1050000,
+          "max_output": 128000,
+          "price": {"input": 1, "output": 5, "cache_read": 0.05, "cache_write": 1.25, "cache_write_long": 2.5,
+                    "above": [{"prompt_tokens": 272000, "input": 2, "output": 7.5, "cache_read": 0.1, "cache_write": 2.5,
+                               "cache_write_long": 5}]},
+          "retire": null,
+          "source": "https://developers.openai.com/api/docs/pricing",
+          "checked": "2026-10-28",
+          "note": {"ko": "추론 가이드에 이 모델의 기본 강도가 없다.", "en": "The reasoning guide does not state this model's default effort."}
+        },
+        "gpt-6-luna": {
+          "name": "GPT-6 Luna",
+          "tier": "low",
+          "pinned": null,
+          "status": "active",
+          "efforts": ["none", "low", "medium", "high", "xhigh", "max"],
+          "default_effort": "medium",
+          "context": 1050000,
+          "max_output": 128000,
+          "price": {"input": 0.1, "output": 0.5, "cache_read": 0.01, "cache_write": 0.125, "cache_write_long": 0.25,
+                    "above": [{"prompt_tokens": 272000, "input": 0.2, "output": 0.75, "cache_read": 0.02,
+                               "cache_write": 0.25, "cache_write_long": 0.5}]},
+          "retire": null,
+          "source": "https://developers.openai.com/api/docs/pricing",
+          "checked": "2026-10-28"
+        },
+        "gpt-6-sol": {
+          "name": "GPT-6 Sol", "tier": null, "pinned": null, "status": "active",
+          "price": {"input": 2, "output": 10, "cache_read": 0.2,
+                    "above": [{"prompt_tokens": 272000, "input": 4, "output": 15, "cache_read": 0.4}],
+                    "note": "캐시 쓰기 단가는 확인하지 않음 / cache write price not checked"},
+          "retire": null,
+          "source": "https://developers.openai.com/api/docs/pricing", "checked": "2026-10-28"
+        },
+        "gpt-5.5-pro": {
+          "name": "GPT-5.5 Pro", "tier": null, "pinned": null, "status": "active",
+          "price": {"input": 30, "output": 180, "cache_read": null,
+                    "above": [{"prompt_tokens": 272000, "input": 60, "output": 270}],
+                    "note": "가격표에 캐시 단가 없음 / no cache prices listed"},
+          "retire": null,
+          "source": "https://developers.openai.com/api/docs/pricing", "checked": "2026-10-28"
+        },
+        "gpt-5-2025-08-07": {
+          "name": "GPT-5", "tier": null, "aliases": ["gpt-5"], "pinned": true, "status": "deprecated",
+          "price": {"input": null, "output": null, "note": "가격 확인 안 함 / price not checked"},
+          "retire": "2026-12-11", "replacement": "gpt-5.6-sol",
+          "source": "https://developers.openai.com/api/docs/deprecations", "checked": "2026-10-28"
+        },
+        "gpt-5-mini-2025-08-07": {
+          "name": "GPT-5 mini", "tier": null, "aliases": ["gpt-5-mini"], "pinned": true, "status": "deprecated",
+          "price": {"input": null, "output": null, "note": "가격 확인 안 함 / price not checked"},
+          "retire": "2026-12-11", "replacement": "gpt-5.6-terra",
+          "source": "https://developers.openai.com/api/docs/deprecations", "checked": "2026-10-28"
+        },
+        "gpt-5-nano-2025-08-07": {
+          "name": "GPT-5 nano", "tier": null, "aliases": ["gpt-5-nano"], "pinned": true, "status": "deprecated",
+          "price": {"input": null, "output": null, "note": "가격 확인 안 함 / price not checked"},
+          "retire": "2026-12-11", "replacement": "gpt-5.6-luna",
+          "source": "https://developers.openai.com/api/docs/deprecations", "checked": "2026-10-28"
+        },
+        "gpt-5-pro-2025-10-06": {
+          "name": "GPT-5 pro", "tier": null, "aliases": ["gpt-5-pro"], "pinned": true, "status": "deprecated",
+          "price": {"input": null, "output": null, "note": "가격 확인 안 함 / price not checked"},
+          "retire": "2026-12-11", "replacement": "gpt-5.6-sol",
+          "source": "https://developers.openai.com/api/docs/deprecations", "checked": "2026-10-28"
+        },
+        "gpt-5.1-2025-11-13": {
+          "name": "GPT-5.1", "tier": null, "aliases": ["gpt-5.1"], "pinned": true, "status": "deprecated",
+          "price": {"input": null, "output": null, "note": "가격 확인 안 함 / price not checked"},
+          "retire": "2027-04-01", "replacement": "gpt-6-sol",
+          "source": "https://developers.openai.com/api/docs/deprecations", "checked": "2026-10-28"
+        },
+        "gpt-5.3-codex": {
+          "name": "GPT-5.3 Codex", "tier": null, "pinned": null, "status": "deprecated",
+          "price": {"input": null, "output": null, "note": "가격 확인 안 함 / price not checked"},
+          "retire": "2027-04-01", "replacement": "gpt-6-sol",
+          "source": "https://developers.openai.com/api/docs/deprecations", "checked": "2026-10-28"
+        },
+        "gpt-5.4-nano-2026-03-17": {
+          "name": "GPT-5.4 nano", "tier": null, "aliases": ["gpt-5.4-nano"], "pinned": true, "status": "deprecated",
+          "price": {"input": null, "output": null, "note": "가격 확인 안 함 / price not checked"},
+          "retire": "2027-04-01", "replacement": "gpt-6-luna",
+          "source": "https://developers.openai.com/api/docs/deprecations", "checked": "2026-10-28"
+        }
+      }
+    },
+    "google": {
+      "name": "Google",
+      "checked": "2026-10-28",
+      "effort_param": "generation_config.thinking_level",
+      "effort_map": {"low": "low", "medium": "medium", "high": "high", "max": "high"},
+      "tiers": {
+        "top": {"tier": "high", "effort": "max",
+                "note": {"ko": "Google에는 최상 가격대 모델이 없어 상 등급 + 최대 강도로 대신한다.",
+                         "en": "Google has no top price tier, so the high tier at max effort stands in."}},
+        "high": "gemini-4-argon",
+        "mid": "gemini-3.8-flash",
+        "low": "gemini-3.5-flash-lite"
+      },
+      "prefix": {"litellm": "gemini", "opencode": "google"},
+      "env_key": "GEMINI_API_KEY",
+      "sources": {
+        "models": "https://ai.google.dev/gemini-api/docs/models",
+        "pricing": "https://ai.google.dev/gemini-api/docs/pricing",
+        "thinking": "https://ai.google.dev/gemini-api/docs/thinking",
+        "litellm_gemini": "https://docs.litellm.ai/docs/providers/gemini"
+      },
+      "note": {
+        "ko": "stable 모델 코드는 보통 바뀌지 않고, preview는 2주 이상 전에 예고, -latest 별칭은 새 버전으로 바뀌며 깨지는 변경은 2주 전에 메일로 알린다(모델 문서). 가격표에 캐시 쓰기 단가 항목이 없고 시간당 저장료가 있다. opencode의 회사 이름 google은 공식 문서로 확인하지 못했다.",
+        "en": "Stable model codes usually do not change; previews get at least 2 weeks' notice; -latest aliases are hot-swapped, with 2 weeks' email notice for breaking changes (models page). The pricing page has no cache-write rate but an hourly storage fee. The opencode provider name google is unverified."
+      },
+      "models": {
+        "gemini-4-argon": {
+          "name": "Gemini 4 Argon",
+          "tier": "high",
+          "pinned": true,
+          "status": "active",
+          "efforts": ["low", "medium", "high"],
+          "default_effort": "medium",
+          "context": 1048576,
+          "max_output": 65536,
+          "price": {"input": 2, "output": 10, "cache_read": 0.1, "cache_write": null, "cache_storage_hour": null,
+                    "changes": [{"from": "2026-12-01", "input": 4, "output": 20, "cache_read": 0.2}],
+                    "note": "암묵적 캐시만 지원, 저장료 표기 없음 / implicit caching only, no storage fee listed"},
+          "retire": null,
+          "source": "https://ai.google.dev/gemini-api/docs/pricing",
+          "checked": "2026-10-28",
+          "note": {"ko": "출력 한도 65,536(긴 디코드를 쓰면 최대 1,048,576).",
+                   "en": "Output limit 65,536 (up to 1,048,576 with long decode)."}
+        },
+        "gemini-3.8-flash": {
+          "name": "Gemini 3.8 Flash",
+          "tier": "mid",
+          "pinned": true,
+          "status": "active",
+          "efforts": ["low", "medium", "high"],
+          "default_effort": "medium",
+          "context": 1048576,
+          "max_output": 65536,
+          "price": {"input": 0.75, "output": 3.75, "cache_read": 0.075, "cache_write": null, "cache_storage_hour": 0.5,
+                    "changes": [{"from": "2027-01-01", "input": 1.5, "output": 7.5, "cache_read": 0.15,
+                                 "cache_storage_hour": 1}]},
+          "retire": null,
+          "source": "https://ai.google.dev/gemini-api/docs/pricing",
+          "checked": "2026-10-28"
+        },
+        "gemini-3.5-flash-lite": {
+          "name": "Gemini 3.5 Flash-Lite",
+          "tier": "low",
+          "pinned": true,
+          "status": "active",
+          "efforts": ["minimal", "low", "medium", "high"],
+          "default_effort": "minimal",
+          "context": 1048576,
+          "max_output": 65536,
+          "price": {"input": 0.3, "output": 2.5, "cache_read": 0.03, "cache_write": null, "cache_storage_hour": 1},
+          "retire": null,
+          "source": "https://ai.google.dev/gemini-api/docs/pricing",
+          "checked": "2026-10-28"
+        },
+        "gemini-3.6-flash": {
+          "name": "Gemini 3.6 Flash", "tier": null, "pinned": true, "status": "legacy",
+          "price": {"input": 0.75, "output": 3.75, "cache_read": 0.075, "cache_storage_hour": 0.5,
+                    "changes": [{"from": "2027-01-01", "input": 1.5, "output": 7.5, "cache_read": 0.15,
+                                 "cache_storage_hour": 1}]},
+          "retire": null,
+          "source": "https://ai.google.dev/gemini-api/docs/pricing", "checked": "2026-10-28"
+        },
+        "gemini-3.1-flash-lite": {
+          "name": "Gemini 3.1 Flash-Lite", "tier": null, "pinned": true, "status": "legacy",
+          "price": {"input": 0.25, "output": 1.5, "cache_read": 0.025, "cache_storage_hour": 1,
+                    "note": "글·이미지·영상 기준(음성은 다름) / text, image and video rates (audio differs)"},
+          "retire": null,
+          "source": "https://ai.google.dev/gemini-api/docs/pricing", "checked": "2026-10-28"
+        },
+        "gemini-3.1-pro-preview": {
+          "name": "Gemini 3.1 Pro Preview", "tier": null, "pinned": false, "status": "preview",
+          "price": {"input": 2, "output": 12, "cache_read": 0.2, "cache_storage_hour": 4.5,
+                    "above": [{"prompt_tokens": 200000, "input": 4, "output": 18, "cache_read": 0.4}]},
+          "retire": null,
+          "source": "https://ai.google.dev/gemini-api/docs/pricing", "checked": "2026-10-28"
+        }
+      }
+    }
+  }
+}
