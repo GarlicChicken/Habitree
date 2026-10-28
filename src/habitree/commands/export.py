@@ -80,7 +80,9 @@ def lean_block(ctx, db):
     / Lean: three lines plus only the rules this project grew; generic pack rules are left to checks and hooks."""
     lang = ctx.lang
     data = db.file_data()
-    own = [r for r in data.get("rules", []) if not r.get("origin") and r.get("status", "active") == "active"]
+    # 꾸러미 규칙은 피드백 0건으로 배포되므로, 피드백이 붙었으면 이 프로젝트에서 자란 것이다
+    own = [r for r in data.get("rules", []) if (not r.get("origin") or r.get("feedback"))
+           and r.get("status", "active") == "active"]
     # 상황에 맞을 때만 싣는다: 측정에서 작은 프로젝트의 색인 안내와 등록 안 된 검증 안내는 턴만 늘렸다
     line = tr(LEAN["find"], lang)
     big = ctx.get("export.map_hint_files", 150)

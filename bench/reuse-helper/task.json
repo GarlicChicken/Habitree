@@ -13,5 +13,23 @@
     {"scope": "code", "aspect": "structure",
      "rule": "파일 이름·주소에 쓸 글은 textkit.slugify()로 만든다. 새 정규식이나 정규화 코드를 쓰지 않는다.",
      "why": "같은 규칙을 두 곳에 두면 한쪽만 고쳐져 어긋난다."}
-  ]
+  ],
+  "grow": {
+    "correction": {
+      "ko": "제목을 바꾸는 코드를 새로 짜지 마. textkit.py에 slugify()가 이미 있으니 그걸 불러 써서 고쳐 줘.",
+      "en": "Do not write new code to convert the title. textkit.py already has slugify(); call it and fix this."
+    },
+    "next": {
+      "prompt": {
+        "ko": "notes.py에 draft_name(title) 함수를 더해 줘. 결과는 'draft-제목.md' 꼴의 파일 이름이야. 제목은 파일 이름에 쓸 수 있게 바꿔 줘.",
+        "en": "Add draft_name(title) to notes.py. The result is a file name like 'draft-title.md'. Make the title safe for file names."
+      },
+      "verify": [
+        [
+          "{python}",
+          "{task}/verify/check_next.py"
+        ]
+      ]
+    }
+  }
 }

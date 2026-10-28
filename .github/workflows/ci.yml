@@ -3,6 +3,7 @@ name: ci
 
 on:
   push:
+    branches: ["**"]   # 태그를 올릴 때는 다시 돌리지 않는다 / not again for tag pushes
   pull_request:
 
 jobs:

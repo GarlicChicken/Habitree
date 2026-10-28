@@ -29,6 +29,16 @@ CORRECTION = [
     r"\bstill\s+(?:not|wrong|broken|failing)\b", r"\b(?:wrong|broken)\s+again\b", r"\bdoesn'?t\s+work\b",
     r"\bundo\s+that\b",
 ]
+# 차분한 정정과 지켜야 할 방식을 알려 주는 말. 불만이 드러나지 않아도 바로잡는 말이다.
+# / Calm corrections and stated conventions, which carry no frustration but still correct the work.
+GUIDANCE = [
+    r"지\s*(?:마|말고|말아)(?![가-힣])", r"말고(?![가-힣])", r"대신(?:에)?(?![가-힣])",
+    r"(?:써|해|맞춰|따라|넣어|빼)야\s*(?:해|돼|지|하|한다|합니다|돼요|해요)", r"기로\s*(?:했|한|정했)",
+    r"(?:이미|벌써)\s*있", r"앞으로(?:는)?(?![가-힣])", r"다음부터", r"(?:항상|늘|절대)\s",
+    r"\bdon'?t\b", r"\binstead\b", r"\b(?:should|must)\s+(?:use|be|call|throw|return)\b",
+    r"\bwe\s+(?:always|never|use|decided)\b", r"\bfrom\s+now\s+on\b", r"\bnext\s+time\b",
+    r"\balready\s+(?:has|have|exists?)\b",
+]
 ACK = lazy_re(r"^(?:응|어|네|넵|예|ㅇㅇ|ㅇㅋ|오케이|좋아|좋아요|좋습니다|고마워|감사합니다|감사|계속|진행|진행해|해 줘|해줘|"
                  r"go|ok|okay|yes|yep|yeah|sure|thanks|thank you|continue|proceed|lgtm|y)[\s.!~]*$", re.I)
 
@@ -270,6 +280,24 @@ def repeat_correction(rule, run):
     return signal(n, f"corr:{first}", {})
 
 
+def correction_to_rule(rule, run):
+    """세션 첫 요청이 아닌데 바로잡는 말이 왔다: 규칙으로 남길 때. / A correction after earlier work: time to record it."""
+    ev, st = run.ev, run.state
+    prompts = st.get("prompts", [])
+    if ev.kind != "prompt" or not prompts:
+        return None
+    cur = prompts[-1]
+    if cur.get("ack") or cur.get("cmd"):
+        return None
+    if len(prompts) < 2 and ev.transcript_bytes < param(rule, "transcript_bytes", 4000):
+        return None  # 세션의 첫 요청은 바로잡는 말이 아니다 / a session's first request corrects nothing
+    text = ev.prompt or ""
+    n = int(bool(cur.get("corr"))) + sum(1 for p in param(rule, "markers", GUIDANCE) if re.search(p, text, re.I))
+    if n < threshold(rule, 1):  # 반응으로 기준이 오르면 표현이 더 많이 걸려야 알린다 / tuned by votes
+        return None
+    return signal(n, f"rec:{cur.get('i')}", {})
+
+
 def topic_mix(rule, run):
     """긴 세션에 앞 요청들과 거의 안 겹치는 새 요청. / An unrelated new request in a long session."""
     ev, st = run.ev, run.state
@@ -364,6 +392,7 @@ DETECTORS = {
     "big_output": big_output,
     "request_split": request_split,
     "repeat_correction": repeat_correction,
+    "correction_to_rule": correction_to_rule,
     "topic_mix": topic_mix,
     "no_verify": no_verify,
     "delegation": delegation,

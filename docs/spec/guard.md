@@ -17,7 +17,7 @@ AI 도구의 훅이 `habitree hook <이벤트>`를 부릅니다. 엔진은 훅 �
 | 시점 · 훅 | 하는 일 |
 |---|---|
 | 세션 시작 `SessionStart` | 작업 순환과 필수 규칙 요약을 AI에게 넣는다(AGENTS.md가 이미 실리면 한 줄만). 새 세션과 `/clear`면 상태를 새로 열고(이어 가기·압축 때는 이어 쓴다), 7일 지난 상태를 지우고, 복사 코드 탐색용 파일 목록을 캐시한다. |
-| 요청 `UserPromptSubmit` | 요청 쪼개기, 거듭 정정, 섞인 주제, 위임 신호. |
+| 요청 `UserPromptSubmit` | 요청 쪼개기, 바로잡는 말, 거듭 정정, 섞인 주제, 위임 신호. |
 | 도구 전 `PreToolUse` | 같은 호출, 고리, 같은 오류의 다음 시도 멈춤, 위임 중 위험한 일 확인. |
 | 도구 뒤 `PostToolUse`·`PostToolUseFailure` | 잔수정, 파일 커짐, 복사 코드, 큰 결과, 같은 오류. |
 | 끝 `Stop` | 빠른 점검(오류가 있으면 한 번 더 일하게), 위임 끝 보고, 이번 답의 알림을 모아 사용자에게. |
@@ -36,6 +36,7 @@ AI 도구의 훅이 `habitree hook <이벤트>`를 부릅니다. 엔진은 훅 �
 | `code.structure.copy-block` | 복사 코드 | 새로 들어간 줄을 정리해 6줄씩 해시, 다른 파일과 비교 | 도구 뒤 | 6줄, 파일 400개·파일당 256KiB 상한 | 있는 코드 불러 쓰기 |
 | `work.context.big-output` | 큰 결과 | 도구 결과의 글자 수 | 도구 뒤 | 20,000자 | 검색 뒤 필요한 범위만 |
 | `work.request.split` | 요청 쪼개 보내기 | 40자 이하 요청이 5분 안에(대답 한 마디·/명령 제외) | 요청 | 3개 | 원하는 것·조건·끝 기준을 한 메시지로 |
+| `work.request.correction-to-rule` | 바로잡는 말 | 세션 첫 요청이 아닌 메시지에 바로잡는 말(…하지 마, 대신, …써야 해, …하기로 했어, 아니 등) | 요청 | 1번, 그때 AI에게 | 고친 뒤 규칙으로 남기기 |
 | `work.request.repeat-correction` | 같은 지적 거듭 | 정정 표현이 같은 주제로 이어짐 | 요청 | 2번 | 배운 것을 담아 새로 시작, 규칙으로 남기기 |
 | `work.context.topic-mix` | 한 세션에 여러 주제 | 긴 세션에서 새 요청 낱말이 앞 요청과 거의 안 겹침 | 요청 | 30턴 또는 기록 1MB(정보) | 새 대화로 |
 | `work.verify.run-before-done` | 검증 없이 끝 | 수정은 있었는데 설정 `verify` 명령 실행 0번 | 끝 | 수정 1번 이상(정보) | 검증 한 번 |
@@ -100,6 +101,7 @@ Claude Code 데스크톱 앱은 Stop 말고는 `systemMessage`를 보여 주지 
 | `detect.severity` | `info`·`warn`·`stop` |
 | `detect.repeat`, `detect.max_per_session` | 반복 제한 |
 | `detect.audience` | 먼저 알릴 대상 `ai`·`user`·`both` |
+| `detect.now` | 정보 등급이라도 답 끝까지 모으지 않고 그때 AI에게 알림 |
 | `detect.params` | 감지기별 값(창 길이, 최소 줄 수 등) |
 | `message.ai`, `message.user`, `message.suggest` | 문구(두 언어), `{n}` 같은 자리표시자 |
 | `on_delegate` | 위임 중 처리 `skip`·`ask`·`nudge` |
@@ -172,7 +174,7 @@ An AI tool's hook calls `habitree hook <event>`. The engine turns the hook input
 | When · hook | What happens |
 |---|---|
 | Session start `SessionStart` | Injects the work cycle and a must-rule summary for the AI (a single line when AGENTS.md is already loaded). Opens fresh state for a new session or `/clear` (resume and compaction keep it), removes state older than 7 days, caches the file list for copy detection. |
-| Prompt `UserPromptSubmit` | Split requests, repeated corrections, mixed topics, delegation phrases. |
+| Prompt `UserPromptSubmit` | Split requests, correcting words, repeated corrections, mixed topics, delegation phrases. |
 | Before a tool `PreToolUse` | Same call, cycles, stopping the next try of a repeated error, confirming risky actions during delegation. |
 | After a tool `PostToolUse`, `PostToolUseFailure` | Small edits, file growth, copied code, large results, repeated errors. |
 | End `Stop` | Quick check (one more round of work if it finds errors), the delegation end report, and the notes from this reply gathered for the user. |
@@ -191,6 +193,7 @@ All thresholds are starting values read from each rule's `detect`. They change p
 | `code.structure.copy-block` | Copied code | New lines trimmed and hashed in 6 line windows, compared with other files | After tool | 6 lines, limits of 400 files and 256 KiB per file | Call the existing code |
 | `work.context.big-output` | Large result | Characters in the tool result | After tool | 20,000 | Search, then read only the range needed |
 | `work.request.split` | Split requests | Prompts of 40 chars or fewer within 5 minutes (acknowledgements and / commands excluded) | Prompt | 3 | One message with goal, conditions and finish line |
+| `work.request.correction-to-rule` | A correction | Correcting words (don't, instead, should use, we decided, no, and so on) in a message after the session's first | Prompt | 1, to the AI right away | Fix it and record a rule |
 | `work.request.repeat-correction` | Same correction again | Correction phrases on the same topic | Prompt | 2 | Start fresh with what was learned; record a rule |
 | `work.context.topic-mix` | Several topics in one session | In a long session, the new prompt shares almost no words with earlier ones | Prompt | 30 turns or a 1 MB transcript (info) | New conversation |
 | `work.verify.run-before-done` | Done without verifying | Edits happened but the configured `verify` command never ran | End | 1 edit or more (info) | Run verify once |
@@ -255,6 +258,7 @@ A detection rule is an ordinary rule with these extra fields. The format is in [
 | `detect.severity` | `info`, `warn`, `stop` |
 | `detect.repeat`, `detect.max_per_session` | Repeat limits |
 | `detect.audience` | Who hears it first: `ai`, `user`, `both` |
+| `detect.now` | Tell the AI right away even at info level, instead of collecting it for the end of the reply |
 | `detect.params` | Detector-specific values (window length, minimum lines, ...) |
 | `message.ai`, `message.user`, `message.suggest` | Wording in two languages, with placeholders like `{n}` |
 | `on_delegate` | Handling while delegated: `skip`, `ask`, `nudge` |

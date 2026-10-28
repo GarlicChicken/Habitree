@@ -2,6 +2,18 @@
 
 새 버전을 위에 씁니다.
 
+## 0.9.0 (2026-10-28)
+
+이름 그대로 규칙이 자라는지 두 세션으로 재고, 재다가 발견한 끊긴 고리를 이은 버전입니다. 자세한 것은 [bench/2026-10-28-rules-grow.md](bench/2026-10-28-rules-grow.md).
+
+- `habitree rules`로 규칙을 더하거나 고치면 이미 있는 AI 지침(AGENTS.md, CLAUDE.md)의 생성 구역을 바로 고칩니다. 전에는 `habitree export`를 따로 돌려야 해서, 다음 세션이 새 규칙을 보지 못했습니다. 직접 고친 구역은 그대로 두고 알립니다.
+- 감지 규칙 `work.request.correction-to-rule`: 세션의 첫 요청이 아닌 메시지에 바로잡는 말("~하지 마", "대신", "~써야 해", "~하기로 했어", "이미 있어", "아니" 등)이 오면, 그 순간 AI에게 구체적인 규칙으로 남기라고 알립니다. 바로 쓸 명령과 기본값을 함께 줘서 쓰는 법을 찾느라 헤매지 않게 했습니다.
+- 감지 규칙 칸 `detect.now`: 정보 등급이라도 답 끝까지 모으지 않고 그때 AI에게 알립니다.
+- 꾸러미 규칙에 이 프로젝트의 지적이 붙으면(`rules hit`) AGENTS.md의 '이 프로젝트의 규칙'에 싣습니다.
+- RULES.md 머리말과 `feedback-to-rule` 스킬이 미리 찾지 말고 바로 `rules add`를 쓰게 안내합니다. 같은 뜻 규칙은 add가 알려 줍니다.
+- 두 세션 측정 `bench/grow.py`와, `reuse-helper`·`money-rules`의 다음 과제(`grow`).
+- 두 세션 측정: 바로잡힌 흐름에서 Habitree 쪽은 5번 모두 시키지 않아도 규칙을 남겼고 다음 세션 5/5 합격, 없는 쪽은 6번 바로잡혔지만 다음 세션 0/6.
+
 ## 0.8.0 (2026-10-28)
 
 처음으로 실제 측정을 하고, 그 결과에 따라 AI가 매번 읽는 지침을 걷어낸 버전입니다. 자세한 것은 [bench/2026-10-28-first-measurement.md](bench/2026-10-28-first-measurement.md).
@@ -88,6 +100,18 @@
 ## English
 
 Newest first.
+
+### 0.9.0 (2026-10-28)
+
+Measured over two sessions whether rules actually grow, as the name says, and closed the breaks in the loop found along the way. Details in [bench/2026-10-28-rules-grow.md](bench/2026-10-28-rules-grow.md).
+
+- Adding or changing a rule with `habitree rules` now refreshes the existing generated blocks of the agent instructions (AGENTS.md, CLAUDE.md) right away. Before, `habitree export` had to be run separately, so the next session never saw the new rule. Hand-edited blocks are kept and reported.
+- Detection rule `work.request.correction-to-rule`: when a message after the session's first one carries correcting words ("don't", "instead", "should use", "we decided", "already has", "no" and so on), the agent is told at that moment to record a specific rule, with a ready command and defaults so it does not have to look up how.
+- Detection field `detect.now`: tell the agent right away even at info level, instead of collecting the note for the end of the reply.
+- A pack rule that receives this project's feedback (`rules hit`) now appears under "rules of this project" in AGENTS.md.
+- The head of RULES.md and the `feedback-to-rule` skill point straight to `rules add` without searching first; add reports a rule with the same meaning.
+- Two-session measurement `bench/grow.py`, with next tasks (`grow`) for `reuse-helper` and `money-rules`.
+- Two-session results: in corrected flows the Habitree side recorded a rule without being asked all 5 times and passed 5/5 next sessions; the other side was corrected 6 times and passed 0/6 next sessions.
 
 ### 0.8.0 (2026-10-28)
 

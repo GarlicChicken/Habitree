@@ -1,6 +1,6 @@
 {
   "name": "habitree",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "AI와 일하는 습관을 키운다: 작업 중 비효율을 먼저 알리고, 피드백을 규칙으로 쌓고, 맡긴 작업은 범위와 경계를 지키며 끝에 보고한다. / Grow good habits for AI coding: early warnings about inefficient work, feedback that becomes rules, and delegation with scope, boundaries and an end report.",
   "author": {"name": "GarlicChicken", "url": "https://github.com/GarlicChicken"},
   "homepage": "https://github.com/GarlicChicken/habitree",

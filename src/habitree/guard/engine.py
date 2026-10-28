@@ -375,6 +375,9 @@ def route(rule, sig, run, out):
     od = rule.get("on_delegate", "nudge")
     audience = det.get("audience", "ai")
 
+    if level == "info" and det.get("now"):
+        out.ai.append(_ai_line(rule, level, ai or user, sugg, lang))  # 그 자리에서 AI에게만 / to the AI, right away
+        return True
     if level == "info":
         out.notes.append((rid, short))
         st.setdefault("turn", []).append({"rule": rid, "text": short})

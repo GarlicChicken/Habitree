@@ -20,6 +20,16 @@
 
 2026-10-28에 세 과제로 처음 잰 결과와, 그 결과로 무엇을 바꿨는지는 [2026-10-28-first-measurement.md](2026-10-28-first-measurement.md)에 있습니다.
 
+## 규칙이 자라는지
+
+바로잡힌 것이 규칙으로 남아 다음 세션에서 같은 실수를 막는지는 두 세션으로 잽니다. 세션 1에서 과제를 시키고, 떨어지면 같은 세션에서 한 번 바로잡고, 코드만 처음 상태로 되돌린 뒤 새 세션에서 비슷한 과제를 시킵니다. 바로잡는 말과 다음 과제는 `task.json`의 `grow` 칸에 있고, 지금은 `reuse-helper`와 `money-rules`에 있습니다.
+
+```
+python bench/grow.py reuse-helper --hooks --yes      # habitree가 PATH에 있어야 한다
+```
+
+결과와 그 과정에서 고친 것은 [2026-10-28-rules-grow.md](2026-10-28-rules-grow.md)에 있습니다.
+
 ## 돌리기
 
 ```
@@ -57,3 +67,5 @@ Run `bench run … --dry-run` first to see the plan; the `claude` runner uses re
 To add a task, create a folder with `task.json`, `project/` and `verify/`. A verify command passes with exit code 0 and is written as an argument list (`{python}` becomes the current Python, `{task}` the task folder). More tasks in more languages let us say more honestly whether the effect holds across languages.
 
 The first results with these tasks (2026-10-28), and what they changed, are in [2026-10-28-first-measurement.md](2026-10-28-first-measurement.md).
+
+Whether a correction grows into a rule that keeps the next session from the same mistake is measured over two sessions with `python bench/grow.py <task> --hooks --yes` (needs `habitree` on PATH): the task, one correction in the same session if it fails, then a similar task in a new session with only the code reset. The correction and the next task live in the `grow` section of `task.json` (currently `reuse-helper` and `money-rules`). Results and what we fixed along the way are in [2026-10-28-rules-grow.md](2026-10-28-rules-grow.md).

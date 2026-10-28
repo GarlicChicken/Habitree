@@ -41,8 +41,15 @@ class TestInit(TempProject):
         code, out, _ = self.cli("export")
         self.assertIn("직접 고친", out)
         self.assertIn("내가 고친 찾기", self.read("AGENTS.md"))
+        # 규칙을 더해도 직접 고친 구역은 덮지 않고 알린다
+        code, out, err = self.cli("rules", "add", "--scope", "code", "--aspect", "structure",
+                                  "--rule", "날짜는 utils.dates를 쓴다", "--why", "중복", "--feedback", "지적")
+        self.assertEqual(code, 0, err)
+        self.assertIn("직접 고친", out)
+        self.assertIn("내가 고친 찾기", self.read("AGENTS.md"))
         code, out, _ = self.cli("export", "--force")
         self.assertNotIn("내가 고친 찾기", self.read("AGENTS.md"))
+        self.assertIn("utils.dates", self.read("AGENTS.md"))
 
     def test_lean_and_full_styles(self):
         # 걷어낸 판(기본): 핵심 세 줄 + 이 프로젝트에서 쌓인 규칙만. 꾸러미의 일반 규칙은 싣지 않는다
@@ -54,8 +61,14 @@ class TestInit(TempProject):
         code, out, err = self.cli("rules", "add", "--scope", "code", "--aspect", "structure", "--level", "must",
                                   "--rule", "금액 표시는 format_won()을 쓴다", "--why", "팀 규칙", "--feedback", "지적")
         self.assertEqual(code, 0, err)
-        self.cli("export")
+        # 규칙을 더하면 export 없이도 AI 지침에 바로 들어간다(다음 세션이 읽게)
+        self.assertIn("AGENTS.md [habitree]", out)
         self.assertIn("format_won", self.read("AGENTS.md"))
+        # 꾸러미 규칙도 이 프로젝트에서 지적을 받으면 이 프로젝트의 규칙으로 싣는다
+        self.assertNotIn("code.structure.copy-block", self.read("AGENTS.md"))
+        code, out, err = self.cli("rules", "hit", "code.structure.copy-block", "--feedback", "slugify를 또 새로 짰다")
+        self.assertEqual(code, 0, err)
+        self.assertIn("붙여 넣지 말고", self.read("AGENTS.md"))
         # 여섯 단계 판은 설정으로
         cfg = json.loads(self.read(".habitree/config.json"))
         cfg["export"] = {"style": "full"}

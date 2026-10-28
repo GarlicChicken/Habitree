@@ -16,5 +16,23 @@
     {"scope": "code", "aspect": "quality",
      "rule": "잘못된 입력(음수, 100을 넘는 비율, 모르는 종류)은 null을 돌려주지 말고 RangeError를 던진다.",
      "why": "조용히 넘어간 잘못된 값은 나중에 더 비싸게 드러난다."}
-  ]
+  ],
+  "grow": {
+    "correction": {
+      "ko": "우리 팀은 금액을 money.js의 roundWon()으로 원 단위로 맞추고, 잘못된 입력(음수, 100을 넘는 비율, 모르는 종류)은 null 대신 RangeError를 던지기로 했어. 그렇게 고쳐 줘.",
+      "en": "Our team rounds amounts to whole won with roundWon() from money.js, and bad input (negative, a rate over 100, an unknown type) throws RangeError instead of returning null. Fix it that way."
+    },
+    "next": {
+      "prompt": {
+        "ko": "cart.js에 splitBill(total, people) 함수를 더해 줘. total원을 people명이 똑같이 나눠 낼 때 한 사람이 낼 금액을 돌려줘.",
+        "en": "Add splitBill(total, people) to cart.js. Return what each person pays when people split total won evenly."
+      },
+      "verify": [
+        [
+          "node",
+          "{task}/verify/check_next.js"
+        ]
+      ]
+    }
+  }
 }

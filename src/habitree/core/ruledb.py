@@ -405,11 +405,15 @@ class RuleDB:
                 link = Path(db_path).name
         L = ["# 규칙" if ko else "# Rules", "",
              (f"> [{Path(link).name}]({link})에서 만든 문서입니다. 고칠 때는 `habitree rules`를 씁니다. "
-              "사용자가 바로잡은 것은 `habitree rules add --scope … --aspect … --rule \"…\" --why \"…\" --feedback \"…\"`로 남기고, "
-              "같은 뜻 규칙이 이미 있으면 `habitree rules hit <id> --feedback \"…\"`." if ko else
+              "사용자가 바로잡은 것은 무엇을 쓰고 무엇을 하지 않는지 구체적으로 "
+              "`habitree rules add --scope code --aspect structure --rule \"…\" --why \"…\" --feedback \"…\"`로 남깁니다"
+              "(범위·관점은 아래 목록에서). 같은 뜻 규칙이 있으면 add가 알려 주고, 그때는 "
+              "`habitree rules hit <id> --feedback \"…\"`." if ko else
               f"> Generated from [{Path(link).name}]({link}). Use `habitree rules` to change it. "
-              "Record a user's correction with `habitree rules add --scope … --aspect … --rule \"…\" --why \"…\" --feedback \"…\"`, "
-              "or `habitree rules hit <id> --feedback \"…\"` when a rule with the same meaning exists."), ""]
+              "Record a user's correction as a specific rule (what to use, what not to do) with "
+              "`habitree rules add --scope code --aspect structure --rule \"…\" --why \"…\" --feedback \"…\"` "
+              "(scopes and aspects are listed below). add reports a rule with the same meaning; then use "
+              "`habitree rules hit <id> --feedback \"…\"`."), ""]
         fb = sum(len(r.get("feedback", [])) for r in rules)
         L.append(f"- 규칙 {len(rules)}개 · 피드백 {fb}건 · 마지막 피드백 {max(dates) if dates else '-'}" if ko else
                  f"- {len(rules)} rules · {fb} feedback entries · last feedback {max(dates) if dates else '-'}")

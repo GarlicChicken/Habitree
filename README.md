@@ -3,7 +3,7 @@
 AI와 함께 일하는 습관을 나무처럼 키우는 도구입니다. 피드백은 규칙으로, 되풀이는 모듈로 자라게 하고, 그렇게 자란 것이 짐이 되지 않게 함께 다듬습니다.
 
 - 마지막 갱신: 2026-10-28
-- 상태: v0.8 알파
+- 상태: v0.9 알파
 - 라이선스: [MIT](LICENSE)
 - [English](#english)
 
@@ -58,6 +58,14 @@ Habitree는 [Open Prompt](https://github.com/GarlicChicken)를 운영하며 쓰�
 
 그래서 AI가 매번 읽는 지침을 걷어냈습니다. 이제는 "있는 것을 먼저 찾아 쓴다", "바로잡힌 것은 규칙으로 남긴다", 그리고 그 프로젝트에서 쌓인 규칙만 싣습니다. 새 프로젝트는 규칙 0개로 시작하고, 일반 규칙은 기계 점검과 훅이 지킵니다. 걷어낸 판의 덧비용은 1~12%로 줄었지만, 반복이 적어 이 차이는 아직 확정적이지 않습니다. 조건과 한계, 회차별 표는 [bench/2026-10-28-first-measurement.md](bench/2026-10-28-first-measurement.md)에 있습니다.
 
+그다음에는 이름 그대로 규칙이 자라는지 쟀습니다. 규칙 0개로 시작해 AI가 실수하면 평범하게 한 번 바로잡고("기억해 줘"는 말하지 않고), 새 세션에서 비슷한 다른 과제를 시켰습니다(과제 2개, 갈래마다 3번).
+
+- 재기 전에 고리가 끊겨 있는 것을 발견했습니다. 규칙을 더해도 다음 세션이 읽는 AGENTS.md가 그대로였고, 늘 읽는 지침에 "바로잡으면 규칙으로 남긴다"고 적어 둔 것만으로는 AI가 바로잡힌 코드만 고치고 끝냈습니다. 그래서 규칙이 바뀌면 지침이 바로 갱신되게 하고, 바로잡는 말이 오는 그 순간 훅이 AI에게 알리게 했습니다.
+- 고친 뒤에는 바로잡힌 5번 모두 AI가 시키지 않아도 구체적인 규칙을 남겼고, 다음 세션 5번이 모두 합격했습니다. Habitree가 없는 쪽은 6번 바로잡혀 그때마다 고쳤지만 남긴 것이 없어, 다음 세션 6번 모두 같은 실수를 했습니다.
+- 규칙을 남기는 데는 바로잡을 때마다 약 $0.03~0.04가 더 들었고, 다음 세션의 비용은 거의 같았습니다. 다만 AI가 처음부터 스스로 맞힌 한 번은 바로잡을 일이 없어 규칙도 남지 않았고, 다음 세션에서 틀렸습니다. 규칙은 바로잡힐 때만 자랍니다.
+
+이 결과는 훅이 있는 도구(Claude Code)에서 잰 것입니다. 지침 파일만 읽는 도구에서 고리를 잇는 일은 아직 남아 있습니다. 자세한 것은 [bench/2026-10-28-rules-grow.md](bench/2026-10-28-rules-grow.md)에 있습니다.
+
 ## 언제 무엇을 돕나
 
 | 언제 | 하는 일 | 명령 |
@@ -93,7 +101,7 @@ claude plugin install habitree@habitree
 
 ## 피드백을 규칙으로
 
-AI의 결과를 바로잡을 때는 고치는 것과 함께 규칙으로 남깁니다. AGENTS.md에 방법이 적혀 있어서 대개는 AI가 직접 기록합니다.
+AI의 결과를 바로잡을 때는 고치는 것과 함께 규칙으로 남깁니다. Claude Code에서는 "~하지 마", "~ 대신", "~하기로 했어" 같은 바로잡는 말이 오면 훅이 그 순간 AI에게 알려, AI가 직접 기록합니다. 규칙이 바뀌면 AGENTS.md의 '이 프로젝트의 규칙'도 바로 고쳐져 다음 세션이 읽습니다. 훅이 없는 도구에서는 AI가 기록하지 않을 때가 있으니 직접 남기면 됩니다.
 
 ```
 habitree rules add --scope work --aspect process \
@@ -102,7 +110,7 @@ habitree rules hit <id> --feedback "또 영어로 씀"       # 같은 지적: �
 habitree rules miss <id> --feedback "이번 경고는 틀렸음"  # 규칙이나 경고가 틀렸을 때
 ```
 
-새 규칙을 더하기 전에 같은 뜻의 규칙이 이미 있는지 먼저 찾아 줍니다. 같은 뜻이 둘로 갈라지면 지적 횟수가 흩어져 규칙이 단단해지지 못하기 때문입니다.
+규칙을 더할 때 같은 뜻의 규칙이 이미 있는지 함께 찾아 줍니다. 같은 뜻이 둘로 갈라지면 지적 횟수가 흩어져 규칙이 단단해지지 못하기 때문입니다.
 
 ## 로드맵
 
@@ -116,6 +124,7 @@ habitree rules miss <id> --feedback "이번 경고는 틀렸음"  # 규칙이나
 | v0.6 | 리팩토링 제안(합치기와 덜어내기 먼저) | 완료 |
 | v0.7 | 가볍게: 훅 비용과 기본 설치를 줄이고, 쓰는 프로젝트의 무게도 보여 주기 | 완료 |
 | v0.8 | 첫 측정, 측정에 따라 AI 지침 걷어내기, 먼저 찾게 하는 연결 | 완료 |
+| v0.9 | 규칙이 자라는 고리 잇기(바로잡는 순간 알림, 지침 바로 갱신)와 두 세션 측정 | 완료 |
 
 ## 문서와 지도
 
@@ -199,6 +208,14 @@ On 2026-10-28 we ran three small tasks many times in projects with and without H
 
 So the instructions the agent reads every session were trimmed to "look for what exists first", "record corrections as rules" and the rules this project has grown. New projects start with zero rules, and generic rules are enforced by checks and hooks. The trimmed version's overhead fell to 1 to 12%, though with few runs this difference is not conclusive yet. Conditions, limits and per-round tables are in [bench/2026-10-28-first-measurement.md](bench/2026-10-28-first-measurement.md).
 
+Next we measured what the name promises: whether rules grow. Starting from zero rules, when the agent made a mistake we corrected it once in plain words (without saying "remember this"), then gave a new session a similar but different task (two tasks, three flows per arm).
+
+- Before measuring, we found the loop broken. Adding a rule left AGENTS.md, which the next session reads, unchanged, and a line in the always-read instructions saying "record corrections as rules" only made the agent fix the code and stop. So instructions now refresh as soon as a rule changes, and a hook tells the agent at the moment a correction arrives.
+- After the fix, the agent recorded a specific rule without being asked in all 5 corrected flows, and all 5 next sessions passed. Without Habitree, the agent was corrected 6 times and fixed the code each time but kept nothing, so all 6 next sessions repeated the mistake.
+- Recording cost about $0.03 to $0.04 extra per correction, and next sessions cost about the same. In one flow the agent got it right on its own, so nothing was corrected, no rule was recorded, and the next session got it wrong. Rules grow only from corrections.
+
+This was measured on a tool with hooks (Claude Code); closing the loop on tools that only read instruction files is still open. Details are in [bench/2026-10-28-rules-grow.md](bench/2026-10-28-rules-grow.md).
+
 ### What it helps with
 
 | When | What it does | Commands |
@@ -234,7 +251,7 @@ claude plugin install habitree@habitree
 
 ### Turning feedback into rules
 
-When you correct the AI, record the correction as a rule while fixing it; AGENTS.md explains how, so the agent usually records it itself. Use `rules add` for a new rule, `rules hit` when the same feedback comes back (should becomes must), and `rules miss` when a rule or warning was wrong. Before adding a rule, Habitree looks for one that already means the same thing, because duplicates split the feedback count and never harden.
+When you correct the AI, record the correction as a rule while fixing it. In Claude Code, when a correcting message arrives ("don't", "instead", "we decided"), a hook tells the agent at that moment and the agent records it itself; the "rules of this project" part of AGENTS.md is refreshed right away, so the next session reads it. Tools without hooks may skip recording, so record it yourself there. Use `rules add` for a new rule, `rules hit` when the same feedback comes back (should becomes must), and `rules miss` when a rule or warning was wrong. When adding a rule, Habitree also looks for one that already means the same thing, because duplicates split the feedback count and never harden.
 
 ### Roadmap
 
@@ -248,6 +265,7 @@ When you correct the AI, record the correction as a rule while fixing it; AGENTS
 | v0.6 | Refactoring suggestions (merging and removing first) | Done |
 | v0.7 | Lighter: smaller hook cost and default install, and showing the weight of the project that uses it | Done |
 | v0.8 | First measurement, trimming agent instructions by the results, links that make the agent look first | Done |
+| v0.9 | Closing the loop where rules grow (a note at the moment of correction, instructions refreshed at once) and a two-session measurement | Done |
 
 ### Made by
 

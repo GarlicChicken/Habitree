@@ -88,6 +88,18 @@ def _abs(p):
     return os.path.isabs(p)
 
 
+def refresh_instructions(ctx, db):
+    """규칙이 바뀌면 이미 있는 AI 지침의 생성 구역을 바로 고친다. 다음 세션이 새 규칙을 읽게 하려는 것.
+    새 파일은 만들지 않고, 직접 고친 구역은 두고 알린다.
+    / Refresh existing managed blocks so the next session reads the new rule; never creates files, keeps hand edits."""
+    from . import export
+    steps = [s for s in export.plan(ctx, db) if s[4] in ("update", "kept")]
+    if any(s[4] == "update" for s in steps):
+        export.apply(ctx, [s for s in steps if s[4] == "update"])
+    for rel, name, _w, _c, action in steps:
+        print(f"  {rel} [{name}]: {tr(export.LABEL[action], ctx.lang)}")
+
+
 def overview(db, lang):
     rs = db.active()
     ko = lang == "ko"
@@ -120,6 +132,8 @@ def run(args, ctx):
 
     def save():
         db.save(doc_path, lang)
+        if not args.db:
+            refresh_instructions(ctx, db)
 
     if act is None:
         overview(db, lang)

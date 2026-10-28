@@ -75,6 +75,8 @@ Habitree 자신에게도 같은 기준을 둡니다. AI가 매번 읽는 지침�
 - 바로잡은 것은 규칙으로 남기라는 한 줄.
 - 그리고 이 프로젝트에서 쌓인 규칙.
 
+다만 시작할 때 읽은 한 줄은 몇 턴 뒤 바로잡히는 순간에 잘 떠오르지 않았습니다(두 세션 측정). 그래서 훅이 있는 도구에서는 바로잡는 말이 오면 그때 AI에게 알리고, 규칙을 더하거나 고치면 AI 지침의 생성 구역을 바로 고칩니다. 규칙은 그 순간에 남겨야 다음 세션에 닿습니다.
+
 모델이 이미 잘 지키는 일반 규칙(비밀값을 넣지 않기 등)은 AI 지침에 싣지 않고 기계 점검과 훅이 지킵니다. 여섯 단계 판이 필요하면 설정 `export.style`을 `full`로 바꿉니다. 이 파일들은 한 언어로만 만들고, AGENTS.md는 32KiB, CLAUDE.md는 200줄 안쪽을 한도로 삼습니다.
 
 ---
@@ -155,5 +157,7 @@ Running the same tasks many times with and without the instructions showed that 
 - One line to run the registered verify commands before finishing, only if there are any.
 - One line to record corrections as rules.
 - The rules this project has grown.
+
+A line read at the start, however, was rarely recalled at the moment of correction several turns later (two-session measurement). So on tools with hooks, a correcting message triggers a note to the agent right then, and adding or changing a rule refreshes the generated blocks of the agent instructions at once. A rule has to be recorded at that moment to reach the next session.
 
 Generic rules a model already follows well (such as keeping secrets out) are left out of the instructions and enforced by checks and hooks. Set `export.style` to `full` if you want the six-step version. These files are generated in one language, with limits of 32 KiB for AGENTS.md and 200 lines for CLAUDE.md.

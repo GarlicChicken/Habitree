@@ -1,6 +1,6 @@
 {
   "pack": "work",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "about": {
     "ko": "작업 중 비효율을 먼저 알리는 감지 규칙과 위임 예외",
     "en": "Detection rules that warn about inefficient work early, and delegation"
@@ -526,6 +526,47 @@
         ]
       },
       "on_delegate": "skip"
+    },
+    {
+      "id": "work.request.correction-to-rule",
+      "scope": "work/request",
+      "aspect": "process",
+      "level": "should",
+      "rule": {
+        "ko": "사용자가 앞선 결과를 바로잡으면, 고친 뒤 그 내용을 이 프로젝트의 규칙으로 남긴다.",
+        "en": "When the user corrects earlier work, fix it and record the correction as a rule of this project."
+      },
+      "why": {
+        "ko": "늘 읽는 지침에 적어 두기만 해서는 바로잡히는 순간에 떠오르지 않았다(두 세션 측정). 규칙으로 남겨야 다음 세션의 지침에 실린다.",
+        "en": "A line in the always-read instructions was not recalled at the moment of correction (two-session measurement). Only a recorded rule reaches the next session's instructions."
+      },
+      "check": {
+        "type": "auto",
+        "how": {
+          "ko": "UserPromptSubmit 훅이 세션의 첫 요청이 아닌 메시지에서 바로잡는 말(…하지 마, 대신, …써야 해, …하기로 했어, 이미 있어, 아니 등)을 보면 그때 AI에게 알린다.",
+          "en": "The UserPromptSubmit hook notes it to the AI when a message after the first one in a session carries correcting words (don't, instead, should use, we decided, already has, no, and so on)."
+        }
+      },
+      "detect": {
+        "signal": "correction_to_rule",
+        "event": "UserPromptSubmit",
+        "threshold": 1,
+        "severity": "info",
+        "now": true,
+        "repeat": "once_per_streak",
+        "max_per_session": 5,
+        "audience": "ai",
+        "params": {
+          "transcript_bytes": 4000
+        }
+      },
+      "message": {
+        "ai": {
+          "ko": "이 말이 앞선 결과를 바로잡거나 지킬 방식을 알려 준 것이라면, 고친 뒤 무엇을 쓰고 무엇을 하지 않는지 구체적으로 규칙에 남긴다(다음 세션 지침에 실린다): `habitree rules add --scope code --aspect structure --rule \"…\" --why \"…\" --feedback \"…\"`. 관점은 quality·process도 된다. 비슷한 규칙이 있으면 add가 알려 주니 미리 찾지 않는다. 아니면 넘어간다.",
+          "en": "If this corrects earlier work or states a convention, fix it, then record a specific rule (what to use, what not to do): `habitree rules add --scope code --aspect structure --rule \"…\" --why \"…\" --feedback \"…\"`. Aspect may be quality or process; add reports similar rules. Otherwise ignore this."
+        }
+      },
+      "on_delegate": "nudge"
     },
     {
       "id": "work.request.repeat-correction",

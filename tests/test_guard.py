@@ -250,6 +250,22 @@ class TestRequests(GuardProject):
         out = self.prompt("아니 로그인 버튼 색이 아직도 그대로예요. 버튼 자체를 파란색으로 바꿔 주세요, 다시요.")
         self.assertIn("work.request.repeat-correction", out.get("systemMessage", ""))
 
+    def test_correction_to_rule(self):
+        # 첫 요청은 바로잡는 말이 아니다
+        self.assertNotIn("correction-to-rule", self.ai(self.prompt("제목을 새로 짜지 말고 파일 이름 함수를 더해 줘")))
+        # 불만 없는 차분한 정정도 그 자리에서 AI에게 알린다
+        out = self.prompt("제목을 바꾸는 코드를 새로 짜지 마. textkit.py에 slugify()가 이미 있으니 그걸 불러 써서 고쳐 줘.")
+        self.assertIn("work.request.correction-to-rule", self.ai(out))
+        self.assertIn("habitree rules add", self.ai(out))
+        self.assertNotIn("systemMessage", out)                   # 사용자 화면에는 띄우지 않는다
+        out = self.prompt("우리 팀은 잘못된 입력은 null 대신 RangeError를 던지기로 했어. 그렇게 고쳐 줘.")
+        self.assertIn("work.request.correction-to-rule", self.ai(out))
+        out = self.prompt("We decided to use roundWon() instead of Math.round.")
+        self.assertIn("work.request.correction-to-rule", self.ai(out))
+        # 바로잡는 말이 없는 다음 요청, 짧은 대답은 조용하다
+        self.assertNotIn("correction-to-rule", self.ai(self.prompt("이제 README에 사용법을 한 단락 더해 줘")))
+        self.assertNotIn("correction-to-rule", self.ai(self.prompt("좋아")))
+
     def test_topic_mix_info(self):
         self.prompt("로그인 화면 버튼 색을 파란색으로 바꾸고 테스트를 고쳐 주세요")
         with hstate.session(self.root / ".habitree/state", self.sid) as st:
