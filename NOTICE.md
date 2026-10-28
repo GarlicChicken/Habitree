@@ -4,7 +4,23 @@ Habitree를 만들기 전에 비슷한 일을 하는 오픈소스와 자료를 �
 
 ## 옮겨 온 코드와 데이터
 
-아직 없습니다. 모델 대응표(`src/habitree/data/vendors.json`)의 값은 각 회사의 공식 가격·모델·단종 문서를 직접 읽고 적었고, 항목마다 출처와 확인일을 남겼습니다.
+옮겨 온 코드는 아직 없고, 데이터 하나를 옮겼습니다.
+
+**scc 언어표.** `habitree map`이 파일의 언어를 판정하고 줄 수를 셀 때 쓰는 [src/habitree/data/languages.json](src/habitree/data/languages.json)은 [boyter/scc](https://github.com/boyter/scc)의 `languages.json`(커밋 `27c14c46b3d33599fb96ca5f946781db9530df51`, 2026-10-28 확인)에서 왔습니다. 언어 375개의 확장자, 파일 이름, shebang, 줄 주석과 여러 줄 주석 표시만 남기고 칸 이름을 줄였습니다. 여러 언어가 함께 쓰던 확장자 12개는 한 언어에만 두었습니다(`_source.shared_ext`). 라이선스는 MIT이고 원문 고지는 아래와 같습니다.
+
+```
+MIT License
+
+Copyright (c) 2021 Ben Boyter
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice (including the next paragraph) shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+```
+
+모델 대응표(`src/habitree/data/vendors.json`)의 값은 각 회사의 공식 가격·모델·단종 문서를 직접 읽고 적었고, 항목마다 출처와 확인일을 남겼습니다.
 
 ## 빌려 온 생각
 
@@ -21,6 +37,14 @@ Habitree를 만들기 전에 비슷한 일을 하는 오픈소스와 자료를 �
 | 장애 때의 대체를 품질 실패와 따로 다루기, 관측 10번 전에는 조정하지 않기 | [LiteLLM](https://github.com/BerriAI/litellm) |
 | 가벼운 모델을 먼저 쓰고 안 되면 주 모델로, 언어별 검증 명령 | [Aider](https://github.com/Aider-AI/aider) |
 | 판정이 자주 틀리면 단계식 승격이 오히려 나빠진다는 점, 학습형 라우터를 만들지 않은 근거 | RouterBench (arXiv 2403.12031), LLMRouterBench (arXiv 2601.07206) |
+| 참조 그래프와 PageRank로 순위를 매기고 글자 예산 안에서 이진 탐색으로 코드 지도 만들기(코드는 옮기지 않고 새로 씀) | [Aider](https://github.com/Aider-AI/aider) repo map |
+| 심볼 기록(이름, 종류, 줄, 시그니처, 설명)과 몸통 해시, 이름 정규화, 목록을 먼저 보이고 몸통은 나중에 | [token-savior](https://github.com/Mibayy/token-savior), [code-index-mcp](https://github.com/johnhuang316/code-index-mcp), [kit](https://github.com/cased/kit) |
+| 수정 시각과 크기로 거르고 sha256으로 확정하는 증분 색인 | [codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp), [claude-context](https://github.com/zilliztech/claude-context) |
+| 문법을 몰라도 창 단위로 찾는 글 중복 | [jscpd](https://github.com/kucherenko/jscpd) |
+| 비밀 파일은 이름만 보고 먼저 빼기 | [Repomix](https://github.com/yamadashy/repomix) |
+| '없다'와 '못 읽었다'를 나누고, 빈 결과 대신 다음에 할 일을 알려 주기 | [llm-context.py](https://github.com/cyberchitta/llm-context.py), [jCodeMunch-MCP](https://github.com/jgravelle/jcodemunch-mcp)(공개 설명만 참고) |
+| 코드가 바뀌면 그 코드를 설명한 글을 낡았을 수 있다고 알리기 | [code-graph-rag](https://github.com/vitali87/code-graph-rag), [contextful](https://github.com/Inferensys/contextful) |
+| 표준 입출력 MCP 서버, 도구는 몇 개만 | [MCP 명세](https://modelcontextprotocol.io/specification) |
 
 ---
 
@@ -30,7 +54,9 @@ Before building Habitree we spent a good while studying open-source projects and
 
 ### Copied code and data
 
-None yet. The values in the model vendor table (`src/habitree/data/vendors.json`) were read directly from each vendor's official pricing, model and deprecation pages, and every entry keeps its source and checked date.
+No code has been copied yet; one data file has. The language table used by `habitree map` ([src/habitree/data/languages.json](src/habitree/data/languages.json)) comes from the `languages.json` of [boyter/scc](https://github.com/boyter/scc) (commit `27c14c46b3d33599fb96ca5f946781db9530df51`, checked 2026-10-28). Only extensions, file names, shebangs and comment markers for 375 languages were kept, with shorter field names, and the 12 extensions shared by several languages were each given to one language (`_source.shared_ext`). It is MIT licensed; the original notice is reproduced in the Korean section above.
+
+The values in the model vendor table (`src/habitree/data/vendors.json`) were read directly from each vendor's official pricing, model and deprecation pages, and every entry keeps its source and checked date.
 
 ### Borrowed ideas
 
@@ -47,5 +73,13 @@ None yet. The values in the model vendor table (`src/habitree/data/vendors.json`
 | Handling outage fallbacks apart from quality failures; no tuning before 10 observations | LiteLLM |
 | Trying a lighter model first and falling back to the main one; per-language verify commands | Aider |
 | Why stepwise escalation suffers when judgments are often wrong, and why we built no learned router | RouterBench, LLMRouterBench |
+| A code map ranked by a reference graph and PageRank, fitted to a character budget by binary search (rewritten, no code copied) | Aider |
+| Symbol records with body hashes, name normalization, lists first and bodies on request | token-savior, code-index-mcp, kit |
+| Incremental indexing filtered by mtime and size, confirmed by sha256 | codebase-memory-mcp, claude-context |
+| Grammar-free windowed duplicate detection | jscpd |
+| Leaving secret files out by name first | Repomix |
+| Telling "not there" from "could not read", and giving next steps instead of empty results | llm-context.py, jCodeMunch-MCP |
+| Flagging descriptions as possibly stale when the code they describe changes | code-graph-rag, contextful |
+| A stdio MCP server with only a few tools | MCP specification |
 
 Links are in the Korean table above.

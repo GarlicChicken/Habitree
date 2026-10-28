@@ -32,6 +32,18 @@ DEFAULTS = {
         "targets": ["agents", "claude"],
         "brief_budget": 3000,  # AGENTS.md 안에 넣는 필수 규칙 요약의 글자 예산
     },
+    "map": {
+        "exclude": [],  # 색인에서만 더 뺄 폴더·경로(위 exclude에 더함)
+        "secrets": None,  # None이면 기본 목록(mapper/index.py DEFAULT_SECRETS). 파일 이름 글롭
+        "max_bytes": 1000000,  # 이보다 큰 파일은 심볼을 뽑지 않는다
+        "show_budget": 4000,  # map show 기본 글자 예산
+        "find_limit": 10,  # map find 기본 결과 수
+        "find_budget": 4000,  # map find 글자 예산
+        "mcp_budget": 4000,  # MCP 도구 결과의 글자 예산
+        "dupe_window": 6,  # 글 중복을 보는 창(줄)
+        "churn_commits": 2000,  # 핫스팟에 쓰는 최근 커밋 수
+        "churn_top": 15,
+    },
     "verify": {},  # 이름 → 명령 배열. 예: {"test": ["pytest", "-q"]}. 종료 코드 0이 합격
     "models": {  # 모델 배분(habitree models). 설정 파일에 이 절이 없으면 check가 모델 점검을 건너뛴다
         "vendor": "anthropic",       # pick·export가 쓸 회사(대응표 vendors.json의 이름)

@@ -11,6 +11,7 @@ Habitree가 어떻게 일하는지를 정한 문서입니다. 코드는 이 문�
 | [spec/check.md](spec/check.md) | 점검 항목과 설정 |
 | [spec/guard.md](spec/guard.md) | 작업 중 경고, 훅, 위임 예외 |
 | [spec/models.md](spec/models.md) | 모델 배분, 검증 명령, 모델 대응표 |
+| [spec/map.md](spec/map.md) | 코드 색인과 MCP 서버 |
 | [spec/conformance.md](spec/conformance.md) | 적합성 시험 |
 
 ---
@@ -26,4 +27,5 @@ The documents that define how Habitree works. The code follows them, and they ar
 | [spec/check.md](spec/check.md) | Check items and settings |
 | [spec/guard.md](spec/guard.md) | In-flight warnings, hooks, delegation |
 | [spec/models.md](spec/models.md) | Model allocation, verify commands, vendor table |
+| [spec/map.md](spec/map.md) | Code index and MCP server |
 | [spec/conformance.md](spec/conformance.md) | Conformance suite |

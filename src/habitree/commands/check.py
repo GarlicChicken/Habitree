@@ -5,6 +5,7 @@
   map.folder-readme      최상위 폴더에 README.md가 없음
   docs.updated           지도·폴더 README에 '마지막 갱신' 날짜가 없거나 오래됨
   docs.link              깨진 상대 링크·앵커
+  docs.stale-code        문서가 링크한 코드가 문서보다 나중에 커밋됨(git이 있을 때)
   docs.log               변경 기록 파일이 없음
   docs.instructions-size AGENTS.md 32KiB 초과, CLAUDE.md 줄 수 초과
   docs.import            CLAUDE.md·AGENTS.md의 @import 대상이 없음
@@ -18,6 +19,9 @@
   generated.edited       생성 구역을 사람이 직접 고침
   paths.collision        NFC·NFD나 대소문자만 다른 파일 이름
   git.precompose         macOS에서 git core.precomposeUnicode가 꺼짐
+  models.deprecated      쓰는 모델의 단종이 가까움
+  models.floor           에이전트 모델이 작업 하한보다 낮음
+  models.price-stale     모델 가격 확인일이 오래됨
   custom.<id>            설정 checks.custom의 명령
 종료 코드: 오류가 있으면 1. / Exit code 1 when any error is found.
 """
@@ -396,12 +400,64 @@ def check_models(ctx, out):
         out.append(Finding(f["id"], f["level"], f["msg"], f.get("path", "")))
 
 
+def check_stale_code(ctx, files, out):
+    """docs.stale-code(알림): Markdown 문서가 링크한 코드 파일이 그 문서의 마지막 커밋보다 나중에 커밋됨.
+    git이 없거나 리포가 아니면 건너뛴다. / Linked code committed after the doc's last commit; skipped without git."""
+    from datetime import datetime, timezone
+
+    from ..core.timeutil import show
+    from ..mapper.churn import last_commit_times
+    from ..mapper.extract import is_code
+    from ..mapper.langs import detect
+    existing, pairs, seen = set(files), [], set()
+    for rel in files:
+        if not rel.lower().endswith(".md"):
+            continue
+        src = resolve(ctx.root, rel)
+        if src is None or not src.is_file():
+            continue
+        base = rel.rsplit("/", 1)[0] if "/" in rel else ""
+        for line, target in links(hio.read_text(src)):
+            if re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", target) or target.startswith(("//", "#", "@")):
+                continue
+            path_part = nfc(unquote(target.split("#")[0]))
+            parts = []
+            for seg in ((path_part.lstrip("/") if path_part.startswith("/") else f"{base}/{path_part}").split("/")):
+                if seg == "..":
+                    if parts:
+                        parts.pop()
+                elif seg not in ("", "."):
+                    parts.append(seg)
+            tgt = "/".join(parts)
+            if tgt in existing and tgt != rel and (rel, tgt) not in seen and is_code(detect(tgt)):
+                seen.add((rel, tgt))
+                pairs.append((rel, line, tgt))
+    if not pairs:
+        return
+    times = last_commit_times(ctx.root, [p for d, _, t in pairs for p in (d, t)])
+    if not times:
+        return
+
+    def when(ts):
+        return show(datetime.fromtimestamp(ts, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+
+    for doc, line, tgt in pairs:
+        dt, ct = times.get(doc), times.get(tgt)
+        if dt is not None and ct is not None and ct > dt:
+            out.append(Finding("docs.stale-code", "info",
+                               {"ko": f"문서보다 나중에 바뀐 코드를 링크함: {tgt} (코드 {when(ct)}, 문서 {when(dt)}). "
+                                      f"설명이 아직 맞는지 확인",
+                                "en": f"Links code changed after this doc: {tgt} (code {when(ct)}, doc {when(dt)}). "
+                                      f"Check the description still holds"}, doc, line))
+
+
 def collect(ctx, no_auto=False):
     files = iter_files(ctx.root, ctx.get("exclude"))
     out = []
     check_map(ctx, files, out)
     check_updated(ctx, out)
     check_links(ctx, files, out)
+    check_stale_code(ctx, files, out)
     check_log(ctx, out)
     check_instructions(ctx, files, out)
     check_rules(ctx, files, out, no_auto)

@@ -13,6 +13,7 @@
 | `check/instructions` | 숨은 제어 문자, 대상이 없는 `@import` |
 | `check/no-log-no-date` | 변경 기록과 갱신일이 없을 때(경고만) |
 | `check/models-floor` | 에이전트가 쓰는 모델이 그 작업의 하한보다 낮음(상위 범위의 하한을 물려받음) |
+| `check/stale-code-no-git` | git이 없으면 `docs.stale-code`를 건너뜀(코드 링크가 있어도 종료 코드 0) |
 
 판정 방법은 [docs/spec/conformance.md](../docs/spec/conformance.md)에 있습니다.
 

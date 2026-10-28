@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "habitree": {
+      "type": "stdio",
+      "command": "habitree",
+      "args": ["mcp"]
+    }
+  }
+}

@@ -8,6 +8,7 @@
 | `map.folder-readme` | 경고(설정으로 바꿈) | 최상위 폴더에 README.md가 없음. `docs.folder_readme`를 `"error"`, `"warn"`, `false` 중에서 고름 |
 | `docs.updated` | 경고, 알림 | 지도와 폴더 README에 '마지막 갱신'(`docs.updated_labels`) 날짜가 없으면 경고, `docs.stale_days`보다 오래되면 알림 |
 | `docs.link` | 오류 | Markdown 상대 링크의 대상이 없거나, `.md` 대상의 제목 앵커가 없음. 코드 안 링크와 웹 주소는 보지 않음 |
+| `docs.stale-code` | 알림 | Markdown 문서가 링크한 코드 파일이 그 문서의 마지막 git 커밋보다 나중에 커밋됨. 커밋 시각만 보며, git이 없거나 리포가 아니면 건너뜀 |
 | `docs.log` | 경고 | 변경 기록 파일(`docs.log`)이 없음 |
 | `docs.instructions-size` | 오류, 경고 | AGENTS.md가 `docs.agents_md_max_bytes`(32768)를 넘으면 오류, CLAUDE.md가 `docs.claude_md_max_lines`(200)를 넘으면 경고 |
 | `docs.import` | 오류 | AGENTS.md·CLAUDE.md의 `@경로` 대상이 없음 |
@@ -53,6 +54,7 @@ The items reported by `habitree check`. Checks that ask an AI to judge cost mone
 | `map.folder-readme` | warn (configurable) | A top-level folder has no README.md; set `docs.folder_readme` to `"error"`, `"warn"` or `false` |
 | `docs.updated` | warn, info | No "last updated" date (`docs.updated_labels`) in the map or a folder README (warn), or older than `docs.stale_days` (info) |
 | `docs.link` | error | A relative Markdown link points nowhere, or a heading anchor is missing in an `.md` target; code spans and URLs are skipped |
+| `docs.stale-code` | info | Code linked from a Markdown doc was committed after the doc's last commit. Only commit times are compared; skipped without git or outside a repository |
 | `docs.log` | warn | The change log (`docs.log`) is missing |
 | `docs.instructions-size` | error, warn | AGENTS.md over `docs.agents_md_max_bytes` (32768) is an error; CLAUDE.md over `docs.claude_md_max_lines` (200) is a warning |
 | `docs.import` | error | An `@path` import in AGENTS.md or CLAUDE.md points nowhere |

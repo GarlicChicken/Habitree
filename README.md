@@ -3,7 +3,7 @@
 AI와 코딩할 때 토큰은 줄이고 재사용은 늘리도록 돕는 도구입니다. 피드백은 규칙으로, 반복은 모듈로 자라게 합니다.
 
 - 마지막 갱신: 2026-10-28
-- 상태: v0.3 알파
+- 상태: v0.4 알파
 - 라이선스: [MIT](LICENSE)
 - [English](#english)
 
@@ -98,6 +98,14 @@ habitree rules similar "커밋 메시지 언어"               # 같은 뜻 규�
 
 규칙에 `check.run`을 적어 두면 사다리의 '자동 검사' 칸이 실제로 돌아갑니다. 명령(종료 코드 0이면 합격), 금지할 형식, 있어야 할 형식, 줄 수 한도 중에서 고를 수 있습니다. 프로젝트가 어떤 언어로 짜여 있든 똑같이 쓸 수 있습니다. 전체 목록은 [docs/spec/check.md](docs/spec/check.md)에 있습니다.
 
+## 만들기 전에 찾기
+
+작업 순환의 첫 단계는 찾기입니다. 그런데 사람이 쓴 README 지도만으로는 함수 하나하나까지 찾기 어렵고, AI는 결국 파일을 통째로 열어 보게 됩니다.
+
+`habitree map`은 프로젝트의 함수, 클래스, 모듈, 문서 구역의 이름과 시그니처, 첫 줄 설명만 모은 색인을 만들고, 다른 파일에서 많이 쓰이는 것부터 정한 글자 수 안에 담아 보여 줍니다. AI는 파일을 열기 전에 이 목록부터 보고, 필요한 것만 엽니다. 언어 판정, 줄 수, 중복, 변경 기록은 어떤 언어에도 같게 동작합니다. Python은 문법 분석으로 정확하게, 그 밖의 스무 개 남짓한 언어는 패턴으로 대략 뽑고, 결과마다 어느 쪽인지 표시합니다. 한국어는 조사가 붙어도 찾습니다.
+
+`habitree mcp`를 AI 도구에 연결하면 찾기, 규칙, 점검을 AI가 직접 부를 수 있습니다. 토큰을 얼마나 줄이는지는 아직 재지 않았고, 재면 조건과 함께 공개하겠습니다. 자세한 것은 [docs/spec/map.md](docs/spec/map.md)에 있습니다.
+
 ## 일하는 도중에 알려 주기
 
 낭비는 대개 끝난 뒤에야 보입니다. 같은 명령을 다섯 번 돌렸고, 같은 오류에 같은 수정을 되풀이했고, 파일 하나가 덧붙이기만으로 두 배가 됐다는 사실을 세션 기록을 읽고 나서야 알게 됩니다.
@@ -130,7 +138,7 @@ Habitree는 탐색, 요약, 코드 작성, 리뷰, 위험한 작업 같은 작�
 | v0.1 | 규칙 DB, `init`·`rules`·`check`·`export`, 적합성 시험, 세 OS CI | 완료 |
 | v0.2 | 작업 중 비효율 경고(`guard`), 훅, 위임 예외, Claude Code 플러그인 | 완료 |
 | v0.3 | 모델 배분(`models`), 검증 명령(`verify`) | 완료 |
-| v0.4 | 코드 색인(`map`), MCP 서버 | 진행 중 |
+| v0.4 | 코드 색인(`map`), MCP 서버 | 완료 |
 | v0.5 | 세션 기록 분석(`audit`), 전후 비교 측정(`bench`) | 예정 |
 
 ## 문서
@@ -142,6 +150,7 @@ Habitree는 탐색, 요약, 코드 작성, 리뷰, 위험한 작업 같은 작�
 | 점검 항목 | [docs/spec/check.md](docs/spec/check.md) |
 | 작업 중 경고와 위임 | [docs/spec/guard.md](docs/spec/guard.md) |
 | 모델 배분과 검증 | [docs/spec/models.md](docs/spec/models.md) |
+| 코드 색인과 MCP 서버 | [docs/spec/map.md](docs/spec/map.md) |
 | 적합성 시험 | [docs/spec/conformance.md](docs/spec/conformance.md) |
 | 구조와 기여 방법 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 바뀐 것 | [CHANGELOG.md](CHANGELOG.md) |
@@ -249,6 +258,14 @@ Rules sit on a scope tree (`work` → `work/cycle`), and child scopes inherit th
 
 Add `check.run` to a rule and the "automatic check" rung of the ladder actually runs: a command (exit 0 passes), a forbidden pattern, a required pattern or a line limit. It works the same whatever language your project is written in.
 
+### Look before you build
+
+The first step of the work cycle is to look for what already exists. A hand-written README map cannot list every function, though, so the agent ends up opening whole files.
+
+`habitree map` builds an index of a project's functions, classes, modules and doc sections, keeping only names, signatures and first-line descriptions, and shows the most used ones first within a character budget. The agent looks at the list before opening files and opens only what it needs. Language detection, line counts, duplicates and change history work the same for any language. Python is read exactly through its parser and about twenty other languages approximately through patterns, and every result says which. Korean search works even with particles attached.
+
+Connect `habitree mcp` to your AI tool and the agent can call search, rules and checks directly. Token savings have not been measured yet; when they are, they will be published with their conditions. See [docs/spec/map.md](docs/spec/map.md).
+
 ### Warnings while you work
 
 Waste usually shows up only afterwards. You learn from the session log that the same command ran five times, the same fix was retried on the same error, or one file doubled in size by appending alone.
@@ -281,7 +298,7 @@ There is no router to run. One policy generates settings for Claude Code subagen
 | v0.1 | Rule DB, `init`/`rules`/`check`/`export`, conformance suite, CI on three OSes | Done |
 | v0.2 | In-flight warnings (`guard`), hooks, delegation, Claude Code plugin | Done |
 | v0.3 | Model allocation (`models`), verify commands (`verify`) | Done |
-| v0.4 | Code index (`map`), MCP server | In progress |
+| v0.4 | Code index (`map`), MCP server | Done |
 | v0.5 | Session audit (`audit`), before/after benchmark (`bench`) | Planned |
 
 ### Made by

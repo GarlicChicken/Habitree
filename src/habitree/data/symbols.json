@@ -1,0 +1,213 @@
+{
+  "_about": {
+    "ko": "언어별 심볼 패턴. 줄마다 정규식(Python re 문법, (?P<name>…) 필수)을 위에서부터 맞춰 처음 맞은 것을 쓴다. 결과는 대략(approx)이다. 언어 이름은 languages.json과 같다. 자세한 것은 docs/spec/map.md.",
+    "en": "Per-language symbol patterns. Each line is tried against the regexes top to bottom (Python re syntax, (?P<name>...) required); the first match wins. Results are approximate. Language names match languages.json. See docs/spec/map.md."
+  },
+  "version": 1,
+  "text_only": [
+    "Markdown", "Plain Text", "ReStructuredText", "AsciiDoc", "Org", "Textile", "License", "Rich Text Format",
+    "LaTeX", "TeX", "JSON", "JSONL", "JSON5", "JSONC", "YAML", "TOML", "INI", "CSV", "XML", "XML Schema", "SVG",
+    "Document Type Definition", "gitignore", "Docker ignore", "Jupyter", "CloudFormation (JSON)", "CloudFormation (YAML)"
+  ],
+  "not_names": [
+    "if", "else", "elif", "for", "foreach", "while", "do", "switch", "case", "return", "catch", "function", "sizeof",
+    "typeof", "throw", "try", "until", "unless", "and", "or", "not", "in", "with", "when", "match", "loop", "await",
+    "yield", "super", "this", "self", "defined", "assert", "using", "lock", "fixed", "of"
+  ],
+  "ref_stop": [
+    "if", "else", "elif", "for", "while", "return", "function", "func", "def", "class", "struct", "interface", "enum",
+    "const", "let", "var", "new", "this", "self", "super", "true", "false", "null", "nil", "None", "True", "False",
+    "undefined", "import", "export", "from", "package", "public", "private", "protected", "static", "async", "await",
+    "yield", "try", "catch", "except", "finally", "throw", "raise", "with", "not", "and", "lambda", "pass", "void",
+    "int", "string", "str", "bool", "float", "double", "char", "long", "short", "unsigned", "typeof", "instanceof",
+    "delete", "default", "extends", "implements", "sizeof", "impl", "trait", "mod", "use", "pub", "mut", "ref", "end",
+    "begin", "then", "local", "echo", "require", "include", "namespace", "using", "template", "typename", "override",
+    "virtual", "final", "abstract", "readonly", "type", "break", "continue", "switch", "case", "elsif", "unless",
+    "self", "cls", "args", "kwargs", "len", "dict", "list", "set", "tuple", "object", "Object", "String", "Number"
+  ],
+  "common_names": [
+    "get", "set", "add", "put", "append", "push", "pop", "items", "keys", "values", "update", "remove", "delete",
+    "insert", "extend", "join", "split", "strip", "trim", "replace", "format", "map", "filter", "reduce", "forEach",
+    "find", "index", "count", "length", "size", "sort", "copy", "clone", "read", "write", "open", "close", "flush",
+    "send", "run", "start", "stop", "call", "apply", "bind", "then", "toString", "equals", "hashCode", "parent",
+    "name", "path", "exists", "lower", "upper", "startswith", "endswith", "encode", "decode", "load", "dump",
+    "loads", "dumps", "log", "debug", "info", "warn", "warning", "error", "next", "iter", "has", "contains", "clear",
+    "init", "main", "test", "setUp", "tearDown", "match", "search", "group", "text", "data", "value", "key", "type",
+    "show", "render", "parse", "resolve", "validate", "handle", "process", "execute", "create", "build"
+  ],
+  "groups": {
+    "python": {
+      "languages": ["Python"],
+      "extractor": "ast",
+      "block": "indent",
+      "patterns": [
+        {"kind": "class", "re": "^\\s*class\\s+(?P<name>[A-Za-z_]\\w*)"},
+        {"kind": "function", "re": "^\\s*(?:async\\s+)?def\\s+(?P<name>[A-Za-z_]\\w*)\\s*\\("}
+      ]
+    },
+    "js": {
+      "languages": ["JavaScript", "TypeScript", "JSX", "Vue", "Svelte"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "class", "re": "^\\s*(?:export\\s+)?(?:default\\s+)?(?:declare\\s+)?(?:abstract\\s+)?class\\s+(?P<name>[A-Za-z_$][\\w$]*)"},
+        {"kind": "interface", "re": "^\\s*(?:export\\s+)?(?:declare\\s+)?interface\\s+(?P<name>[A-Za-z_$][\\w$]*)"},
+        {"kind": "enum", "re": "^\\s*(?:export\\s+)?(?:declare\\s+)?(?:const\\s+)?enum\\s+(?P<name>[A-Za-z_$][\\w$]*)"},
+        {"kind": "type", "re": "^\\s*(?:export\\s+)?(?:declare\\s+)?type\\s+(?P<name>[A-Za-z_$][\\w$]*)\\s*(?:<[^=]*>)?\\s*="},
+        {"kind": "function", "re": "^\\s*(?:export\\s+)?(?:default\\s+)?(?:declare\\s+)?(?:async\\s+)?function\\s*\\*?\\s*(?P<name>[A-Za-z_$][\\w$]*)"},
+        {"kind": "function", "re": "^\\s*(?:export\\s+)?(?:const|let|var)\\s+(?P<name>[A-Za-z_$][\\w$]*)\\s*(?::[^=]*)?=\\s*(?:async\\s+)?(?:function\\b|(?:<[^>]*>\\s*)?\\([^)]*\\)\\s*(?::[^=]*)?=>|\\(\\s*$|[A-Za-z_$][\\w$]*\\s*=>)"},
+        {"kind": "const", "re": "^\\s*export\\s+(?:const|let|var)\\s+(?P<name>[A-Za-z_$][\\w$]*)"},
+        {"kind": "const", "top": true, "re": "^(?:const|let|var)\\s+(?P<name>[A-Z][A-Z0-9_]+)\\s*(?::[^=]*)?="},
+        {"kind": "method", "inside": ["class"], "member": true, "re": "^\\s+(?:(?:public|private|protected|static|readonly|async|override|abstract|declare|get|set)\\s+)*(?:\\*\\s*)?(?P<name>#?[A-Za-z_$][\\w$]*)\\s*(?:<[^>]*>)?\\s*\\([^;]*$"},
+        {"kind": "method", "inside": ["class"], "member": true, "re": "^\\s+(?:(?:public|private|protected|static|readonly)\\s+)*(?P<name>#?[A-Za-z_$][\\w$]*)\\s*(?::[^=]*)?=\\s*(?:async\\s+)?(?:\\([^)]*\\)|[A-Za-z_$][\\w$]*)\\s*(?::[^=]*)?=>"}
+      ]
+    },
+    "go": {
+      "languages": ["Go"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "method", "re": "^func\\s*\\(\\s*(?:[A-Za-z_]\\w*\\s+)?\\*?\\s*(?P<parent>[A-Za-z_]\\w*)(?:\\[[^\\]]*\\])?\\s*\\)\\s*(?P<name>[A-Za-z_]\\w*)"},
+        {"kind": "function", "re": "^func\\s+(?P<name>[A-Za-z_]\\w*)"},
+        {"kind": "type", "re": "^type\\s+(?P<name>[A-Za-z_]\\w*)(?:\\[[^\\]]*\\])?\\s+(?P<kind>struct|interface)?"}
+      ]
+    },
+    "rust": {
+      "languages": ["Rust"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "function", "re": "^\\s*(?:pub(?:\\s*\\([^)]*\\))?\\s+)?(?:default\\s+)?(?:const\\s+)?(?:async\\s+)?(?:unsafe\\s+)?(?:extern\\s+(?:\"[^\"]*\"\\s+)?)?fn\\s+(?P<name>[A-Za-z_]\\w*)"},
+        {"kind": "type", "kinds": {"mod": "module"}, "re": "^\\s*(?:pub(?:\\s*\\([^)]*\\))?\\s+)?(?P<kind>struct|enum|trait|union|mod|type)\\s+(?P<name>[A-Za-z_]\\w*)"},
+        {"kind": "impl", "re": "^\\s*(?:unsafe\\s+)?impl(?:\\s*<[^>]*>)?\\s+(?:[\\w:]+(?:<[^>]*>)?\\s+for\\s+)?(?P<name>[A-Za-z_][\\w:]*)"},
+        {"kind": "macro", "re": "^\\s*macro_rules!\\s*(?P<name>[A-Za-z_]\\w*)"},
+        {"kind": "const", "re": "^\\s*(?:pub(?:\\s*\\([^)]*\\))?\\s+)?(?:const|static)\\s+(?:mut\\s+)?(?P<name>[A-Z][A-Z0-9_]*)\\s*:"}
+      ]
+    },
+    "java": {
+      "languages": ["Java", "C#", "Groovy"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "class", "re": "^\\s*(?:\\[[^\\]]*\\]\\s*)*(?:@\\w+(?:\\([^)]*\\))?\\s+)*(?:(?:public|private|protected|internal|static|final|abstract|sealed|partial|readonly|unsafe|new|non-sealed|strictfp|file|ref)\\s+)*(?P<kind>class|interface|enum|record|struct)\\s+(?P<name>[A-Za-z_]\\w*)"},
+        {"kind": "method", "inside": ["class", "interface", "enum", "record", "struct"], "member": true, "re": "^\\s*(?:\\[[^\\]]*\\]\\s*)*(?:(?:public|private|protected|internal|static|final|abstract|synchronized|native|virtual|override|async|sealed|extern|unsafe|new|default|partial|readonly|strictfp)\\s+)*(?:<[^>]*>\\s+)?(?:[\\w.]+(?:<[^()]*>)?(?:\\[\\])*\\??\\s+)?(?P<name>[A-Za-z_]\\w*)\\s*(?:<[^>]*>)?\\s*\\([^;]*$"}
+      ]
+    },
+    "kotlin": {
+      "languages": ["Kotlin"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "function", "re": "^\\s*(?:@\\w+(?:\\([^)]*\\))?\\s+)*(?:(?:public|private|protected|internal|open|override|suspend|inline|operator|infix|tailrec|abstract|final|external|actual|expect)\\s+)*fun\\s+(?:<[^>]*>\\s*)?(?:[\\w.<>?]+\\.)?(?P<name>[A-Za-z_]\\w*)\\s*\\("},
+        {"kind": "class", "re": "^\\s*(?:(?:public|private|protected|internal|open|abstract|final|sealed|data|enum|annotation|inner|value|inline|expect|actual)\\s+)*(?P<kind>class|interface|object)\\s+(?P<name>[A-Za-z_]\\w*)"}
+      ]
+    },
+    "scala": {
+      "languages": ["Scala"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "function", "kinds": {"def": "function"}, "re": "^\\s*(?:(?:private|protected|override|final|implicit|lazy|sealed|abstract|case|inline|transparent|open)(?:\\[[^\\]]*\\])?\\s+)*(?P<kind>def|class|object|trait|enum)\\s+(?P<name>[A-Za-z_]\\w*)"}
+      ]
+    },
+    "swift": {
+      "languages": ["Swift"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "function", "re": "^\\s*(?:@\\w+(?:\\([^)]*\\))?\\s+)*(?:(?:public|private|fileprivate|internal|open|static|class|final|override|mutating|nonmutating|convenience|required|dynamic|nonisolated)\\s+)*func\\s+(?P<name>[A-Za-z_]\\w*)"},
+        {"kind": "class", "re": "^\\s*(?:@\\w+(?:\\([^)]*\\))?\\s+)*(?:(?:public|private|fileprivate|internal|open|final|indirect)\\s+)*(?P<kind>class|struct|enum|protocol|extension|actor)\\s+(?P<name>[A-Za-z_][\\w.]*)"}
+      ]
+    },
+    "c": {
+      "languages": ["C", "C++", "C Header", "C++ Header", "Objective C", "Objective C++", "CUDA"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "macro", "re": "^\\s*#\\s*define\\s+(?P<name>[A-Za-z_]\\w*)\\("},
+        {"kind": "class", "re": "^\\s*(?:typedef\\s+)?(?:template\\s*<[^>]*>\\s*)?(?P<kind>struct|class|enum|union|namespace)(?:\\s+class)?\\s+(?:\\[\\[[^\\]]*\\]\\]\\s*)?(?:[A-Z_][A-Z0-9_]*\\s+)?(?P<name>[A-Za-z_]\\w*)\\s*(?:final\\s*)?(?:[:{]|$)"},
+        {"kind": "function", "re": "^(?!(?:if|for|while|switch|return|else|do|case|goto|sizeof|typedef|using|namespace|template|static_assert)\\b)(?:[A-Za-z_][\\w:<>,]*[\\s*&]+)+(?P<name>~?[A-Za-z_]\\w*(?:::~?[A-Za-z_]\\w*)*)\\s*\\("},
+        {"kind": "method", "inside": ["class", "struct"], "member": true, "re": "^\\s+(?:(?:virtual|static|inline|explicit|constexpr|friend)\\s+)*(?:[A-Za-z_][\\w:<>,]*[\\s*&]+)*(?P<name>~?[A-Za-z_]\\w*)\\s*\\([^;]*$"}
+      ]
+    },
+    "ruby": {
+      "languages": ["Ruby"],
+      "block": "end",
+      "patterns": [
+        {"kind": "function", "re": "^\\s*def\\s+(?:self\\.)?(?P<name>[A-Za-z_]\\w*[?!=]?)"},
+        {"kind": "class", "kinds": {"module": "module"}, "re": "^\\s*(?P<kind>class|module)\\s+(?:<<\\s*)?(?P<name>[A-Z][\\w:]*)"}
+      ]
+    },
+    "php": {
+      "languages": ["PHP"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "function", "re": "^\\s*(?:(?:public|private|protected|static|final|abstract|readonly)\\s+)*function\\s+&?\\s*(?P<name>[A-Za-z_]\\w*)\\s*\\("},
+        {"kind": "class", "re": "^\\s*(?:(?:abstract|final|readonly)\\s+)*(?P<kind>class|interface|trait|enum)\\s+(?P<name>[A-Za-z_]\\w*)"}
+      ]
+    },
+    "shell": {
+      "languages": ["Shell", "BASH", "Zsh", "Korn Shell"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "function", "re": "^\\s*function\\s+(?P<name>[A-Za-z_][\\w:.-]*)"},
+        {"kind": "function", "re": "^\\s*(?P<name>[A-Za-z_][\\w:.-]*)\\s*\\(\\)"}
+      ]
+    },
+    "powershell": {
+      "languages": ["Powershell"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "function", "flags": "i", "re": "^\\s*(?:function|filter)\\s+(?P<name>[A-Za-z_][\\w-]*)"},
+        {"kind": "class", "flags": "i", "re": "^\\s*class\\s+(?P<name>[A-Za-z_]\\w*)"}
+      ]
+    },
+    "lua": {
+      "languages": ["Lua", "Luau"],
+      "block": "end",
+      "patterns": [
+        {"kind": "function", "re": "^\\s*(?:local\\s+)?function\\s+(?P<name>[A-Za-z_][\\w.:]*)"},
+        {"kind": "function", "re": "^\\s*(?:local\\s+)?(?P<name>[A-Za-z_][\\w.]*)\\s*=\\s*function\\b"}
+      ]
+    },
+    "perl": {
+      "languages": ["Perl"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "function", "re": "^\\s*sub\\s+(?P<name>[A-Za-z_]\\w*)"},
+        {"kind": "module", "block": "line", "re": "^\\s*package\\s+(?P<name>[\\w:]+)"}
+      ]
+    },
+    "r": {
+      "languages": ["R"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "function", "re": "^\\s*(?P<name>[A-Za-z_.][\\w.]*)\\s*(?:<-|=)\\s*function\\s*\\("}
+      ]
+    },
+    "elixir": {
+      "languages": ["Elixir"],
+      "block": "end",
+      "patterns": [
+        {"kind": "module", "re": "^\\s*defmodule\\s+(?P<name>[A-Z][\\w.]*)"},
+        {"kind": "function", "kinds": {"def": "function", "defp": "function", "defmacro": "macro", "defmacrop": "macro"}, "re": "^\\s*(?P<kind>defmacrop|defmacro|defp|def)\\s+(?P<name>[a-z_]\\w*[?!]?)"}
+      ]
+    },
+    "dart": {
+      "languages": ["Dart"],
+      "block": "brace",
+      "patterns": [
+        {"kind": "class", "re": "^\\s*(?:(?:abstract|final|base|interface|sealed|mixin)\\s+)*(?P<kind>class|mixin|enum|extension)\\s+(?P<name>[A-Za-z_]\\w*)"},
+        {"kind": "function", "re": "^\\s*(?:(?:static|external)\\s+)*(?:[\\w<>?,]+\\s+)?(?P<name>[A-Za-z_]\\w*)\\s*\\([^;]*\\)\\s*(?:async\\s*\\*?\\s*)?(?:\\{|=>)"}
+      ]
+    },
+    "sql": {
+      "languages": ["SQL", "PL/SQL"],
+      "block": "line",
+      "patterns": [
+        {"kind": "table", "flags": "i", "kinds": {"table": "table", "view": "view", "function": "function", "procedure": "function", "trigger": "trigger", "index": "index", "type": "type"}, "re": "^\\s*create\\s+(?:or\\s+replace\\s+)?(?:temp(?:orary)?\\s+)?(?:materialized\\s+)?(?P<kind>table|view|function|procedure|trigger|index|type)\\s+(?:if\\s+not\\s+exists\\s+)?(?P<name>[\\w.\"`\\[\\]]+)"}
+      ]
+    },
+    "markdown": {
+      "languages": ["Markdown"],
+      "block": "heading",
+      "fences": true,
+      "refs": false,
+      "patterns": [
+        {"kind": "section", "re": "^(?P<level>#{1,6})\\s+(?P<name>.+?)\\s*#*\\s*$"}
+      ]
+    }
+  }
+}

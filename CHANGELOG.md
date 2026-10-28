@@ -2,6 +2,15 @@
 
 새 버전을 위에 씁니다.
 
+## 0.4.0 (2026-10-28)
+
+새로 만들기 전에 이미 있는 것을 먼저 찾게 하는 버전입니다.
+
+- `habitree map`: 코드 색인. `build`(바뀐 파일만 다시 읽음), `show`(PageRank 순위, 글자 예산, `--focus`), `find`(낱말 나누기, 앞부분 일치, 한국어 두 글자 묶음, 세 단계 결과, `--json`), `dupes`, `churn`, `stats`. Python은 문법 분석으로, 스무 개 남짓한 언어는 패턴으로 뽑습니다. 언어표 375개는 scc(MIT)에서 왔습니다. 비밀 파일은 처음부터 뺍니다.
+- `habitree mcp`: 표준 입출력 MCP 서버. 도구는 `map_find`, `map_show`, `rules_brief`, `check` 네 개이고, `.mcp.json` 예시가 있습니다.
+- 점검 항목 `docs.stale-code`: 문서가 링크한 코드가 그 문서보다 나중에 커밋됐으면 알립니다(git이 없으면 건너뜀).
+- 명세 `docs/spec/map.md`, 적합성 사례 `check/stale-code-no-git`.
+
 ## 0.3.0 (2026-10-28)
 
 일의 종류마다 알맞은 모델에서 시작하고, 기계 검증이 실패할 때만 올라가게 하는 버전입니다.
@@ -39,6 +48,15 @@
 ## English
 
 Newest first.
+
+### 0.4.0 (2026-10-28)
+
+Look for what already exists before building something new.
+
+- `habitree map`: a code index. `build` (rereads only changed files), `show` (PageRank order, character budget, `--focus`), `find` (word splitting, prefix match, Korean two-character grams, three result levels, `--json`), `dupes`, `churn` and `stats`. Python is parsed exactly; about twenty other languages are matched by patterns. The table of 375 languages comes from scc (MIT). Secret files are left out from the start.
+- `habitree mcp`: a stdio MCP server with four tools (`map_find`, `map_show`, `rules_brief`, `check`) and an example `.mcp.json`.
+- Check item `docs.stale-code`: notes when code linked from a doc was committed after the doc (skipped without git).
+- The spec `docs/spec/map.md` and the conformance case `check/stale-code-no-git`.
 
 ### 0.3.0 (2026-10-28)
 
