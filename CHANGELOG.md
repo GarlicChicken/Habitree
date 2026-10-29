@@ -12,6 +12,7 @@
 - 꾸러미 규칙에 이 프로젝트의 지적이 붙으면(`rules hit`) AGENTS.md의 '이 프로젝트의 규칙'에 싣습니다.
 - RULES.md 머리말과 `feedback-to-rule` 스킬이 미리 찾지 말고 바로 `rules add`를 쓰게 안내합니다. 같은 뜻 규칙은 add가 알려 줍니다.
 - 두 세션 측정 `bench/grow.py`와, `reuse-helper`·`money-rules`의 다음 과제(`grow`).
+- README 앞에 'Habitree가 말하는 효율'을 더했습니다. 프로젝트 전체의 토큰을 크게 줄이는 도구가 아니라, 한 번 바로잡은 실수를 되풀이하지 않게 하는 도구라는 것을 측정 결과와 함께 적었습니다.
 - 두 세션 측정: 바로잡힌 흐름에서 Habitree 쪽은 5번 모두 시키지 않아도 규칙을 남겼고 다음 세션 5/5 합격, 없는 쪽은 6번 바로잡혔지만 다음 세션 0/6.
 
 ## 0.8.0 (2026-10-28)
@@ -111,6 +112,7 @@ Measured over two sessions whether rules actually grow, as the name says, and cl
 - A pack rule that receives this project's feedback (`rules hit`) now appears under "rules of this project" in AGENTS.md.
 - The head of RULES.md and the `feedback-to-rule` skill point straight to `rules add` without searching first; add reports a rule with the same meaning.
 - Two-session measurement `bench/grow.py`, with next tasks (`grow`) for `reuse-helper` and `money-rules`.
+- The README now opens with what efficiency means here: not cutting a whole project's tokens by much, but never repeating a mistake that was corrected once, with the measured numbers.
 - Two-session results: in corrected flows the Habitree side recorded a rule without being asked all 5 times and passed 5/5 next sessions; the other side was corrected 6 times and passed 0/6 next sessions.
 
 ### 0.8.0 (2026-10-28)

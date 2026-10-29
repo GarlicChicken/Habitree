@@ -52,13 +52,14 @@ AI가 남긴 규칙은 이런 것이었습니다.
 | reuse-helper with / without | $0.20 / $0.16 | $0.11 / $0.10 |
 | money-rules with / without | $0.19 / $0.16 | $0.11 / $0.10 |
 
-규칙을 남기는 데 바로잡을 때마다 약 $0.03~0.04가 더 들었습니다. 다음 세션의 비용은 거의 같았습니다. 다음 세션의 토큰도 평균 181K 대 177K, 183K 대 177K로 비슷했습니다. 다른 점은 with 쪽이 같은 비용으로 맞혔다는 것입니다.
+규칙을 남기는 데 바로잡을 때마다 약 $0.03~0.04가 더 들었습니다. 다음 세션의 비용은 거의 같았습니다. 다음 세션의 토큰도 평균 181K 대 177K, 183K 대 177K로 비슷했습니다. 다른 점은 with 쪽이 같은 비용으로 맞혔다는 것입니다. 그 작업 하나를 맞히는 데 든 비용으로 보면, without 쪽은 다시 틀려서 바로잡는 한 바퀴가 또 필요해 약 $0.26(첫 시도 $0.10 + 바로잡기 $0.16), with 쪽은 한 번에 맞혀 약 $0.11이었습니다.
 
 ## 알게 된 것
 
 1. **규칙은 바로잡힌 그 순간에 남겨야 자랍니다.** 시작할 때 읽는 지침 한 줄로는 부족했고, 바로잡는 말이 온 그때의 알림이 차이를 만들었습니다.
 2. **남긴 규칙은 비슷한 다른 과제에도 통했습니다.** 다음 세션의 과제는 처음과 다른 함수였는데, 규칙이 함수 이름과 하지 말 것을 구체적으로 적고 있어서 그대로 지켜졌습니다.
-3. **운 좋게 맞힌 것은 이어지지 않습니다.** reuse-helper with의 한 번은 AI가 세션 1에서 스스로 slugify를 찾아 맞혔습니다. 바로잡을 일이 없었으니 규칙도 남지 않았고, 다음 세션에서는 직접 코드를 짰습니다. 규칙은 바로잡힐 때만 자랍니다.
+3. **효율은 되풀이되는 실수를 막는 데서 나옵니다.** 프로젝트 전체의 토큰을 크게 줄이는 것이 아니라, 한 번 바로잡은 실수에 드는 틀리고 고치는 한 바퀴를 다음부터 없애는 것입니다. 같은 실수가 자주 나올 프로젝트일수록 아끼는 양이 커집니다.
+4. **운 좋게 맞힌 것은 이어지지 않습니다.** reuse-helper with의 한 번은 AI가 세션 1에서 스스로 slugify를 찾아 맞혔습니다. 바로잡을 일이 없었으니 규칙도 남지 않았고, 다음 세션에서는 직접 코드를 짰습니다. 규칙은 바로잡힐 때만 자랍니다.
 
 ## 한계와 다음에 잴 것
 
@@ -96,13 +97,14 @@ Trial runs showed three breaks:
 
 Among corrected flows, the with arm recorded a rule all 5 times without being asked, and all 5 next sessions passed. The without arm was corrected 6 times and fixed the code each time, but kept nothing, so all 6 next sessions repeated the mistake. Claude Code's auto memory was on in both arms, but neither used it this time. Recorded rules named the helper and what not to do, for example "Amounts are rounded to whole won with roundWon() from money.js, not Math.round; bad input (negative, a rate over 100, an unknown type) throws RangeError instead of returning null or a plain Error."
 
-Recording cost about $0.03 to $0.04 extra per correction ($0.20 vs $0.16 and $0.19 vs $0.16 per correction turn). Next sessions cost about the same ($0.11 vs $0.10) with similar tokens (181K vs 177K, 183K vs 177K on average); the difference is that the with arm got it right.
+Recording cost about $0.03 to $0.04 extra per correction ($0.20 vs $0.16 and $0.19 vs $0.16 per correction turn). Next sessions cost about the same ($0.11 vs $0.10) with similar tokens (181K vs 177K, 183K vs 177K on average); the difference is that the with arm got it right. Counted as the cost of getting that one task right, the without arm needed another round of being wrong and corrected, about $0.26 (first try $0.10 plus correction $0.16), while the with arm got it right at once for about $0.11.
 
 ### What we learned
 
 1. Rules grow only if they are recorded at the moment of correction. A line read at the start was not enough; the note at the moment of correction made the difference.
 2. Recorded rules carried over to a similar but different task, because they named the function and what not to do.
-3. Luck does not carry over. In one with flow the agent found slugify on its own in session 1; with nothing to correct, no rule was recorded, and the next session wrote its own code. Rules grow only from corrections.
+3. The efficiency comes from stopping repeated mistakes. It does not cut a whole project's tokens by much; it removes, from then on, the round of being wrong and corrected that a mistake costs. The more often the same mistake would come back, the more it saves.
+4. Luck does not carry over. In one with flow the agent found slugify on its own in session 1; with nothing to correct, no rule was recorded, and the next session wrote its own code. Rules grow only from corrections.
 
 ### Limits and next measurements
 

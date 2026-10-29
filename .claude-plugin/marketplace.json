@@ -6,7 +6,7 @@
     {
       "name": "habitree",
       "source": "./",
-      "description": "작업 중 비효율 경고, 피드백을 규칙으로, 위임 예외 / In-flight warnings, feedback to rules, delegation"
+      "description": "같은 실수 되풀이 막기(바로잡힌 것을 규칙으로), 작업 중 비효율 경고, 위임 예외 / Stop repeated mistakes (corrections become rules), in-flight warnings, delegation"
     }
   ]
 }

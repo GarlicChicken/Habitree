@@ -1,8 +1,8 @@
 # Habitree
 
-AI와 함께 일하는 습관을 나무처럼 키우는 도구입니다. 피드백은 규칙으로, 되풀이는 모듈로 자라게 하고, 그렇게 자란 것이 짐이 되지 않게 함께 다듬습니다.
+AI와 함께 일하는 습관을 나무처럼 키우는 도구입니다. 한 번 바로잡은 실수는 규칙이 되고, 규칙은 습관이 되어, AI가 같은 실수를 되풀이하지 않게 합니다. 그렇게 자란 것이 짐이 되지 않게 함께 다듬습니다.
 
-- 마지막 갱신: 2026-10-28
+- 마지막 갱신: 2026-10-29
 - 상태: v0.9 알파
 - 라이선스: [MIT](LICENSE)
 - [English](#english)
@@ -13,7 +13,15 @@ AI에게 일을 맡기다 보면 같은 말을 여러 번 하게 됩니다. 지�
 
 Habitree는 [Open Prompt](https://github.com/GarlicChicken)를 운영하며 쓰던 방식에서 나왔습니다. 그 프로젝트는 작업할 때마다 조금씩 나아지는 하나의 두뇌처럼 굴러갑니다. 일을 시작하면 지도부터 보고, 있는 것은 다시 쓰고, 없는 것은 되풀이될 것을 생각해 만들고, 바꾼 것은 기록하고, 받은 피드백은 그 자리에서 규칙으로 남깁니다. 그렇게 하니 같은 지적이 다시 나오는 일이 눈에 띄게 줄었습니다. 이 습관을 다른 프로젝트에서도 쓸 수 있게 꺼내 놓은 것이 Habitree입니다.
 
-목표는 처음부터 하나였습니다. **효율과 재사용.** 덜 읽고, 덜 되풀이하고, 이미 만든 것을 다시 쓰게 하는 것입니다.
+목표는 처음부터 하나였습니다. **효율과 재사용.** 같은 실수를 되풀이하지 않고, 이미 만든 것을 다시 쓰게 하는 것입니다.
+
+## Habitree가 말하는 효율
+
+여기서 말하는 효율은 토큰을 몇 퍼센트 줄이는 일이 아닙니다. **같은 실수를 두 번 하지 않게 하는 것**입니다.
+
+AI는 세션이 바뀌면 지난번에 바로잡힌 것을 잊습니다. 그래서 같은 실수를 또 하고, 사람은 같은 말을 또 하고, 틀리고 고치는 한 바퀴가 다시 돕니다. Habitree는 바로잡힌 그 순간 그 내용을 규칙으로 남기고, 다음 세션의 AI가 그 규칙을 읽고 시작하게 합니다. 이름 그대로, 바로잡힌 것을 습관으로 길러서 되풀이되는 실수를 막습니다.
+
+그래서 효과는 같은 실수가 되풀이될 만한 곳일수록 큽니다. 측정에서 Habitree를 쓴 쪽은 한 번 바로잡힌 실수를 다음 세션에서 다시 하지 않았고(다음 세션 합격 5번 중 5번, 쓰지 않은 쪽은 6번 중 0번), 그 작업 하나를 맞히는 데 드는 비용은 틀리고 다시 바로잡는 한 바퀴가 빠져 약 $0.26에서 $0.11로 줄었습니다. 반대로 프로젝트 전체의 토큰이나 속도를 크게 줄여 주는 도구는 아닙니다. 같은 지적이 드문 프로젝트에서는 거의 티가 나지 않습니다.
 
 ## 생각하는 방식
 
@@ -155,7 +163,7 @@ Habitree는 [Open Prompt](https://github.com/GarlicChicken)의 첫 오픈소스�
 
 ## English
 
-Habitree grows your habits for working with AI, like a tree. Feedback grows into rules and repetition grows into modules, and what grows is trimmed so it never turns into a burden.
+Habitree grows your habits for working with AI, like a tree. A mistake corrected once becomes a rule, and the rule becomes a habit, so the AI stops repeating it. What grows is trimmed so it never turns into a burden.
 
 ### Why
 
@@ -163,7 +171,15 @@ When you hand work to an AI, you end up saying the same things again and again. 
 
 Habitree comes from the way we run [Open Prompt](https://github.com/GarlicChicken). That project works like a brain that gets a little better every time someone works on it: you start from the map, reuse what exists, build what is missing with repetition in mind, record what changed, and turn feedback into a rule on the spot. Doing that, the same correction came back noticeably less often. Habitree takes that habit out so other projects can use it.
 
-The goal has been the same from the start: **efficiency and reuse.** Read less, repeat less, and use again what has already been built.
+The goal has been the same from the start: **efficiency and reuse.** Stop repeating the same mistakes, and use again what has already been built.
+
+### What efficiency means here
+
+Efficiency here does not mean cutting tokens by some percentage. It means **never making the same mistake twice**.
+
+When a session ends, the AI forgets what it was corrected on. So it makes the same mistake again, the person says the same thing again, and the loop of getting it wrong and fixing it runs once more. Habitree records the correction as a rule at the moment it is made, and the next session's AI starts by reading that rule. As the name says, corrections grow into habits, and repeated mistakes stop.
+
+So the effect is largest where the same mistakes would keep coming back. In our measurement, the Habitree side never repeated a corrected mistake in the next session (5 of 5 next sessions passed, against 0 of 6 without it), and getting that one task right cost about $0.11 instead of $0.26, because the round of getting it wrong and correcting it again was gone. On the other hand, this is not a tool that makes a whole project much faster or much cheaper in tokens; in a project where the same correction rarely comes back, you will hardly notice it.
 
 ### How we think about it
 

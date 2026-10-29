@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "habitree"
 dynamic = ["version"]
-description = "Grow good habits for AI coding: feedback becomes rules, repetition becomes modules."
+description = "Grow good habits for AI coding: a mistake corrected once becomes a rule, so the agent stops repeating it."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE", "NOTICE.md"]
