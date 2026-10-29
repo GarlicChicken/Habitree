@@ -92,7 +92,7 @@ class GuardProject(TempProject):
         pre = self.pre("Edit", inp)
         if apply:
             text = path.read_text(encoding="utf-8")
-            path.write_text(text.replace(old, new, 1), encoding="utf-8", newline="\n")
+            path.write_bytes(text.replace(old, new, 1).encode("utf-8"))
         return pre, self.post("Edit", inp)
 
 

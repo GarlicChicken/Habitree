@@ -48,7 +48,7 @@ class TempProject(unittest.TestCase):
     def write(self, rel, text):
         p = self.root / rel
         p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(text, encoding="utf-8", newline="\n")
+        p.write_bytes(text.encode("utf-8"))  # LF 그대로(write_text의 newline 인자는 3.10부터) / keep LF on 3.9
         return p
 
     def read(self, rel):
